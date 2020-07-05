@@ -1,0 +1,14 @@
+on:
+  [push]
+
+  jobs:
+    check_job:
+      runs-on: ubuntu-latest
+      name: A job to checkout
+      steps:
+      - name: action
+        id: wen
+        uses: WhenWen/myaction
+      - name: output
+        output: echo "These are some suggestions.
+        ${{ steps.wen.outputs.suggestion }} "
