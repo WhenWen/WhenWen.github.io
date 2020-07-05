@@ -8,6 +8,6 @@ jobs:
     steps:
     - name: action
       id: wen
-      uses: WhenWen/myaction@v3
+      uses: WhenWen/myaction@v4
     - name: output
       run: echo "These are some suggestions.${{ steps.wen.outputs.suggestion }} "
