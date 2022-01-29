@@ -115,15 +115,16 @@
       {% if author.impactstory %}
         <li><a href="{{ author.impactstory }}"><i class="ai ai-impactstory ai-fw"></i> Impactstory</a></li>
       {% endif %}
+      {% if author.zhihu %}
+        <li><a href="https://zhihu.com/{{ author.zhihu }}"><i class="fab fa-fw fa-dribbble-square" aria-hidden="true"></i> Zhihu</a></li>
+      {% endif %}
       {% if author.openreview %}
       <li><a href="{{ author.openreview }}"><i class="ai ai-impactstory ai-fw"></i> Openreview</a></li>
       {% endif %}
       {% if author.wikipedia %}
         <li><a href="https://en.wikipedia.org/wiki/User:{{ author.wikipedia }}"><i class="fab fa-fw fa-wikipedia-w" aria-hidden="true"></i> Wikipedia</a></li>
-        {% endif %}
-        {% if author.zhihu %}
-        <li><a href="https://zhihu.com/{{ author.zhihu }}"><i class="fab fa-fw fa-dribbble-square" aria-hidden="true"></i> Zhihu</a></li>
       {% endif %}
+
 {% endif %}
     </ul>
   </div>
