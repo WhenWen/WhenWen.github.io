@@ -120,7 +120,8 @@
       {% endif %}
       {% if author.wikipedia %}
         <li><a href="https://en.wikipedia.org/wiki/User:{{ author.wikipedia }}"><i class="fab fa-fw fa-wikipedia-w" aria-hidden="true"></i> Wikipedia</a></li>
-      {% if author.zhihu %}
+        {% endif %}
+        {% if author.zhihu %}
         <li><a href="https://zhihu.com/{{ author.zhihu }}"><i class="fab fa-fw fa-dribbble-square" aria-hidden="true"></i> Zhihu</a></li>
       {% endif %}
 {% endif %}
