@@ -8,7 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-I'm currently a sophomore student at Tsinghua University, major in Computer Science.
+I'm currently a sophomore student at Yao Class Tsinghua University, major in Computer Science.
 
 I'm interested in machine learning and artificial intelligence from both theoretical and practical perspectives and are currently actively learning relative materials, including NLP as an experimentalist  and Statistical Learning as a student.
 
