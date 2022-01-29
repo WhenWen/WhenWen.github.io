@@ -14,4 +14,6 @@ I'm interested in machine learning and artificial intelligence from both theoret
 
 I have participated in Mathematics Olympiad in my high school years.
 
+I'm a sci-fi fan and a proud whovian.
+
 Currently I am focusing on a project involving Prompt Tuning at Tsinghua Natural Language Processing Lab.
