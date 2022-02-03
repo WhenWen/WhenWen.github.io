@@ -7,13 +7,13 @@
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Kaiyue Wen / Personal Site"
+title                    : "Your Name / Site Title"
 title_separator          : "-"
-name                     : &name "Kaiyue Wen"
-description              : &description "A sophomore at IIIS Tsinghua, interested in NLP and ML"
-url                      : https://whenwen.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+name                     : &name "Your Name"
+description              : &description "personal description"
+url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : "WhenWen/WhenWen.github.io"
+repository               : "academicpages/academicpages.github.io"
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
 breadcrumbs              : false # true, false (default)
 words_per_minute         : 160
@@ -80,43 +80,41 @@ analytics:
 
 # Site Author
 author:
-  name             : "Kaiyue Wen"
+  name             : "Your Sidebar Name"
   avatar           : "profile.png"
-  bio              : "Valar Morghulis"
-  location         : "Shenzhen China"
+  bio              : "Your biography for the left-hand sidebar"
+  location         : "Location"
   employer         :
-  pubmed           : 
-  googlescholar    : 
-  email            : "wenky20@mails.tsinghua.edu.cn"
-  researchgate     : 
+  pubmed           : "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
+  googlescholar    : "http://yourfullgooglescholarurl.com"
+  email            :
+  researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
   codepen          :
   dribbble         :
   flickr           :
-  facebook         : 
+  facebook         :
   foursquare       :
-  github           : "WhenWen"
+  github           : "academicpages"
   google_plus      :
   keybase          :
   instagram        :
-  impactstory      : 
+  impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
   lastfm           :
-  linkedin         : "wen-kaiyue-a3a336192/"
-  orcid            : 
+  linkedin         :
+  orcid            : "http://orcid.org/yourorcidurl"
   pinterest        :
   soundcloud       :
-  stackoverflow    : 
+  stackoverflow    : # http://stackoverflow.com/users/123456/username
   steam            :
   tumblr           :
-  twitter          : 
+  twitter          : "replacethistwitterhandle"
   vine             :
   weibo            :
   xing             :
   youtube          :
   wikipedia        :
-  zhihu            : "people/wen-kai-yue-92"
-  openreview       : "https://openreview.net/profile?id=~Kaiyue_Wen1"
 
 
 # Reading Files
