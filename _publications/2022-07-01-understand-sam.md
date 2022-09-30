@@ -1,15 +1,15 @@
 ---
-title: "Realistic Deep Learning May Not Fit Benignly"
+title: "How Sharpness-Aware Minimization Minimizes Sharpness?"
 collection: publications
-permalink: /publication/2022-05-01-benign-overfit
-excerpt: 'This paper discuss how interplay of label noise and overparameterization level shapes overfitting.'
-date: 2022-05-01
+permalink: /publication/2022-07-01-understand-sam
+excerpt: '\textbf{Kaiyue Wen}, Tengyu Ma, Zhiyuan Li'
+date: 2022-07-01
 venue: 'TBD'
-paperurl: 'https://arxiv.org/pdf/2206.00501.pdf'
+paperurl: 'https://openreview.net/forum?id=5spDgWmpY6x'
 ---
 
-<a href='https://arxiv.org/pdf/2206.00501.pdf'>Download paper here</a>
+<a href='https://openreview.net/forum?id=5spDgWmpY6x'>Download paper here</a>
 
-\textbf{Kaiyue Wen}*, Jiaye Teng, Jingzhao Zhang
+\textbf{Kaiyue Wen}, Tengyu Ma, Zhiyuan Li
 
-This paper discuss how interplay of label noise and overparameterization level shapes overfitting.
+This paper discuss the limiting dynamics of Sharpness Aware Minimization

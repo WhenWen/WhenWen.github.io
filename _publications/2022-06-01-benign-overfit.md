@@ -2,7 +2,7 @@
 title: "Realistic Deep Learning May Not Fit Benignly"
 collection: publications
 permalink: /publication/2022-06-01-benign-overfit
-excerpt: 'This paper discuss how interplay of label noise and overparameterization level shapes overfitting.'
+excerpt: '\textbf{Kaiyue Wen}*, Jiaye Teng, Jingzhao Zhang'
 date: 2022-06-01
 venue: 'TBD'
 paperurl: 'https://arxiv.org/pdf/2206.00501.pdf'
