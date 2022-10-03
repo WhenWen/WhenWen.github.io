@@ -10,7 +10,7 @@ redirect_from:
 
 这里是温凯越。
 
-I'm currently a sophomore student at Yao Class IIIS Tsinghua University, major in Computer Science.
+I'm currently a junior student at Yao Class IIIS Tsinghua University, major in Computer Science.
 
 My research interest spans across multiple areas on machine learning. 
 
