@@ -2,7 +2,7 @@
 title: "Finding Skill Neurons in Pre-trained Transformers via Prompt Tuning"
 collection: publications
 permalink: /publication/2022-05-01-prompt-transfer
-excerpt: 'Xiaozhi Wang^*, **Kaiyue Wen**^*, Zhengyan Zhang, Lei Hou, Zhiyuan Liu, Juanzi Li'
+excerpt: 'Xiaozhi Wang\*, **Kaiyue Wen**\*, Zhengyan Zhang, Lei Hou, Zhiyuan Liu, Juanzi Li'
 date: 2022-05-01
 venue: 'EMNLP 2022'
 paperurl: 'https://openreview.net/pdf?id=-FFxLqKt33k'
