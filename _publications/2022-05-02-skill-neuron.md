@@ -12,4 +12,4 @@ paperurl: 'https://openreview.net/pdf?id=-FFxLqKt33k'
 
 
 
-This paper discuss our discovery of a set of neuron inside pretrained language model that encode skills, meaning that the activations of these neurons, with delta training, or even without any training, can be used to predict some of the downstream tasks. We further prove that these neurons are crucial for downstream delta tuning.
+This paper discuss our discovery of a set of neurons inside pretrained language model that encode skills, meaning that the activations of these neurons, with delta training, or even without any training, can be used to predict some of the downstream tasks. We further prove that these neurons are crucial for downstream delta tuning.
