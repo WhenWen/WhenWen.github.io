@@ -2,7 +2,7 @@
 title: "Residual Permutation Test for High-Dimensional Regression Coefficient Testing"
 collection: publications
 permalink: /publication/2022-11-30-permutation-test
-excerpt: 'Kaiyue Wen\*, Tengyao Wang\*, Yuhao Wang. '
+excerpt: '**Kaiyue Wen**\*, Tengyao Wang\*, Yuhao Wang. '
 date: 2022-11-30
 venue: TBD
 paperurl: 'https://arxiv.org/abs/2211.16182'
