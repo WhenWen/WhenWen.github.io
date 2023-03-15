@@ -5,9 +5,9 @@ permalink: /publication/2022-07-01-understand-sam
 excerpt: '**Kaiyue Wen**, Tengyu Ma, Zhiyuan Li'
 date: 2022-07-01
 venue: 'ICLR 2023'
-paperurl: 'https://openreview.net/forum?id=5spDgWmpY6x'
+paperurl: 'https://arxiv.org/abs/2211.05729'
 ---
-`<a href='https://openreview.net/forum?id=5spDgWmpY6x'>`Download paper here `</a>`
+`<a href='https://arxiv.org/abs/2211.05729'>`Download paper here `</a>`
 
 **Kaiyue Wen**, Tengyu Ma, Zhiyuan Li
 
