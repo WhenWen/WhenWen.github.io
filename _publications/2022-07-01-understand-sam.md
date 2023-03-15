@@ -7,8 +7,6 @@ date: 2022-07-01
 venue: 'ICLR 2023'
 paperurl: 'https://arxiv.org/abs/2211.05729'
 ---
-`<a href='https://arxiv.org/abs/2211.05729'>`Download paper here `</a>`
-
 **Kaiyue Wen**, Tengyu Ma, Zhiyuan Li
 
 This paper discuss the limiting dynamics of Sharpness Aware Minimization

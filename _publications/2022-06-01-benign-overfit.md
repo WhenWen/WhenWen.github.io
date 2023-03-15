@@ -7,8 +7,6 @@ date: 2022-06-01
 venue: 'ICLR 2023'
 paperurl: 'https://arxiv.org/pdf/2206.00501.pdf'
 ---
-`<a href='https://arxiv.org/pdf/2206.00501.pdf'>`Download paper here`</a>`
-
-**Kaiyue Wen**\*, Jiaye Teng\*, Jingzhao Zhang
+**Kaiyue Wen***, Jiaye Teng*, Jingzhao Zhang
 
 This paper discuss how interplay of label noise and overparameterization level shapes overfitting.
