@@ -7,17 +7,10 @@ redirect_from:
   - /about/
   - /about.html
 ---
+As a junior student at Yao Class IIIS Tsinghua University majoring in Computer Science, I am passionately pursuing my research interests that span multiple areas of machine learning.
 
-这里是温凯越。
+Theoretically, my curiosity is piqued by the optimization dynamics of deep neural networks and the implicit bias that different optimization methods yield. In addition, I have conducted research on statistics and causality, which I believe are vital for unlocking the full potential of machine learning.
 
-I'm currently a junior student at Yao Class IIIS Tsinghua University, major in Computer Science.
+My current empirical research centers on developing a granular understanding of natural language processing models, with a focus on analyzing the behavior of individual components. Additionally, I am also involved in an interdisciplinary project that leverages machine learning in cryptography, which has been an exciting and rewarding experience.
 
-My research interest spans across multiple areas on machine learning. 
-
-Theoretically, I am interested in the optimization dynamics of deep neural networks and the implicit bias different optimization methods yield.
-I am also conducting research on statistics and causality.
-
-Empirically, I mainly focus on neuron level understanding of natural language processing model. 
-I am also working on an interdisciplinary project leveraging machine learning in cryptography.
-
-Feel free to contact me via email!
+If my research interests align with yours, I would love to hear from you! Please feel free to contact me via email to discuss any opportunities or collaborations.
