@@ -7,8 +7,8 @@ redirect_from:
   - /about/
   - /about.html
 ---
-Nice Met! I am Kaiyue Wen. I am a junior-year undergraduate student at Yao's pilot class in computer science and engineering at Tsinghua University.
+Nice Met! I am Kaiyue Wen. I am a junior-year undergraduate student at Yao's pilot class in computer science and engineering at Tsinghua University. Here is my [CV](https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf).
 
 My research interest spreads broadly in machine learning, including theory and downstream applications. I've been particularly drawn to exploring language models, with a focus on gaining a mechanistic understanding with a complementary blend of empirical and theoretical methods.
 
-If my research interests align with yours, I would love to hear from you! Please feel free to contact me via email to discuss any opportunities or collaborations.
+If my research interests align with yours, I would love to hear from you!
