@@ -2,10 +2,7 @@
 main:
   - title: "Publications"
     url: /publications/
-
-  - title: "Blog Posts"
-    url: /year-archive/
     
   - title: "CV"
-    url: /cv/
+    url: https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf
     
