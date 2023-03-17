@@ -7,7 +7,7 @@ redirect_from:
   - /about/
   - /about.html
 ---
-Nice Met! I am Kaiyue Wen. I am a junior-year undergraduate student at Yao's pilot class studying computer science and engineering at Tsinghua University. Here are my [CV](https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf) and [Publications](https://scholar.google.com/citations?hl=en&user=oTmQCFUAAAAJ).
+Hello! I am Kaiyue Wen. I am a junior-year undergraduate student at Yao's pilot class studying computer science and engineering at Tsinghua University. Here are my [CV](https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf) and [Publications](https://scholar.google.com/citations?hl=en&user=oTmQCFUAAAAJ).
 
 My research interest spreads broadly in machine learning, including theory and downstream applications. I've been particularly drawn to exploring language models, with a focus on gaining a mechanistic understanding with a complementary blend of empirical and theoretical methods.
 
