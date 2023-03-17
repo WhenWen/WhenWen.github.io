@@ -17,7 +17,7 @@ My research interest spreads broadly in machine learning, including theory and d
 * **May, 2023** Reviewing ICML for the first time!
 * **May, 2023** New preprint [Solving LPN with Neural Networks](https://arxiv.org/abs/2303.07987) on arxiv!
 * **Feb, 2023** Visiting [Andrej Risteski](https://www.andrew.cmu.edu/user/aristesk/) at CMU!
-* **Jan, 2023** 2 papers ([Understanding SAM](https://arxiv.org/abs/2211.05729), [Not Benign Overfitting](https://arxiv.org/abs/2206.00501)) accepted at ICLR 2022!
+* **Jan, 2023** 2 papers ([Understanding SAM](https://arxiv.org/abs/2211.05729), [Not Benign Overfitting](https://arxiv.org/abs/2206.00501)) accepted at ICLR 2023!
 * **Dec, 2022** New preprint [Residual Permutation Test](https://arxiv.org/abs/2211.16182) on arxiv!
 * **Dec, 2022** New preprint [Understanding SAM](https://arxiv.org/abs/2211.05729) on arxiv!
 * **Oct, 2022** 1 paper ([Skill Neurons](https://arxiv.org/abs/2211.07349)) accepted at EMNLP 2022.
