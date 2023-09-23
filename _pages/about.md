@@ -9,7 +9,7 @@ redirect_from:
 ---
 Hello! I am Kaiyue Wen. I am a senior-year undergraduate student at Yao's pilot class studying computer science and engineering at Tsinghua University. Here are my [CV](https://whenwen.github.io/files/CVofKaiyueWen.pdf) and [Publications](https://scholar.google.com/citations?hl=en&user=oTmQCFUAAAAJ).
 
-My research interest spreads broadly in machine learning, including theory and applications. I delve deeper into large language models, exploring both their macroscopic and microscopic attributes.
+My research interest spreads broadly in machine learning, including theory and applications. I delve deeper into large language models, exploring both macroscopic and microscopic attributes.
 
 1. *Macroscopic Level.* I am interested in better utilizing large language models, including but not limited to, improving interpretability, controllability, and reasoning ability, through building systems around LLMs through first-principle analysis and theoretical thinking.
 2. *MIcroscopic Level.* I am interested in understanding the training dynamics of large language models, including but not limited to, the generalization ability, the implicit bias, and the optimization dynamics of pretraining, through theoretical analysis and empirical study.
