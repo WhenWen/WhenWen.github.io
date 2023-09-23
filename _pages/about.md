@@ -36,4 +36,4 @@ I believe that the two levels are closely related and mutually beneficial. I am 
 
 ## One More Thing
 
-I keep a firm faith in analytical thinking, hard working, and consistent self improvement. Any advice or feedback is welcome, and you can use this [Anonymous Form](https://www.admonymous.co/kaiyue) or discuss with me in person. Thanks!
+I keep a firm faith in analytical thinking, hard working, and consistent self improvement. Any advice or feedback is welcome. You can use this [Anonymous Form](https://www.admonymous.co/kaiyue) or discuss with me in person.
