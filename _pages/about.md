@@ -18,7 +18,7 @@ I believe that the two levels are closely related and mutually beneficial. I am 
 
 ## Recent News
 
-* **Sep, 2023** 2 papers ([Sharpness Minimization&amp;Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2023! [Sharpness Minimization&amp;Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
+* **Sep, 2023** 2 papers ([Sharpness&Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2024! [Sharpness&Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
 * **Sep, 2023** Receive silver medal for Yao Award (Top 4 in Yao's pilot class).
 * **Aug, 2023** Return to China for my senior year in Tsinghua.
 * **Jul, 2023** Visit Hawaii for ICML 2023! Always great to see old friends.
