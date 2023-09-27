@@ -12,7 +12,7 @@ Hello! I am Kaiyue Wen. I am a senior-year undergraduate student in Yao's pilot 
 My research interest spreads broadly in machine learning, including theory and applications. I delve deeper into language models, exploring both macroscopic and microscopic attributes.
 
 1. *Macroscopic Level.* I am interested in better utilizing large language models, including but not limited to, improving interpretability, controllability, and reasoning ability, through building systems around LLMs through first-principle analysis and theoretical thinking.
-2. *MIcroscopic Level.* I am interested in understanding the training dynamics of large language models, including but not limited to, the generalization ability, the implicit bias, and the optimization dynamics of pretraining, through theoretical analysis and empirical study.
+2. *Microscopic Level.* I am interested in understanding the training dynamics of large language models, including but not limited to, the generalization ability, the implicit bias, and the optimization dynamics of pretraining, through theoretical analysis and empirical study.
 
 I believe that the two levels are closely related and mutually beneficial. I am applying for a PhD position starting in 2024. Please contact me through email if you are interested in my research!
 
