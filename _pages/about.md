@@ -18,8 +18,9 @@ I believe that the two levels are closely related and mutually beneficial. I am 
 
 ## Recent News
 
-* **Sep, 2023** 2 papers ([Sharpness&Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2023! [Sharpness&Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
-* **Sep, 2023** Receive silver medal for Yao Award (Top 4 in Yao's pilot class).
+* **Oct. 2023** Awarded the National Scholarship (top 0.2%)!
+* **Sep, 2023** 2 papers ([Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2023! [Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
+* **Sep, 2023** Receive the silver medal for Yao Award (Top 4 in Yao's pilot class)!
 * **Aug, 2023** Return to China for my senior year in Tsinghua.
 * **Jul, 2023** Visit Hawaii for ICML 2023! Always great to see old friends.
 * **Jun, 2023** [Residual Permutation Test](https://arxiv.org/abs/2211.16182) receive Major Revision from AoS.
@@ -37,4 +38,3 @@ I believe that the two levels are closely related and mutually beneficial. I am 
 ## One More Thing
 
 I keep a firm faith in analytical thinking, hard work, and consistent self-improvement. Any advice or feedback is welcome. You can use this [Anonymous Form](https://www.admonymous.co/kaiyue) or discuss with me in person.
-
