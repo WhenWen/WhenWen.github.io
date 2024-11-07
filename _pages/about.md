@@ -7,17 +7,18 @@ redirect_from:
   - /about/
   - /about.html
 ---
-Hello! I am Kaiyue Wen. I am a senior-year undergraduate student in Yao's pilot class studying computer science and engineering at Tsinghua University. Here are my [CV](https://whenwen.github.io/files/CVofKaiyueWen.pdf) and [Publications](https://scholar.google.com/citations?hl=en&user=oTmQCFUAAAAJ).
+Hello! I am Kaiyue Wen. I am a first-year Phd student at Stanford University. I am currently rotating with [Percy Liang](https://cs.stanford.edu/~pliang/).
+I graduated from Tsinghua University, where I was a member of Yao's pilot class. Here are my [CV](https://whenwen.github.io/files/CVofKaiyueWen.pdf) and [Publications](https://scholar.google.com/citations?hl=en&user=oTmQCFUAAAAJ). During my undergraduate study, I am fortunate to be advised by [Tengyu Ma](https://ai.stanford.edu/~tengyuma/), [Zhiyuan Liu](http://nlp.csai.tsinghua.edu.cn/~lzy/), [Andrej Risteski](https://www.andrew.cmu.edu/user/aristesk/), [Jingzhao Zhang](https://sites.google.com/view/jingzhao/home), and [Zhiyuan Li](https://ai.stanford.edu/~zhiyuanli/).
 
-My research interest spreads broadly in machine learning, including theory and applications. I delve deeper into language models, exploring both macroscopic and microscopic attributes.
+My research interest spreads broadly in deep learning, including theory and applications. My long-term goal is to understand the physics behind deep learning and I believe a combination of theoretical analysis and empirical study is essential for this goal.
 
-1. *Macroscopic Level.* I am interested in better utilizing large language models, including but not limited to, improving interpretability, controllability, and reasoning ability, by building systems around LLMs through first-principle analysis and theoretical thinking.
-2. *Microscopic Level.* I am interested in understanding the training dynamics of large language models, including but not limited to, the generalization ability, the implicit bias, and the optimization dynamics of pretraining, through theoretical analysis and empirical study.
-
-I believe that the two levels are closely related and mutually beneficial. I am applying for a PhD position starting in 2024. Please contact me through email if you are interested in my research!
 
 ## Recent News
 
+* **Oct, 2024** New preprints [River Valley Landscape](https://arxiv.org/abs/2410.05192) and [Optimization Analysis on Chain-of-Thought](https://arxiv.org/abs/2410.05459) on arxiv!
+* **Sep, 2024** Start my Ph.D. study at Stanford University! I am currently rotating with [Percy Liang](https://cs.stanford.edu/~pliang/).
+* **May, 2024** Receive and accept the offer from Stanford University!  I proudly receive the Stanford Graduate Fellowship.
+* **Feb, 2024** New preprint [RNNs are not Transformers (Yet)](https://arxiv.org/abs/2402.18510) on arxiv!
 * **Oct, 2023** Awarded the National Scholarship (top 0.2%)!
 * **Sep, 2023** 2 papers ([Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2023! [Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
 * **Sep, 2023** Receive the silver medal for Yao Award (Top 4 in Yao's pilot class)!
