@@ -17,7 +17,8 @@ My research interest spreads broadly in deep learning, including theory and appl
 
 * **Oct, 2024** New preprints [River Valley Landscape](https://arxiv.org/abs/2410.05192) and [Optimization Analysis on Chain-of-Thought](https://arxiv.org/abs/2410.05459) on arxiv!
 * **Sep, 2024** Start my Ph.D. study at Stanford University! I am currently rotating with [Percy Liang](https://cs.stanford.edu/~pliang/).
-* **May, 2024** Receive and accept the offer from Stanford University!  I proudly receive the Stanford Graduate Fellowship.
+* **Jul, 2024** Graduated from Tsinghua University with a Bachelor's degree in Computer Science. 
+* **May, 2024** Receive and accept the offer from Stanford University!  I am honored to receive the Stanford Graduate Fellowship.
 * **Feb, 2024** New preprint [RNNs are not Transformers (Yet)](https://arxiv.org/abs/2402.18510) on arxiv!
 * **Oct, 2023** Awarded the National Scholarship (top 0.2%)!
 * **Sep, 2023** 2 papers ([Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007), [(Un)interpretability of Transformers](https://openreview.net/forum?id=kaILSVAspn)) accepted at Neurips 2023! [Sharpness&amp;Generalization](https://arxiv.org/abs/2307.11007) is received as **oral**.
