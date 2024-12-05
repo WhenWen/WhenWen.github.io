@@ -15,6 +15,8 @@ My research interest spreads broadly in deep learning, including theory and appl
 
 ## Recent News
 
+
+* **Dec, 2024** [Residual Permutation Test](https://arxiv.org/abs/2211.16182) is accepted at AoS!
 * **Oct, 2024** New preprints [River Valley Landscape](https://arxiv.org/abs/2410.05192) and [Optimization Analysis on Chain-of-Thought](https://arxiv.org/abs/2410.05459) on arxiv!
 * **Sep, 2024** Start my Ph.D. study at Stanford University! I am currently rotating with [Percy Liang](https://cs.stanford.edu/~pliang/).
 * **Jul, 2024** Graduated from Tsinghua University with a Bachelor's degree in Computer Science. 
