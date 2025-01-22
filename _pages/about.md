@@ -14,6 +14,7 @@ My research interest spreads broadly in deep learning, including theory and appl
 
 ## Recent News
 
+* **Jan, 2025** New preprint ([Global Load Balancing Helps Expert Specialization](https://arxiv.org/abs/2501.11873)) on arxiv! 
 * **Jan, 2025** 3 papers ([River Valley Landscape](https://arxiv.org/abs/2410.05192), [RNNs are not Transformers (Yet)](https://arxiv.org/abs/2402.18510), [Optimization Analysis on Chain-of-Thought](https://arxiv.org/abs/2410.05459)) accepted at ICLR 2025!
 * **Dec, 2024** [Residual Permutation Test](https://arxiv.org/abs/2211.16182) is accepted at AoS!
 * **Oct, 2024** New preprints [River Valley Landscape](https://arxiv.org/abs/2410.05192) and [Optimization Analysis on Chain-of-Thought](https://arxiv.org/abs/2410.05459) on arxiv!
