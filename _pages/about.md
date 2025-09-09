@@ -11,7 +11,7 @@ Hello! I am Kaiyue Wen. I am a second-year Phd student at Stanford University, w
 
 My research interest spreads broadly in deep learning. My long-term goal is to understand the physics behind deep learning and I believe a combination of theoretical analysis and empirical study is essential for this goal.
 
-More recently, I have been fascinated about two Recently, I’ve become fascinated by two fundamental axes of scaling in deep learning.
+Recently, I’ve become fascinated by two fundamental axes of scaling in deep learning.
 
 1. **Demystifying pretraining**: Pretraining has been the driving force behind the evolution of large language models, yet many foundational algorithmic choices remain poorly understood. Key aspects such as optimizers, architectures, and hyperparameter scaling strategies still lack consensus. My goal is to clarify these choices through rigorous benchmarking (e.g., [benchmarking modern optimizers](https://arxiv.org/abs/2509.02046)) and theoretical analysis (e.g., exploring the [representation limitation of RNNs](https://arxiv.org/abs/2402.18510), [architectures beyond $\mathrm{TC}^0$](https://arxiv.org/abs/2505.16381), and [river-valley loss landscape](https://arxiv.org/abs/2410.05192)). Most of my research in this direction is carried out in the open-source project [Marin](https://marin.community/).
 
