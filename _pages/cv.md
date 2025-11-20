@@ -6,9 +6,8 @@ nav: true
 nav_order: 5
 ---
 
-<meta http-equiv="refresh" content="0; url=https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True">
-<script>
-  window.location.href = "https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True";
-</script>
-
-<p>Redirecting to CV... If you are not redirected, <a href="https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True">click here</a>.</p>
+<div class="cv-container" style="width: 100%; height: 100vh;">
+  <iframe src="{{ '/files/CVofKaiyueWen.pdf' | relative_url }}" width="100%" height="100%" style="border: none;">
+    <p>Your browser does not support PDFs. <a href="{{ '/files/CVofKaiyueWen.pdf' | relative_url }}">Download the PDF</a>.</p>
+  </iframe>
+</div>
