@@ -1,12 +1,14 @@
 ---
-layout: archive
-title: "CV"
+layout: page
 permalink: /cv/
-author_profile: true
-redirect_from:
-  - /resume
+title: CV
+nav: true
+nav_order: 5
 ---
 
-{% include base_path %}
+<meta http-equiv="refresh" content="0; url=https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True">
+<script>
+  window.location.href = "https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True";
+</script>
 
-View  [Here](..\files\CVofKaiyueWen.pdf) 
+<p>Redirecting to CV... If you are not redirected, <a href="https://github.com/WhenWen/WhenWen.github.io/blob/master/files/CVofKaiyueWen.pdf?raw=True">click here</a>.</p>
