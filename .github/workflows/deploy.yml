@@ -36,6 +36,13 @@ jobs:
           ruby-version: '3.3.5' # Match the version from original workflow
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
           cache-version: 0 # Increment this number if you need to re-download cached gems
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      - name: Install Jupyter
+        run: pip install jupyter nbconvert
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
