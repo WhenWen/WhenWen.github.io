@@ -1,0 +1,702 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Normalized Linear Model - AdamW Toy Example (Noise + Precise Theory)</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 15px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    .control {
+      min-width: 260px;
+    }
+    input[type=range] {
+      width: 160px;
+    }
+    .plots {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 15px;
+    }
+    button {
+      margin-right: 8px;
+    }
+    .value-label {
+      font-weight: bold;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+<h2>Normalized Linear Model: y = Wx / ||Wx|| (Teacher–Student, AdamW)</h2>
+<p>
+  Student weights \(W\) learn to match a fixed teacher on Gaussian inputs using AdamW, with added gradient noise.
+  Outputs are normalized: \(y = \frac{Wx}{\|Wx\|}\).<br>
+  Solid lines = empirical; dashed lines = predicted <em>equilibrium</em> values using the more precise
+  \(W_\infty\) formula from the blog (no dependence on \(W_0\)). Moving sliders re-bases the dashed lines.
+</p>
+
+<div class="controls">
+  <div class="control">
+    <label>
+      Learning rate:
+      <input id="lrSlider" type="range" min="0.0005" max="0.1" step="0.00001" value="0.01">
+      <span id="lrValue" class="value-label"></span>
+    </label>
+  </div>
+  <div class="control">
+    <label>
+      Weight decay:
+      <input id="wdSlider" type="range" min="0.05" max="0.15" step="0.0001" value="0.10">
+      <span id="wdValue" class="value-label"></span>
+    </label>
+  </div>
+  <div class="control">
+    <label>
+      β₁:
+      <input id="beta1Slider" type="range" min="0.5" max="0.99" step="0.001" value="0.9">
+      <span id="beta1Value" class="value-label"></span>
+    </label>
+  </div>
+  <div class="control">
+    <button id="startBtn">Start / Resume</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <div class="control">
+    <label>
+      Speed (steps/frame):
+      <input id="speedSlider" type="range" min="1" max="100" step="1" value="20">
+      <span id="speedValue" class="value-label"></span>
+    </label>
+  </div>
+  <div class="control">
+    <span>Iterations: <span id="iterCount" class="value-label">0</span></span>
+  </div>
+</div>
+
+<div class="plots">
+  <div id="lossPlot"></div>
+  <div id="wNormPlot"></div>
+  <div id="updNormPlot"></div>
+  <div id="anglePlot"></div>
+</div>
+
+<script>
+// ------------------------ Utility functions ------------------------
+
+function randn() {
+  // Box-Muller Gaussian sampler
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function zeros(rows, cols) {
+  const arr = new Array(rows);
+  for (let i = 0; i < rows; i++) {
+    arr[i] = new Float64Array(cols);
+  }
+  return arr;
+}
+
+function randnMatrix(rows, cols) {
+  const arr = new Array(rows);
+  for (let i = 0; i < rows; i++) {
+    const row = new Float64Array(cols);
+    for (let j = 0; j < cols; j++) row[j] = randn();
+    arr[i] = row;
+  }
+  return arr;
+}
+
+function matVec(W, x) {
+  const k = W.length;
+  const d = x.length;
+  const y = new Float64Array(k);
+  for (let i = 0; i < k; i++) {
+    let s = 0.0;
+    const Wi = W[i];
+    for (let j = 0; j < d; j++) s += Wi[j] * x[j];
+    y[i] = s;
+  }
+  return y;
+}
+
+function norm(v) {
+  let s = 0.0;
+  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+  return Math.sqrt(s);
+}
+
+function frobNorm(W) {
+  let s = 0.0;
+  for (let i = 0; i < W.length; i++) {
+    const row = W[i];
+    for (let j = 0; j < row.length; j++) s += row[j] * row[j];
+  }
+  return Math.sqrt(s);
+}
+
+function cosineBetweenMatrices(A, B) {
+  let dot = 0.0, na = 0.0, nb = 0.0;
+  for (let i = 0; i < A.length; i++) {
+    const Ai = A[i], Bi = B[i];
+    for (let j = 0; j < Ai.length; j++) {
+      const a = Ai[j], b = Bi[j];
+      dot += a * b;
+      na += a * a;
+      nb += b * b;
+    }
+  }
+  if (na === 0 || nb === 0) return 0.0;
+  let c = dot / Math.sqrt(na * nb);
+  c = Math.max(-1.0, Math.min(1.0, c));
+  return c;
+}
+
+// ------------------------ Model / Training state ------------------------
+
+const inputDim = 20;   // d
+const outputDim = 3;   // k
+const batchSize = 32;
+const beta2 = 0.999;
+const eps = 1e-8;
+
+// Gradient noise scale (noise-dominated regime)
+const gradNoiseStd = 0.2;  // you can tune this
+
+// Sliding window size - keep only last N steps for performance
+const maxHistorySize = 30000;
+
+let teacherW, W, m, v;
+let t; // Adam time step
+let totalIterations = 0; // Total iterations count (not reset)
+
+// Empirical logs
+let iters = [];
+let lossHistory = [];
+let wNormHistory = [];
+let updNormHistory = [];
+let angleHistory = [];
+
+// EMA (exponential moving average) logs for smoothed visualization
+let lossEMA = [];
+let wNormEMA = [];
+let updNormEMA = [];
+let angleEMA = [];
+const emaAlpha = 0.001; // EMA smoothing factor
+
+// Predicted equilibrium logs (flat lines at current W_inf, upd_inf, angle_inf)
+let wNormPredHistory = [];
+let updNormPredHistory = [];
+let anglePredHistory = [];
+
+// Run control
+let running = false;
+let loopHandle = null;
+
+// ------------------------ Initialization ------------------------
+
+function initWeights() {
+  // Teacher: random Gaussian, row-normalized
+  teacherW = randnMatrix(outputDim, inputDim);
+  for (let i = 0; i < outputDim; i++) {
+    const n = norm(teacherW[i]);
+    if (n > 0) {
+      for (let j = 0; j < inputDim; j++) teacherW[i][j] /= n;
+    }
+  }
+
+  // Student: small initialization
+  const initScale = 0.01;
+  W = randnMatrix(outputDim, inputDim);
+  for (let i = 0; i < outputDim; i++) {
+    for (let j = 0; j < inputDim; j++) {
+      W[i][j] *= initScale;
+    }
+  }
+
+  m = zeros(outputDim, inputDim);
+  v = zeros(outputDim, inputDim);
+  t = 0;
+  totalIterations = 0;
+
+  iters = [];
+  lossHistory = [];
+  wNormHistory = [];
+  updNormHistory = [];
+  angleHistory = [];
+
+  lossEMA = [];
+  wNormEMA = [];
+  updNormEMA = [];
+  angleEMA = [];
+
+  wNormPredHistory = [];
+  updNormPredHistory = [];
+  anglePredHistory = [];
+}
+
+// ------------------------ Forward, loss, gradient (with noise) ------------------------
+
+function forwardAndGrad() {
+  const X = randnMatrix(batchSize, inputDim);
+  let totalLoss = 0.0;
+  const gradW = zeros(outputDim, inputDim);
+
+  for (let b = 0; b < batchSize; b++) {
+    const x = X[b];
+
+    // Teacher output (normalized)
+    let zT = matVec(teacherW, x);
+    let nT = norm(zT) + 1e-12;
+    for (let i = 0; i < zT.length; i++) zT[i] /= nT;
+
+    // Student output (normalized)
+    let zS = matVec(W, x);
+    let nS = norm(zS) + 1e-12;
+    const yS = new Float64Array(outputDim);
+    for (let i = 0; i < outputDim; i++) yS[i] = zS[i] / nS;
+
+    // Loss: 0.5 * ||yS - zT||^2
+    const gy = new Float64Array(outputDim);
+    let sampleLoss = 0.0;
+    for (let i = 0; i < outputDim; i++) {
+      const diff = yS[i] - zT[i];
+      sampleLoss += 0.5 * diff * diff;
+      gy[i] = diff; // dL/dyS
+    }
+    totalLoss += sampleLoss;
+
+    // dL/dzS via normalization
+    let zDotGy = 0.0;
+    for (let i = 0; i < outputDim; i++) zDotGy += zS[i] * gy[i];
+    const nS3 = nS * nS * nS;
+
+    const gz = new Float64Array(outputDim);
+    for (let i = 0; i < outputDim; i++) {
+      gz[i] = gy[i] / nS - (zS[i] * zDotGy) / nS3;
+    }
+
+    // Accumulate gradW += outer(gz, x)/batchSize
+    for (let i = 0; i < outputDim; i++) {
+      const rowGrad = gradW[i];
+      const gzi = gz[i];
+      for (let j = 0; j < inputDim; j++) {
+        rowGrad[j] += gzi * x[j] / batchSize;
+      }
+    }
+  }
+
+  // Add constant Gaussian noise to gradient (noise-dominated)
+  for (let i = 0; i < outputDim; i++) {
+    const rowGrad = gradW[i];
+    for (let j = 0; j < inputDim; j++) {
+      rowGrad[j] += gradNoiseStd * randn();
+    }
+  }
+
+  const avgLoss = totalLoss / batchSize;
+  return { loss: avgLoss, gradW };
+}
+
+// ------------------------ AdamW update ------------------------
+
+function stepAdamW(gradW, lr, weightDecay, beta1) {
+  t += 1;
+  const oneMinusB1 = 1.0 - beta1;
+  const oneMinusB2 = 1.0 - beta2;
+  const b1t = Math.pow(beta1, t);
+  const b2t = Math.pow(beta2, t);
+
+  // Use standard bias-corrected lr_t as in Adam
+  const lr_t = lr * Math.sqrt(1.0 - b2t) / (1.0 - b1t);
+
+  const oldW = W.map(row => Float64Array.from(row));
+  const adamStepMatrix = zeros(outputDim, inputDim);
+
+  for (let i = 0; i < outputDim; i++) {
+    const mi = m[i], vi = v[i], Wi = W[i], gWi = gradW[i];
+    for (let j = 0; j < inputDim; j++) {
+      const g = gWi[j];
+      mi[j] = beta1 * mi[j] + oneMinusB1 * g;
+      vi[j] = beta2 * vi[j] + oneMinusB2 * g * g;
+      const mHat = mi[j];
+      const vHat = vi[j];
+      const adamStep = mHat / (Math.sqrt(vHat) + eps);
+      adamStepMatrix[i][j] = adamStep;
+
+      // AdamW: decoupled weight decay
+      const update = lr_t * (adamStep + weightDecay * Wi[j]);
+      Wi[j] -= update;
+    }
+  }
+
+  return adamStepMatrix;
+}
+
+// ------------------------ Theory: more precise equilibrium predictions ------------------------
+//
+// From the blog's linear–Gaussian model:
+//
+// Per-coordinate:
+//   E[u_t^2] ≈ (1-β)/(1+β)
+// Frobenius:
+//   ||u_t||_F ≈ U = sqrt(d) * sqrt( (1-β) / (1+β) ),  with d = numel, σ=1
+//
+// Exact relation (target norm) between U and ||W||:
+//   (η ||u_t||_F / ||W_t||_F)^2 = ((1-α^2)(1-αβ))/(1+αβ),
+//   α = 1 - ηλ
+// => ||W_t||_F ≈ η ||u_t||_F sqrt( (1+αβ) / ((1-α^2)(1-αβ)) )
+//
+// Relative full update size (including weight decay) s_eff:
+//   s_eff(α,β) = ||ΔW_t||_F / ||W_t||_F
+//               = α sqrt( 2(1-α)(1-β) / (1+αβ) )
+//
+// Angle between W and ΔW:
+//   ΔW_t = -ηλ W_t - η u_t
+//   cos θ = <ΔW, W> / (||ΔW|| ||W||)
+//          ≈ -(ηλ ||W||) / ||ΔW|| = -(1-α) / s_eff
+//
+
+function equilibriumPredictions(lr, wd, beta1) {
+  const numel = outputDim * inputDim;
+  const tiny = 1e-12;
+
+  // Approx constant Adam-like update norm (Property 1)
+  const U = Math.sqrt(numel) * Math.sqrt((1 - beta1) / (1 + beta1)); // σ=1
+
+  // α corresponds to shrink from weight decay per step in the simplified model
+  const alpha = 1 - lr * wd;
+  const beta = beta1;
+
+  // More precise W_inf prediction using the exact r^2(α,β) formula
+  const denom1 = 1 - alpha * alpha;       // (1 - α^2)
+  const denom2 = 1 - alpha * beta;        // (1 - αβ)
+  const denom3 = 1 + alpha * beta;        // (1 + αβ)
+
+  let W_inf;
+  if (denom1 > tiny && denom2 > tiny) {
+    const ratio = (1 + alpha * beta) / (denom1 * denom2);
+    const safeRatio = Math.max(ratio, tiny);
+    W_inf = lr * U * Math.sqrt(safeRatio);
+  } else {
+    // Fallback to approximate scaling if hyperparams are degenerate
+    W_inf = U * Math.sqrt(lr / (2 * Math.max(wd, tiny)));
+  }
+
+  // More precise full update norm via s_eff(α,β)
+  let s_eff;
+  if (denom3 > tiny) {
+    const inside = 2 * (1 - alpha) * (1 - beta) / denom3;
+    const safeInside = Math.max(inside, 0);
+    s_eff = alpha * Math.sqrt(safeInside);
+  } else {
+    // Fallback: Pythagorean approximation
+    const deltaFromWD = lr * wd * W_inf;
+    const deltaFromU = lr * U;
+    s_eff = Math.sqrt(deltaFromWD * deltaFromWD + deltaFromU * deltaFromU) / Math.max(W_inf, tiny);
+  }
+
+  const updInf = s_eff * W_inf;
+
+  // Angle prediction: cos θ ≈ -(1-α)/s_eff
+  let cosineInf = 0;
+  if (s_eff > tiny) {
+    cosineInf = -(1 - alpha) / s_eff;
+    cosineInf = Math.max(-1, Math.min(1, cosineInf));
+  } else if (updInf > tiny && W_inf > tiny) {
+    // Secondary fallback (older approximation)
+    cosineInf = -lr * wd * W_inf / updInf;
+    cosineInf = Math.max(-1, Math.min(1, cosineInf));
+  }
+
+  return { W_inf, U, cosineInf };
+}
+
+// Cached predictions to avoid recomputing every iteration
+let cachedPredictions = null;
+let cachedHyperparams = null;
+
+// Recompute predicted histories as flat equilibrium lines with current hyperparams
+function recomputePredictionHistories() {
+  const lr = parseFloat(document.getElementById("lrSlider").value);
+  const wd = parseFloat(document.getElementById("wdSlider").value);
+  const beta1 = parseFloat(document.getElementById("beta1Slider").value);
+
+  // Check if hyperparams changed
+  const currentHyperparams = `${lr}_${wd}_${beta1}`;
+  if (currentHyperparams === cachedHyperparams && cachedPredictions) {
+    // Extend cached predictions to match current history length
+    const { W_inf, U, cosineInf } = cachedPredictions;
+    const n = iters.length;
+    wNormPredHistory = new Array(n).fill(W_inf);
+    updNormPredHistory = new Array(n).fill(U);
+    anglePredHistory = new Array(n).fill(cosineInf);
+    return;
+  }
+
+  // Recompute predictions
+  const { W_inf, U, cosineInf } = equilibriumPredictions(lr, wd, beta1);
+  cachedPredictions = { W_inf, U, cosineInf };
+  cachedHyperparams = currentHyperparams;
+  
+  const n = iters.length;
+  wNormPredHistory = new Array(n).fill(W_inf);
+  updNormPredHistory = new Array(n).fill(U);
+  anglePredHistory = new Array(n).fill(cosineInf);
+}
+
+// Trim prediction histories to match current data size (for sliding window)
+function trimPredictionHistories() {
+  if (wNormPredHistory.length > iters.length) {
+    const trimCount = wNormPredHistory.length - iters.length;
+    wNormPredHistory = wNormPredHistory.slice(trimCount);
+    updNormPredHistory = updNormPredHistory.slice(trimCount);
+    anglePredHistory = anglePredHistory.slice(trimCount);
+  }
+}
+
+// ------------------------ Plotting ------------------------
+
+function initPlots() {
+  const layoutBase = (title, yTitle) => ({
+    title: title,
+    xaxis: { title: "Iteration" },
+    yaxis: { title: yTitle },
+    margin: { l: 60, r: 20, t: 40, b: 50 }
+  });
+
+  Plotly.newPlot("lossPlot", [
+    {
+      x: [], y: [], mode: "lines", name: "Loss (raw)",
+      line: { color: "rgba(59, 130, 246, 0.3)", width: 1 }
+    },
+    {
+      x: [], y: [], mode: "lines", name: "Loss (EMA)",
+      line: { color: "#3b82f6", width: 2 }
+    }
+  ], layoutBase("Loss", "Loss"));
+
+  Plotly.newPlot("wNormPlot", [
+    {
+      x: [], y: [], mode: "lines",
+      name: "||W|| (raw)",
+      line: { color: "rgba(37, 99, 235, 0.3)", width: 1 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "||W|| (EMA)",
+      line: { color: "#2563eb", width: 2 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "||W|| (predicted eq.)",
+      line: { color: "#2563eb", dash: "dash", width: 2 }
+    }
+  ], layoutBase("Weight Norm", "||W||₂"));
+
+  Plotly.newPlot("updNormPlot", [
+    {
+      x: [], y: [], mode: "lines",
+      name: "||ΔW|| (raw)",
+      line: { color: "rgba(22, 163, 74, 0.3)", width: 1 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "||ΔW|| (EMA)",
+      line: { color: "#16a34a", width: 2 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "||ΔW|| (predicted eq.)",
+      line: { color: "#16a34a", dash: "dash", width: 2 }
+    }
+  ], layoutBase("Update Norm", "||ΔW||₂"));
+
+  Plotly.newPlot("anglePlot", [
+    {
+      x: [], y: [], mode: "lines",
+      name: "cos(angle(W, ΔW)) (raw)",
+      line: { color: "rgba(220, 38, 38, 0.3)", width: 1 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "cos(angle(W, ΔW)) (EMA)",
+      line: { color: "#dc2626", width: 2 }
+    },
+    {
+      x: [], y: [], mode: "lines",
+      name: "cos(angle(W, ΔW)) (predicted eq.)",
+      line: { color: "#dc2626", dash: "dash", width: 2 }
+    }
+  ], layoutBase("Cosine of Angle Between W and Update", "cos(θ)"));
+}
+
+function updatePlots() {
+  const it = iters;
+
+  Plotly.update("lossPlot", { x: [it], y: [lossHistory] }, {}, [0]);
+  Plotly.update("lossPlot", { x: [it], y: [lossEMA] }, {}, [1]);
+
+  Plotly.update("wNormPlot", { x: [it], y: [wNormHistory] }, {}, [0]);
+  Plotly.update("wNormPlot", { x: [it], y: [wNormEMA] }, {}, [1]);
+  Plotly.update("wNormPlot", { x: [it], y: [wNormPredHistory] }, {}, [2]);
+
+  Plotly.update("updNormPlot", { x: [it], y: [updNormHistory] }, {}, [0]);
+  Plotly.update("updNormPlot", { x: [it], y: [updNormEMA] }, {}, [1]);
+  Plotly.update("updNormPlot", { x: [it], y: [updNormPredHistory] }, {}, [2]);
+
+  Plotly.update("anglePlot", { x: [it], y: [angleHistory] }, {}, [0]);
+  Plotly.update("anglePlot", { x: [it], y: [angleEMA] }, {}, [1]);
+  Plotly.update("anglePlot", { x: [it], y: [anglePredHistory] }, {}, [2]);
+}
+
+// ------------------------ Training loop ------------------------
+
+function trainStep() {
+  if (!running) return;
+
+  const lr = parseFloat(document.getElementById("lrSlider").value);
+  const wd = parseFloat(document.getElementById("wdSlider").value);
+  const beta1 = parseFloat(document.getElementById("beta1Slider").value);
+  const stepsPerFrame = parseInt(document.getElementById("speedSlider").value);
+
+  // Run multiple training iterations per frame for speed
+  for (let step = 0; step < stepsPerFrame; step++) {
+    const { loss, gradW } = forwardAndGrad();
+    const upd = stepAdamW(gradW, lr, wd, beta1);
+
+    totalIterations++;
+    iters.push(totalIterations);
+
+    lossHistory.push(loss);
+    const wNorm = frobNorm(W);
+    wNormHistory.push(wNorm);
+    const updNorm = frobNorm(upd);
+    updNormHistory.push(updNorm);
+
+    const cosineAngle = updNorm > 0 ? cosineBetweenMatrices(W, upd) : 0.0;
+    angleHistory.push(cosineAngle);
+
+    // Compute EMA (exponential moving average)
+    if (lossEMA.length === 0) {
+      // Initialize EMA with first values
+      lossEMA.push(loss);
+      wNormEMA.push(wNorm);
+      updNormEMA.push(updNorm);
+      angleEMA.push(cosineAngle);
+    } else {
+      // Update EMA: ema_new = alpha * value + (1 - alpha) * ema_old
+      const prevLossEMA = lossEMA[lossEMA.length - 1];
+      const prevWNormEMA = wNormEMA[wNormEMA.length - 1];
+      const prevUpdNormEMA = updNormEMA[updNormEMA.length - 1];
+      const prevAngleEMA = angleEMA[angleEMA.length - 1];
+
+      lossEMA.push(emaAlpha * loss + (1 - emaAlpha) * prevLossEMA);
+      wNormEMA.push(emaAlpha * wNorm + (1 - emaAlpha) * prevWNormEMA);
+      updNormEMA.push(emaAlpha * updNorm + (1 - emaAlpha) * prevUpdNormEMA);
+      angleEMA.push(emaAlpha * cosineAngle + (1 - emaAlpha) * prevAngleEMA);
+    }
+  }
+
+  // Sliding window: keep only last maxHistorySize entries for performance
+  if (iters.length > maxHistorySize) {
+    const trimCount = iters.length - maxHistorySize;
+    iters = iters.slice(trimCount);
+    lossHistory = lossHistory.slice(trimCount);
+    wNormHistory = wNormHistory.slice(trimCount);
+    updNormHistory = updNormHistory.slice(trimCount);
+    angleHistory = angleHistory.slice(trimCount);
+    lossEMA = lossEMA.slice(trimCount);
+    wNormEMA = wNormEMA.slice(trimCount);
+    updNormEMA = updNormEMA.slice(trimCount);
+    angleEMA = angleEMA.slice(trimCount);
+    
+    // Also trim prediction histories
+    trimPredictionHistories();
+  }
+
+  // Recompute theory curves (uses caching now)
+  recomputePredictionHistories();
+
+  document.getElementById("iterCount").textContent = totalIterations.toString();
+  updatePlots();
+
+  loopHandle = window.requestAnimationFrame(trainStep);
+}
+
+// ------------------------ UI wiring ------------------------
+
+function updateSliderLabels() {
+  document.getElementById("lrValue").textContent =
+    parseFloat(document.getElementById("lrSlider").value).toFixed(6);
+  document.getElementById("wdValue").textContent =
+    parseFloat(document.getElementById("wdSlider").value).toFixed(5);
+  document.getElementById("beta1Value").textContent =
+    parseFloat(document.getElementById("beta1Slider").value).toFixed(4);
+  document.getElementById("speedValue").textContent =
+    document.getElementById("speedSlider").value;
+}
+
+// When sliders move, re-base prediction curves to new equilibrium
+function onHyperparamChange() {
+  updateSliderLabels();
+  cachedHyperparams = null; // Invalidate cache
+  recomputePredictionHistories();
+  updatePlots();
+}
+
+document.getElementById("lrSlider").addEventListener("input", onHyperparamChange);
+document.getElementById("wdSlider").addEventListener("input", onHyperparamChange);
+document.getElementById("beta1Slider").addEventListener("input", onHyperparamChange);
+document.getElementById("speedSlider").addEventListener("input", updateSliderLabels);
+
+document.getElementById("startBtn").addEventListener("click", () => {
+  if (!running) {
+    running = true;
+    trainStep();
+  }
+});
+
+document.getElementById("pauseBtn").addEventListener("click", () => {
+  running = false;
+  if (loopHandle !== null) {
+    window.cancelAnimationFrame(loopHandle);
+    loopHandle = null;
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  running = false;
+  if (loopHandle !== null) {
+    window.cancelAnimationFrame(loopHandle);
+    loopHandle = null;
+  }
+  initWeights();
+  initPlots();
+  document.getElementById("iterCount").textContent = "0";
+  updateSliderLabels();
+});
+
+// ------------------------ On load ------------------------
+
+initWeights();
+initPlots();
+updateSliderLabels();
+</script>
+</body>
+</html>
+```

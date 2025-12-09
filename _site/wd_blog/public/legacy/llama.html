@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LLaMA Transformer Block</title>
+  <style>
+    :root {
+      --border: #d2c4b5;
+      --bg-page: #faf6f0;
+      --bg-box: #fffcf6;
+      --bg-rms: #f6e3c6;
+      --bg-attn: #fdf7c0;
+      --bg-mlp: #dfe8ff;
+      --bg-linear: #e7ebff;
+      --bg-activation: #ffe5fb;
+      --text-main: #333333;
+      --text-muted: #777777;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--bg-page);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      color: var(--text-main);
+    }
+
+    .diagram {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 32px;
+    }
+
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .column-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .column-title span {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .dashed-box {
+      border: 2px dashed var(--border);
+      border-radius: 20px;
+      padding: 20px 24px;
+      background: var(--bg-box);
+      position: relative;
+    }
+
+    .block-label {
+      position: absolute;
+      top: 10px;
+      right: 18px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .module {
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      background: #f7f4ec;
+      margin: 4px 0;
+    }
+
+    .module.small {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .module.tiny {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+
+    .module.rmsnorm {
+      background: var(--bg-rms);
+    }
+
+    .module.attention {
+      background: var(--bg-attn);
+    }
+
+    .module.mlp {
+      background: var(--bg-mlp);
+    }
+
+    .module.linear {
+      background: var(--bg-linear);
+    }
+
+    .module.activation {
+      background: var(--bg-activation);
+    }
+
+    .module.note {
+      border-style: dashed;
+      background: #ffffff;
+      font-weight: 400;
+    }
+
+    .sub-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 16px;
+      line-height: 1;
+      margin: 2px 0;
+    }
+
+    .arrow.small {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .residual-group {
+      text-align: center;
+      margin: 6px 0 2px;
+    }
+
+    .residual-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      background: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .residual-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .detail-title {
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .detail-subtitle {
+      font-size: 11px;
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: -4px;
+      margin-bottom: 6px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 6px;
+    }
+
+    .path {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .symbol-label {
+      font-style: italic;
+      font-size: 13px;
+      margin-top: -2px;
+    }
+
+    .legend {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .diagram-caption {
+      max-width: 1200px;
+      margin: 18px auto 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="diagram">
+    <!-- LEFT: LLaMA transformer block (repeated N times) -->
+    <div class="column">
+      <div class="column-title">
+        LLaMA Transformer Block <span>(stacked × N)</span>
+      </div>
+      <div class="dashed-box">
+        <div class="block-label">Per-layer structure</div>
+
+        <div class="arrow small">Input token representation</div>
+
+        <div class="module rmsnorm">RMSNorm</div>
+        <div class="arrow">↓</div>
+
+        <div class="module attention">
+          Multi-Head Self-Attention
+          <span class="sub-label">with RoPE on q, k</span>
+        </div>
+
+        <div class="residual-group">
+          <div class="residual-circle">+</div>
+          <div class="residual-text">Residual add</div>
+        </div>
+
+        <div class="module rmsnorm">RMSNorm</div>
+        <div class="arrow">↓</div>
+
+        <div class="module mlp">
+          MLP (SwiGLU)
+          <span class="sub-label">gate_proj / up_proj / down_proj</span>
+        </div>
+
+        <div class="residual-group">
+          <div class="residual-circle">+</div>
+          <div class="residual-text">Residual add</div>
+        </div>
+
+        <div class="arrow small">Output to next LLaMA block</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: zoom-in views for attention and MLP -->
+    <div class="column">
+      <!-- Self-attention detail -->
+      <div class="dashed-box">
+        <div class="detail-title">Self-Attention (inside each block)</div>
+        <div class="detail-subtitle">pre-norm with shared RMSNorm</div>
+
+        <div class="module rmsnorm small">RMSNorm</div>
+        <div class="arrow">↓</div>
+
+        <div class="row">
+          <div class="path">
+            <div class="module linear small">
+              Linear
+              <span class="sub-label">W<sub>q</sub></span>
+            </div>
+            <div class="module note tiny">RoPE</div>
+            <div class="symbol-label">q</div>
+          </div>
+
+          <div class="path">
+            <div class="module linear small">
+              Linear
+              <span class="sub-label">W<sub>k</sub></span>
+            </div>
+            <div class="module note tiny">RoPE</div>
+            <div class="symbol-label">k</div>
+          </div>
+
+          <div class="path">
+            <div class="module linear small">
+              Linear
+              <span class="sub-label">W<sub>v</sub></span>
+            </div>
+            <div class="symbol-label">v</div>
+          </div>
+        </div>
+
+        <div class="arrow">↑</div>
+        <div class="module attention">
+          Scaled Dot-Product Attention
+          <span class="sub-label">heads merged</span>
+        </div>
+        <div class="arrow">↑</div>
+
+        <div class="module linear small">
+          Output Projection
+          <span class="sub-label">W<sub>o</sub></span>
+        </div>
+      </div>
+
+      <!-- MLP (SwiGLU) detail -->
+      <div class="dashed-box">
+        <div class="detail-title">MLP with SwiGLU (inside each block)</div>
+        <div class="detail-subtitle">
+          pre-norm followed by gated feedforward network
+        </div>
+
+        <div class="module rmsnorm small">RMSNorm</div>
+        <div class="arrow">↓</div>
+
+        <div class="row">
+          <div class="path">
+            <div class="module linear small">
+              Linear
+              <span class="sub-label">gate_proj</span>
+            </div>
+          </div>
+          <div class="path">
+            <div class="module linear small">
+              Linear
+              <span class="sub-label">up_proj</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <div class="module activation">
+          SwiGLU
+          <span class="sub-label">SiLU(gate) ⊙ up</span>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <div class="module linear small">
+          Linear
+          <span class="sub-label">down_proj</span>
+        </div>
+
+        <div class="legend">
+          Output is added back to the block input through the residual path.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="diagram-caption">
+    Diagram: Standard LLaMA transformer architecture – stacked blocks with
+    RMSNorm, multi-head self-attention with RoPE, and a SwiGLU MLP, drawn in a
+    style similar to the original figure.
+  </div>
+</body>
+</html>

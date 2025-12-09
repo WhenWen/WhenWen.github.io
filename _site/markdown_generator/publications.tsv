@@ -1,0 +1,2 @@
+pub_date	title	venue	excerpt url_slug	paper_url
+2022    On Transferability of Prompt Tuning for Natural Language Processing NAACL 2022This paper discuss how to transfer prompt trained on different tasks and models. PromptTransfer https://openreview.net/pdf?id=m80bEyzG4iE

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RMSNorm(Wx): Scale Invariance Demo</title>
+<style>
+  :root{
+    --bg: #0b0d12;
+    --panel: #121722;
+    --ink: #e8edf6;
+    --muted: #aab6cf;
+    --accent: #7aa2ff;
+    --ok: #34c759;
+    --warn: #ff9f0a;
+    --bad: #ff453a;
+    --chip: #1a2232;
+    --border: #243048;
+  }
+
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg: #f7f9fc;
+      --panel: #ffffff;
+      --ink: #101623;
+      --muted: #50607c;
+      --accent: #2b59ff;
+      --chip: #f1f5ff;
+      --border: #d9e1f2;
+    }
+  }
+
+  html, body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+  }
+  header{
+    padding: 24px 20px 12px;
+  }
+  header h1{
+    margin:0 0 6px; font-size: clamp(20px, 2.6vw, 28px); font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  header p{ margin:0; color:var(--muted); max-width: 900px}
+  .container{
+    padding: 16px 20px 40px; display: grid; gap: 16px;
+    grid-template-columns: 1.2fr 1.8fr;
+  }
+  @media (max-width: 980px){
+    .container{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05), 0 12px 24px rgba(0,0,0,0.08);
+  }
+  .panel h2{
+    margin:0 0 10px; font-size: 18px;
+  }
+  .panel h3{
+    margin: 12px 0 6px; font-size: 15px; color: var(--muted); font-weight: 600;
+  }
+
+  .controls{ display: grid; gap: 12px }
+  .row{ display:flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .row label{
+    display: inline-flex; align-items: center; gap: 8px; background: var(--chip);
+    padding: 8px 10px; border-radius: 10px; border:1px solid var(--border);
+  }
+  .row label input[type="number"]{
+    width: 90px; padding:6px 8px; border-radius: 8px; border:1px solid var(--border);
+    background: var(--panel); color: var(--ink);
+  }
+  .row label.small input[type="number"]{ width: 70px; }
+  input[type="checkbox"]{ transform: translateY(1px); }
+
+  .range-group{
+    display:grid; gap:8px; width:100%;
+  }
+  .range-line{ display:flex; align-items:center; gap:12px; }
+  input[type="range"]{ width: 100%; }
+  .range-line input[type="number"]{ width:110px }
+
+  button{
+    background: var(--accent); color: white; border: none; border-radius: 10px;
+    padding: 9px 12px; font-weight: 600; cursor: pointer;
+  }
+  button.ghost{
+    background: transparent; color: var(--accent); border:1px solid var(--border);
+  }
+  button:active{ transform: translateY(1px); }
+
+  .grid{
+    display: grid; gap:6px; --cols: 6; grid-template-columns: repeat(var(--cols), minmax(3.2rem, 1fr));
+  }
+  .vector.grid{ grid-template-columns: repeat(var(--cols), minmax(4.2rem, 1fr)); }
+  .grid input[type="number"]{
+    width:100%; padding:8px 6px; border-radius: 10px; border:1px solid var(--border);
+    background: var(--panel); color: var(--ink); text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .two-col{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  @media (max-width: 780px){ .two-col{ grid-template-columns: 1fr; } }
+
+  .cards{
+    display:grid; gap: 12px;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+  }
+  @media (max-width: 980px){
+    .cards{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--chip);
+  }
+  .chips{ display:flex; gap:6px; flex-wrap: wrap; }
+  .chip{
+    padding:6px 8px; background: var(--panel); border:1px solid var(--border);
+    border-radius: 10px; font-variant-numeric: tabular-nums;
+  }
+  .metric{
+    margin-top: 6px; font-weight: 700;
+  }
+  .metric .good{ color: var(--ok)}
+  .metric .warn{ color: var(--warn)}
+  .metric .bad{ color: var(--bad)}
+  .small{ color:var(--muted); font-size: 13px }
+
+  .explain pre{
+    white-space: pre-wrap; background: var(--chip); border:1px solid var(--border);
+    border-radius: 12px; padding: 12px; overflow-x: auto;
+  }
+  .note{
+    margin-top: 10px; padding: 10px 12px; border:1px dashed var(--border); border-radius: 10px; background: transparent;
+  }
+  footer{ padding: 14px 20px; color: var(--muted); }
+  code{ background: var(--chip); padding: 2px 4px; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Scale Invariance of <code>RMSNorm(Wx)</code></h1>
+    <p>
+      This demo shows that for <strong>positive</strong> scales <code>c &gt; 0</code> (and <code>ε = 0</code>),
+      replacing <code>W</code> by <code>c·W</code> leaves
+      <code>f(x) = RMSNorm(Wx)</code> unchanged. Try different values of <code>c</code>, <code>ε</code>, and edit <code>x</code>, <code>W</code>.
+    </p>
+  </header>
+
+  <div class="container">
+    <section class="panel">
+      <h2>Controls</h2>
+      <div class="controls">
+        <div class="row">
+          <label title="Vector/Matrix dimension">
+            Dimension d
+            <input id="dim" type="number" min="2" max="12" step="1" value="6" />
+          </label>
+          <label class="small" title="Random generator seed (for reproducibility)">
+            Seed
+            <input id="seed" type="number" step="1" value="42" />
+          </label>
+          <button id="randomize">Randomize x &amp; W</button>
+          <label title="RMSNorm epsilon">
+            ε (epsilon)
+            <input id="eps" type="number" min="0" step="0.000001" value="0" />
+          </label>
+        </div>
+
+        <div class="range-group">
+          <div class="range-line">
+            <strong>Scale c</strong>
+            <input id="scale" type="range" min="-3" max="3" step="0.01" value="1" aria-label="Scale c slider"/>
+            <input id="scaleNum" type="number" step="0.01" value="1" aria-label="Scale c numeric"/>
+            <label class="small" title="Restrict c to non-negative values">
+              <input id="posOnly" type="checkbox" checked />
+              restrict to c ≥ 0
+            </label>
+            <button id="resetc" class="ghost">Reset c = 1</button>
+          </div>
+          <div class="small">
+            Set <code>ε = 0</code> and <em>c ≥ 0</em> to see exact invariance (up to floating point). Allow negative <em>c</em> to observe the global sign flip.
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:12px">
+        <div>
+          <h3>x (input vector)</h3>
+          <div id="xGrid" class="grid vector" style="--cols:6"></div>
+        </div>
+        <div>
+          <h3>W (weight matrix)</h3>
+          <div id="wGrid" class="grid matrix" style="--cols:6"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Outputs</h2>
+
+      <div class="cards">
+        <div class="card">
+          <h3>y = RMSNorm(Wx)</h3>
+          <div id="yOut" class="chips"></div>
+        </div>
+        <div class="card">
+          <h3>ŷ = RMSNorm(c·W x)</h3>
+          <div id="yScaled" class="chips"></div>
+        </div>
+        <div class="card">
+          <h3>Difference (ŷ − y)</h3>
+          <div id="diff" class="chips"></div>
+          <div class="metric">‖ŷ − y‖₂ = <span id="err" class="good">0</span></div>
+          <div class="small" id="verdict"></div>
+        </div>
+      </div>
+
+      <div class="note" id="note">
+        Tip: If <code>c = 0</code>, then <code>c·W x = 0</code> and RMSNorm returns the zero vector (degenerate case) — invariance does not hold at <code>c=0</code>.
+      </div>
+
+      <div class="explain" style="margin-top:12px">
+        <h3>Why this happens (one‑liner)</h3>
+        <pre>
+Let z = W x. RMSNorm(z) = z / √(mean(z²) + ε).
+For c &gt; 0 and ε = 0:
+  RMSNorm(c z) = (c z) / √(mean((c z)²))
+               = (c z) / √(c² mean(z²))
+               = z / √(mean(z²)) = RMSNorm(z).
+For c &lt; 0 (ε = 0), RMSNorm(c z) = sign(c) · RMSNorm(z): a global sign flip.</pre>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    f(x) = RMSNorm(Wx). Invariance holds exactly for c &gt; 0 and ε = 0 (up to floating‑point), approximately for small ε ≪ mean(z²), and fails at c = 0 or when c &lt; 0 (global sign).
+  </footer>
+
+<script>
+  // ----- Utilities -----
+  const $ = (sel) => document.querySelector(sel);
+
+  function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+  // Simple deterministic PRNG for reproducible "Randomize"
+  function mulberry32(a) {
+    return function() {
+      let t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+  }
+  function randn(prng) {
+    // Box–Muller to get approximately N(0,1)
+    let u=0, v=0;
+    while(u===0) u = prng();
+    while(v===0) v = prng();
+    return Math.sqrt(-2.0*Math.log(u)) * Math.cos(2*Math.PI*v);
+  }
+
+  // Linear algebra bits
+  function matVec(W, x){
+    const d = x.length, out = new Array(W.length);
+    for(let i=0;i<W.length;i++){
+      let s = 0;
+      const row = W[i];
+      for(let j=0;j<d;j++) s += row[j]*x[j];
+      out[i] = s;
+    }
+    return out;
+  }
+  function rmsnorm(v, eps){
+    const n = v.length;
+    let ss = 0;
+    for(let i=0;i<n;i++) ss += v[i]*v[i];
+    const denom = Math.sqrt(ss / n + eps);
+    if(!isFinite(denom) || denom === 0) return Array(n).fill(0);
+    const out = new Array(n);
+    for(let i=0;i<n;i++) out[i] = v[i] / denom;
+    return out;
+  }
+  function add(a,b){ const n=a.length; const o=new Array(n); for(let i=0;i<n;i++) o[i]=a[i]+b[i]; return o; }
+  function sub(a,b){ const n=a.length; const o=new Array(n); for(let i=0;i<n;i++) o[i]=a[i]-b[i]; return o; }
+  function scale(v,c){ const n=v.length; const o=new Array(n); for(let i=0;i<n;i++) o[i]=c*v[i]; return o; }
+  function l2(v){ let s=0; for(let i=0;i<v.length;i++) s += v[i]*v[i]; return Math.sqrt(s); }
+
+  // DOM building for vector/matrix
+  function buildVector(container, d, values=null){
+    container.innerHTML = '';
+    container.style.setProperty('--cols', d);
+    for(let i=0;i<d;i++){
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.001';
+      inp.value = values ? values[i].toFixed(3) : (i===0? '1.000':'0.000');
+      inp.addEventListener('input', update);
+      container.appendChild(inp);
+    }
+  }
+  function buildMatrix(container, d, values=null){
+    container.innerHTML = '';
+    container.style.setProperty('--cols', d);
+    for(let r=0;r<d;r++){
+      for(let c=0;c<d;c++){
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.step = '0.001';
+        const val = values ? values[r][c] : (r===c ? 1 : 0);
+        inp.value = (val).toFixed(3);
+        inp.addEventListener('input', update);
+        container.appendChild(inp);
+      }
+    }
+  }
+  function readVector(container){
+    const xs = Array.from(container.querySelectorAll('input')).map(i => parseFloat(i.value)||0);
+    return xs;
+  }
+  function readMatrix(container, d){
+    const ins = Array.from(container.querySelectorAll('input'));
+    const W = [];
+    let k=0;
+    for(let r=0;r<d;r++){
+      const row = [];
+      for(let c=0;c<d;c++,k++){
+        row.push(parseFloat(ins[k].value)||0);
+      }
+      W.push(row);
+    }
+    return W;
+  }
+  function renderVector(chipsEl, v, digits=5){
+    chipsEl.innerHTML = '';
+    const fmt = (x) => {
+      // nice formatting
+      const s = (Math.abs(x) < 1e-12) ? 0 : x;
+      return Number(s).toFixed(digits);
+    }
+    v.forEach(val=>{
+      const span = document.createElement('span');
+      span.className = 'chip';
+      span.textContent = fmt(val);
+      chipsEl.appendChild(span);
+    });
+  }
+
+  // State & initialization
+  const xGrid = $('#xGrid'), wGrid = $('#wGrid');
+  const dimInp = $('#dim'), seedInp = $('#seed'), epsInp = $('#eps');
+  const scaleRange = $('#scale'), scaleNum = $('#scaleNum'), posOnly = $('#posOnly'), resetC = $('#resetc');
+  const randomizeBtn = $('#randomize');
+
+  const yOut = $('#yOut'), yScaled = $('#yScaled'), diffEl = $('#diff'), errEl = $('#err'), verdictEl = $('#verdict');
+
+  function randomize(d, seed){
+    const prng = mulberry32((seed|0)>>>0);
+    const x = Array.from({length:d}, ()=> randn(prng));
+    const W = Array.from({length:d}, ()=> Array.from({length:d}, ()=> randn(prng)/Math.sqrt(d)));
+    buildVector(xGrid, d, x);
+    buildMatrix(wGrid, d, W);
+    update();
+  }
+
+  function syncScale(v){
+    // Keep slider and numeric in sync; optionally enforce c ≥ 0
+    let c = parseFloat(v);
+    if(!isFinite(c)) c = 1;
+    if(posOnly.checked && c < 0) c = Math.abs(c);
+    c = clamp(c, parseFloat(scaleRange.min), parseFloat(scaleRange.max));
+    scaleRange.value = c;
+    scaleNum.value = c;
+    return c;
+  }
+
+  function update(){
+    const d = clamp(parseInt(dimInp.value)||6, 2, 12);
+    dimInp.value = d; // normalize
+    // read values
+    const x = readVector(xGrid);
+    const W = readMatrix(wGrid, d);
+    const eps = Math.max(0, parseFloat(epsInp.value)||0);
+    const c = syncScale(scaleNum.value);
+
+    // compute
+    const z = matVec(W, x);
+    const y = rmsnorm(z, eps);
+    const zc = scale(z, c);          // (cW)x == c (Wx)
+    const yhat = rmsnorm(zc, eps);
+    const delta = sub(yhat, y);
+    const err = l2(delta);
+
+    // render
+    renderVector(yOut, y);
+    renderVector(yScaled, yhat);
+    renderVector(diffEl, delta, 6);
+    errEl.textContent = err.toExponential(3);
+    errEl.className = err < 1e-10 ? 'good' : (err < 1e-4 ? 'warn' : 'bad');
+
+    // verdict text
+    if(eps === 0 && c > 0){
+      verdictEl.textContent = 'With ε=0 and c>0, outputs match exactly (within floating point).';
+    } else if (eps > 0 && c > 0){
+      verdictEl.textContent = 'With ε>0 and c>0, outputs are nearly equal; small differences come from ε.';
+    } else if (c < 0 && eps === 0){
+      verdictEl.textContent = 'With ε=0 and c<0, RMSNorm adds a global sign: ŷ = sign(c)·y.';
+    } else if (c === 0){
+      verdictEl.textContent = 'At c=0, (c·W)x = 0 ⇒ RMSNorm returns 0 (degenerate case).';
+    } else {
+      verdictEl.textContent = '';
+    }
+  }
+
+  // Wire up events
+  dimInp.addEventListener('change', () => {
+    const d = clamp(parseInt(dimInp.value)||6, 2, 12);
+    dimInp.value = d;
+    // rebuild grids with identity / zeros then update
+    buildVector(xGrid, d); buildMatrix(wGrid, d);
+    randomize(d, parseInt(seedInp.value)||42);
+  });
+  seedInp.addEventListener('change', () => randomize(parseInt(dimInp.value)||6, parseInt(seedInp.value)||42));
+  epsInp.addEventListener('input', update);
+
+  scaleRange.addEventListener('input', (e)=> { syncScale(e.target.value); update(); });
+  scaleNum.addEventListener('input', (e)=> { syncScale(e.target.value); update(); });
+  posOnly.addEventListener('change', ()=> { syncScale(scaleNum.value); update(); });
+  resetC.addEventListener('click', ()=> { syncScale(1); update(); });
+
+  randomizeBtn.addEventListener('click', ()=> {
+    randomize(parseInt(dimInp.value)||6, parseInt(seedInp.value)||42);
+  });
+
+  // First render
+  buildVector(xGrid, 6);
+  buildMatrix(wGrid, 6);
+  randomize(6, 42);
+</script>
+</body>
+</html>

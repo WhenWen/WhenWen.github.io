@@ -1,0 +1,2785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Decay in Deep Learning</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Fira+Code&display=swap"
+        rel="stylesheet">
+
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- MathJax for LaTeX -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Plotly for the AdamW demo -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Minimal inline styles so the demo is visible even without style.css -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 4rem;
+        }
+
+        .demo-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            flex: 1 1 220px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.25rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            font-weight: 500;
+        }
+
+        .demo-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .visual-section h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .matrix-container {
+            display: grid;
+            background: #ffffff;
+            padding: 0.35rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .output-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-header {
+            font-size: 0.85rem;
+            margin-bottom: 0.35rem;
+            color: #1f2937;
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .diff-indicator {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .diff-indicator.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        /* Enhanced Range Slider Styling */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value, 0%), #e5e7eb var(--value, 0%), #e5e7eb 100%);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-moz-range-progress {
+            background: #3b82f6;
+            height: 4px;
+            border-radius: 3px;
+        }
+
+        .adamw-demo-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        .adamw-control-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .adamw-value-display {
+            font-family: 'Fira Code', monospace;
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .adamw-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .adamw-btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .adamw-btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .adamw-btn-secondary {
+            background: #ffffff;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .adamw-btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .adamw-plot-container {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            height: 350px;
+        }
+
+        .uiswitch-container {
+            display: flex;
+            align-items: center;
+            height: 38px;
+        }
+
+        .uiswitch {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 34px;
+            background-color: #e5e7eb;
+            border-radius: 17px;
+            cursor: pointer;
+        }
+
+        .uiswitch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .uiswitch-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4b5563;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .uiswitch-slider::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: calc(50% - 2px);
+            height: 30px;
+            background-color: white;
+            border-radius: 15px;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .uiswitch input:checked+.uiswitch-slider::before {
+            transform: translateX(100%);
+        }
+
+        .uiswitch-option {
+            width: 50%;
+            text-align: center;
+            z-index: 1;
+            transition: color 0.2s ease-in-out;
+            user-select: none;
+        }
+
+        .uiswitch input:not(:checked)+.uiswitch-slider .uiswitch-option-adamw {
+            color: #2563eb;
+        }
+
+        .uiswitch input:checked+.uiswitch-slider .uiswitch-option-muon {
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="content"></div>
+    </div>
+
+    <!-- Hidden Markdown Content -->
+    <script type="text/template" id="markdown-source">
+# From Weight Decay to Hyperball Optimization: Controlling the Effective Learning Rate is All You Need
+
+Weight decay is a standard component of training, yet its role in modern deep learning is often misunderstood. In this post, We will show how recent deep learning research reveals that for scale-invariant models (like Transformers), weight decay does not control capacity. Instead, it controls the **effective step size**.
+
+<div class="key-point-box">
+
+
+1.  **Debunk** the classical "capacity control" view. 
+
+<img src="../../assets/images/fig0.png" alt="Illustrative figure showing weight decay concepts" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
+
+
+2.  **Derive** the modern view: weight decay regulates weight norm, which then control the effective update size. This can leads to unexpected phenomena. For example, gradient norm may increase as loss decreases!
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_metrics_plot.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot"></iframe>
+</div>
+
+3.  **Demonstrate** a new outer optimizer called **Hyperball** that removes weight decay entirely by controlling weight norms directly. This allows for faster convergence compared to runs with weight decay and strong hyperparameter transfer across depths and widths using standard parameters.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
+</div>
+
+</div>
+
+---
+
+## 1. The Paradox of Weight Decay
+
+Standard weight decay updates parameters $W$ by:
+$$
+W_{t+1} = (1 - \eta_t \lambda) W_t - \eta_t u_t
+$$
+where $\eta_t$ is the learning rate, $\lambda$ is the decay coefficient and $u_t$ is the update direction given by the base optimizer. This is equivalent to minimizing $L(W) + \frac{\lambda}{2}\|W\|_F^2$.
+
+<div class="key-point-box">
+
+**Classical View:** This penalty keeps weights small, limiting model capacity and preventing overfitting.
+
+**Modern Reality:** Most weight matrices in modern architectures (Transformers, ResNets with BatchNorm/LayerNorm) are **scale-invariant**. Multiplying weights by a constant $c$ does not change the output or the loss:
+$$
+L(cW) = L(W), \quad \forall c > 0
+$$
+
+
+
+</div>
+
+__SCALE_INVARIANCE_DEMO__
+
+
+If the neural network function and hence the loss is unchanged by the scale of $W$, penalizing $\|W\|_F$ cannot constrain capacity. Yet, people continue to use weight decay. Why?
+
+## 2. The Mechanism: How Weight Decay Sets the Effective Learning Rate
+
+<div style="display: flex; align-items: flex-start; gap: 1.5rem; margin: 1em 0;">
+<div style="flex: 1.2; min-width: 0;">
+
+For scale-invariant losses $L(cW)=L(W)$, optimization depends only on the **direction** of the weights
+$$
+\hat{W} = W / \|W\|_F.
+$$
+
+We define the **effective step size** $\eta_{\text{eff}}$ as the magnitude of the change in the weight direction:
+$$
+\eta_{\text{eff}} := \|\hat{W}_{t+1} - \hat{W}_t\|.
+$$
+
+
+</div>
+<div style="flex: 0.8; min-width: 280px; max-width: 380px;">
+<img src="../../assets/images/fig1_output.png" alt="Illustrative figure showing weight decay concepts" style="width: 100%; height: auto;">
+</div>
+</div>
+
+The key mechanism is:
+
+1. The **weight norm** $\|W\|_F$ determines how large a step we take in direction space.
+2. The **weight decay** coefficient $\lambda$ determines the equilibrium value of $\|W\|_F$.
+
+Together these imply that $\lambda$ directly sets the effective step size.
+
+Before we dive into the calculations, let's showcase our theory with an interactive simulation. The demo below trains a simple normalized linear model using AdamW / Muon with gradient noise. Watch how the **empirical measurements** (solid lines) closely track the **theoretical predictions** (dashed lines). You can adjust the hyperparameters in real-time to see how $\eta$, $\lambda$, and $\beta_1$ affect the equilibrium behavior.
+
+__ADAMW_DEMO__
+
+---
+
+### 2.1 Properties of Updates
+
+There are two properties that we need to know about update before derivation. Recap that $u_t$ is the update given by the base optimizer (without timing the learning rate or weight decay).
+
+<details style="margin-top: 1.5rem;">
+    <summary style="cursor: pointer; font-weight: 600;">
+    Property 1: Near Constant Update Norm ($\|u_t\|_F \approx \text{const}$)
+    <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+    Normalized updates have a constant Frobenius norm determined by the model dimensions. We will denote this constant as $U$.
+    </p>
+    </summary>
+    <div style="margin-top: 1rem; padding-left: 1.0em; border-left: 2px solid var(--border-color);">
+    
+    For many of the modern optimizers, they are designed to be invariant to the scale of the gradient. Therefore, this property approximately holds in practice.
+    
+    
+    1. Muon
+    
+    All of the singular value of Muon's update is $1$, therefore
+    
+    $$
+    \|u_{t, \mathrm{Muon}} \| = \left(\sum_{\sigma_i \in \mathrm{singular\ value\ of\ u_{t,\mathrm{Muon}} }} \sigma_i^2 \right)^{1/2} = \sqrt{\mathrm{Smallest\ Dimension\ of\ }W}.
+    $$
+    
+    
+    2. Adam
+    
+    Adam is typically considered as preconditioning every element with the second order moment of the gradient. Leveraging this view we can show  (ref https://kexue.fm/archives/11267).
+    
+    $$
+    u_{t, Adam} \approx \frac{1 - \beta_1}{1 + \beta_1} \sqrt{\mathrm{Number\ of \ Element\ in\ } W}
+    $$
+    
+    
+    To show this, we will only consider a single scalar update $\bar u_{t, Adam}$ to derive the expected RMSNorm.
+    
+    $$\bar u_{t, Adam} = \frac{1 - \beta_1}{1 - \beta_2} \frac{\sum_{i = 0}^{\infty} \beta_1^i \bar g_{t-i}}{\sqrt{\sum_{i = 0}^{\infty} \beta_2^{i} \bar g_{t-i}^2}}.$$ We will now assume that gradient $\bar g_t$ is a vector in $\mathbb{R}^d$ is i.i.d. Gaussian with mean 0 and variance $\sigma^2 I_d$. This assumption may looks outrageous at first glance because this is assuming there is no any signal for optimization. However, this approximation is good for this estimation if the noise is much larger than the signal.
+
+    
+    
+    We know that for the denominator, we have that
+    \begin{align*}
+    (1 - \beta_2) \mathbb{E}[\sum_{i = 0}^{\infty} \beta_2^{i} \bar g_{t-i}^2] = (1 - \beta_2) \sigma^2 \sum_{i = 0}^{\infty} \beta_2^{i} = \sigma^2.
+    \end{align*}
+    
+    Assuming that $\beta_2$ is sufficiently close to 1, we can assume the denominator is approximately $\sigma^2$.
+    
+    $$\bar u_{t, Adam} \approx (1 - \beta_1)\frac{\sum_{i = 0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma}.$$
+    
+    Further
+    $$
+    \mathbb{E}[(\frac{\sum_{i = 0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma})^2] = \mathbb{E}[(\sum_{i = 0}^{\infty} \beta_1^i \bar g_{t-i})^2 / \sigma^2] = \sum_{i = 0}^{\infty} \beta_1^{2i} = 1 / (1 - \beta_1^2).
+    $$
+    
+    This indicates that 
+    $$\mathbb{E}[\bar u_{t, Adam}^2] \approx (1 - \beta_1)^2 / (1 - \beta_1^2) = (1 - \beta_1) / (1 + \beta_1).$$
+    
+
+</div>
+</details>
+
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Property 2: Constant Angle between Update and Weight ($\langle u_t, W_t \rangle /  \|u_t\|_F \|W_t\|_F \approx \text{const}$)
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+
+
+
+</p>
+</summary>
+<div style="margin-top: 1rem; padding-left: 1.0em; border-left: 2px solid var(--border-color);">
+
+The weight decay explicitly makes the weight a weighted average of all the previous updates.
+$$
+W_{t+1} = (1 - \eta \lambda) W_t - \eta u_t = -\sum_{i = 0}^t (1 - \eta \lambda)^{t-i} \eta u_t.
+$$
+
+
+Let's start by considering SGD with momentum and weight decay. 
+
+$$
+u_t = (\sum_{i = 0}^t \beta_1^{t - i} g_{t-i}) (1 - \beta_1) / (1 - \beta_1^{t+1}).
+$$
+
+We will now assume that gradient $g_t$ is a vector in $\mathbb{R}^d$ is i.i.d. Gaussian with mean 0 and variance $\sigma^2 I_d$. This assumption may looks outrageous at first glance because this is assuming there is no any signal for optimization. However, this approximation is good for this estimation if the noise is much larger than the signal.
+
+We can now make the following approximation assuming high dimensional limits:
+$$
+\begin{align*}
+\langle g_i, g_j \rangle \approx \sigma^2 \delta_{ij} d. 
+\end{align*}
+$$
+
+We then have 
+
+$$
+\begin{align*}
+\langle u_{t}, u_{t'} \rangle &= \langle (\sum_{i = 0}^t \beta_1^{t - i} g_{i}) (1 - \beta_1) / (1 - \beta_1^{t+1}), (\sum_{j = 0}^{t'} \beta_1^{t' - j} g_{j}) (1 - \beta_1) / (1 - \beta_1^{t'+1}) \rangle \\
+&= \frac{(1 - \beta_1)^2}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sum_{i = 0}^t \sum_{j = 0}^{t'} \beta_1^{t + t' - i - j} \langle g_{i}, g_{j} \rangle \\
+&= \frac{(1 - \beta_1)^2}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sum_{i = 0}^t \sum_{j = 0}^{t'} \beta_1^{t + t' - i - j} \sigma^2 \delta_{ij} d \\
+&= \frac{(1 - \beta_1)^2}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sum_{i = 0}^{\min(t, t')} \beta_1^{t + t' - 2i} \sigma^2 d \\
+&= \frac{(1 - \beta_1)^2}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sigma^2 d \beta_1^{t + t' - 2 \min(t, t')}  \sum_{i = 0}^{\min(t, t')} \beta_1^{2 \min(t, t') - 2i} \\
+&= \frac{(1 - \beta_1)^2}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sigma^2 d \beta_1^{t + t' - 2 \min(t, t')} (1 - \beta_1^{2 \min(t, t') + 2}) / (1 - \beta_1^2) \\
+& = \frac{(1 - \beta_1)(1 - \beta_1^{2\min(t, t') + 2})\beta_1^{t + t' - 2 \min(t, t')}}{(1 - \beta_1^{t+1})(1 - \beta_1^{t'+1})} \sigma^2 d
+\end{align*}
+$$ 
+
+
+</div>
+</details>
+
+
+
+
+---
+
+### 2.2 Norm Determines the Effective Step Size (Direction Dynamics)
+
+Consider a single optimizer step:
+
+$$
+w_{t+1} = w_t - \eta_t(\lambda w_t + u_t).
+$$
+* The **weight decay part**, $-\eta_t\lambda w_t$, is purely radial: it rescales $w_t$ but does not change its direction.
+* The **gradient part**, $-\eta_t u_t$, is (by orthogonality) tangential, and therefore entirely responsible for movement on the sphere.
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Projecting the update onto the tangent space of the sphere gives the change in direction:
+$$
+\|\hat{w}_{t+1} - \hat{w}_t\| \approx \frac{\eta_t}{\|w_t\|} \|u_t\|.
+$$
+</p>
+</summary>
+<div style="margin-top: 1rem; padding-left: 1.0em; border-left: 2px solid var(--border-color);">
+
+We calculate the change in direction using the first-order Taylor expansion of the normalization function $f(w) = \frac{w}{\|w\|}$. The Jacobian of this function is:
+$$
+\frac{\partial f}{\partial w} = \frac{1}{\|w\|} \left(I - \frac{w w^T}{\|w\|^2}\right) = \frac{1}{\|w\|} P_{w^\perp}
+$$
+where $P_{w^\perp}$ is the projection matrix onto the tangent space orthogonal to $w$.
+
+Substituting the update step $\Delta w_t = -\eta_t \lambda w_t - \eta_t u_t$:
+$$
+\begin{aligned}
+\hat{w}_{t+1} - \hat{w}_t &\approx \frac{\partial f}{\partial w} \Delta w_t \\
+&= \frac{1}{\|w_t\|} P_{w^\perp} (-\eta_t \lambda w_t - \eta_t u_t)
+\end{aligned}
+$$
+Two simplifications apply:
+1. $P_{w^\perp} w_t = 0$ because $w_t$ is orthogonal to the tangent plane.
+2. $P_{w^\perp} u_t = u_t$ because $u_t$ is already orthogonal to $w_t$ (Property 1).
+
+This leaves only the gradient term:
+$$
+\hat{w}_{t+1} - \hat{w}_t \approx -\frac{\eta_t}{\|w_t\|} u_t.
+$$
+Taking the norm of both sides yields the result.
+
+</div>
+</details>
+
+Therefore, we know the effective step size is approximately:
+$$
+\boxed{
+\eta_{\mathrm{eff},t} \approx \frac{\eta_t}{\|W_t\|_F} \|u_t\|_F.
+}
+$$
+
+<div class="key-point-box">
+
+**Conclusion of Step 1:**  Larger weight norms reduce the effective step size on the sphere.
+
+</div>
+
+---
+
+### 2.3 Weight Decay Determines the Weight Norm (Norm Dynamics)
+
+Given the two properties, then we have the following equations following Pythagorean/Gougu theorem:
+
+
+<div class="derivation-layout">
+<div class="derivation-math">
+
+$$
+\begin{align*}
+&W_{t + 1} = (1 - \eta \lambda) W_t - \eta u_t \\
+\implies & \|W_{t + 1} \|_F^2 = (1 - \eta \lambda)^2 \| W_t \|_F^2 + \eta^2 U^2
+\end{align*}
+$$
+
+</div>
+<div class="derivation-image">
+<img src="../../assets/images/right_triangle.png" alt="Right triangle illustration showing orthogonality of update">
+</div>
+</div>
+
+Without weight decay ($\lambda = 0$),  the weight norm will monotonously increase with respect to $t$:
+
+$$
+\| W_{t} \|_{F} = \sqrt{t \eta^2 U^2 + \|W_0\|_F^2}.
+$$
+
+With weight decay, in contrast, the weight norm will converge to a constant. Assuming the gradient magnitude is roughly stable $\|u_t\|\approx U$, the norm converges to the equilibrium:
+
+$$
+\| W_{\infty} \|_F = \sqrt{\frac{\eta}{\lambda(2-\eta\lambda)}} U \approx U\sqrt{\frac{\eta}{2\lambda}}
+$$
+
+$$
+\| W_{t} \|_{F}  = \sqrt{ \| W_{\infty} \|_F^2 + (1 - \eta\lambda)^{2t} (\|W_0 \|_F^2 -  \| W_{\infty} \|_F^2) }
+$$
+
+<div class="key-point-box">
+
+**Conclusion of Step 2:** Weight decay and learning rate jointly set the equilibrium weight norm.
+
+</div>
+
+---
+
+### 2.4 Final Conclusion: Deriving the Effective Learning Rate
+
+In scale-invariant models, the **effective** learning rate on direction space is not $\eta$.
+
+**Case 1: No Weight Decay ($\lambda = 0$)**
+The weight norm grows as $\sqrt{t}$, so the effective step size decays naturally:
+$$
+\eta_{\mathrm{eff}} \approx \frac{\eta U}{\eta U \sqrt{t}} = \frac{1}{\sqrt{t}}.
+$$
+
+**Case 2: With Weight Decay ($\lambda > 0$)**
+The weight norm stabilizes at equilibrium. Plug the equilibrium norm into the effective step size:
+$$
+\eta_{\mathrm{eff}}
+\approx
+\frac{\eta U}{U \sqrt{\eta/(2\lambda)}} =
+\boxed{\sqrt{2\eta\lambda}}.
+$$
+Weight decay induces a **hidden learning-rate scheduler** by controlling the equilibrium norm, which controls the effective step size taken by the model.
+
+<div class="key-point-box">
+
+**Final Conclusion:** Non-zero weight decay acts as a hidden learning-rate scheduler:
+$$
+\eta_{\mathrm{eff}} \approx \sqrt{2\eta\lambda}
+$$
+</div>
+
+### 2.5 One Last Thing: Why Gradient Norm Increases?
+
+As we have derived $\|W_t\|_F \approx \sqrt{\eta/\lambda}$, the rising gradient norm at the end of training is just a consequence of learning rate decay.
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Scale Invariance Implies Inverse Gradient Scaling $\nabla L(cW) = \nabla L(W) / c$.
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+Larger weight norm implies a constant update change the feature less after normalization.
+</p>
+</summary>
+<div style="margin-top: 1rem; padding-left: 1.0em; border-left: 2px solid var(--border-color);">
+
+For scale invariant loss, we have:
+
+$$
+L(cW + c\epsilon) - L(cW) = L(W + \epsilon) - L(W) \implies \nabla_W L(cW) = \nabla_W  L(W) / c.
+$$
+
+This means that a larger weight norm implies a smaller gradient norm.
+</div>
+</details>
+
+
+Therefore, the gradient norm is determined by:
+$$
+\| G_t \|_F \propto \frac{1}{\|W_t\|_F} \propto \sqrt{\lambda/\eta}
+$$
+This explains why the gradient norm naturally increases over time as the learning rate $\eta$ decays.
+
+
+### 2.3 Weight Decay Determines the Weight Norm (Norm Dynamics)
+
+Given Property 1 (roughly constant update norm) and Property 2 (roughly constant angle between $u_t$ and $W_t$), the norm dynamics of $W_t$ are very close to a 1-D linear system.
+
+Start from the weight decay update
+$$
+W_{t+1} = (1 - \eta \lambda) W_t - \eta u_t,
+$$
+and decompose $\eta u_t$ into a component orthogonal to $W_t$ (tangential) and a component parallel to it (radial). In expectation, the dominant effect of weight decay is radial, while the optimizer update $u_t$ is mostly tangential (by Property 2). This gives the Pythagorean-style recursion
+$$
+\|W_{t+1}\|_F^2
+\approx (1 - \eta\lambda)^2 \|W_t\|_F^2 + \eta^2 U^2,
+$$
+where $U \approx \|u_t\|_F$ is the (approximately constant) update norm from Property 1.
+
+<div class="derivation-layout">
+<div class="derivation-math">
+
+$$
+\begin{align*}
+&W_{t + 1} = (1 - \eta \lambda) W_t - \eta u_t \\
+\implies & \|W_{t + 1} \|_F^2 \approx (1 - \eta \lambda)^2 \| W_t \|_F^2 + \eta^2 U^2
+\end{align*}
+$$
+
+</div>
+<div class="derivation-image">
+<img src="../../assets/images/right_triangle.png" alt="Right triangle illustration showing orthogonality of update">
+</div>
+</div>
+
+This is just a damped "variance + noise" recursion. It has a unique equilibrium:
+$$
+\|W_\infty\|_F^2
+\approx
+\frac{\eta^2 U^2}{1 - (1-\eta\lambda)^2}
+=
+\frac{\eta^2 U^2}{\eta\lambda(2-\eta\lambda)}
+\approx
+U^2\,\frac{\eta}{2\lambda}
+\quad (\eta\lambda \ll 1).
+$$
+
+So the **equilibrium weight norm scales as**
+$$
+\boxed{
+\|W_\infty\|_F
+\approx
+U\,\sqrt{\frac{\eta}{2\lambda}}
+}
+$$
+
+This is the "quick and dirty" argument. The nice part is: if you solve the *full* stochastic dynamics exactly, you get the **same scaling**.
+
+---
+
+#### A solvable linear–Gaussian model
+
+To go beyond the right-triangle picture, we can write down a simple 1-D stochastic model for each coordinate:
+$$
+\begin{aligned}
+w_{t+1} &= \alpha w_t - \eta u_t, \quad \alpha := 1-\eta\lambda,\\
+u_t &= \beta u_{t-1} + (1-\beta) g_t, \\
+g_t &\sim \mathcal N(0,\sigma^2)\ \text{i.i.d.}
+\end{aligned}
+$$
+
+In vector form, each coordinate follows this same 2-D linear system, so in high dimension the Frobenius norm is just $\sqrt{d}$ times the scalar RMS.
+
+This is essentially the same toy model analyzed in 苏剑林's blog (ref https://kexue.fm/archives/11307). Solving the corresponding Lyapunov equation for the stationary covariance of $(w_t, u_t)$ gives the **per-coordinate variances**:
+
+- Momentum update RMS:
+  $$
+  \mathbb{E}[u_t^2]
+  =
+  \sigma^2\,\frac{1-\beta}{1+\beta},
+  $$
+  which is exactly the "constant update norm" of Property 1 in this Gaussian model.
+
+- Weight RMS (exact formula):
+  $$
+  \mathbb{E}[w_t^2]
+  =
+  \eta^2 \sigma^2\,
+  \frac{(1-\beta)(1+\alpha\beta)}
+       {(1+\beta)(1-\alpha^2)(1-\alpha\beta)}.
+  $$
+
+In high dimension, the Frobenius norm is just
+$$
+\|u_t\|_F \approx \sqrt{d}\,\sigma\sqrt{\frac{1-\beta}{1+\beta}},
+\quad
+\|W_t\|_F \approx \sqrt{d}\,\eta\sigma
+\sqrt{
+\frac{(1-\beta)(1+\alpha\beta)}
+     {(1+\beta)(1-\alpha^2)(1-\alpha\beta)}
+}.
+$$
+
+Now take the **small weight-decay per step** regime ($\eta\lambda \ll 1$, i.e. $\alpha = 1-\eta\lambda \approx 1$). Then
+$$
+1-\alpha^2 \approx 2\eta\lambda,\qquad
+1-\alpha\beta \approx 1-\beta,\qquad
+1+\alpha\beta \approx 1+\beta,
+$$
+and all the $\beta$-dependence cancels:
+
+$$
+\mathbb{E}[w_t^2]
+\approx
+\eta^2\sigma^2\,
+\frac{(1-\beta)(1+\beta)}
+     {(1+\beta)\,(2\eta\lambda)\,(1-\beta)}
+=
+\sigma^2\,\frac{\eta}{2\lambda}.
+$$
+
+So with $\sigma = 1$ the **stationary RMS weight norm** is
+$$
+\boxed{
+\|W_\infty\|_F
+\approx
+\sqrt{d}\,\sqrt{\frac{\eta}{2\lambda}}
+}
+\quad (\eta\lambda \ll 1,\ \sigma = 1)
+$$
+
+which matches precisely the result derived in (ref https://kexue.fm/archives/11307).
+
+Importantly, **it does not depend on the momentum coefficient** $\beta$ to leading order in $\eta\lambda$. The crude triangle argument gave the right scaling; the exact linear–Gaussian calculation confirms it and cleans up the details.
+
+---
+
+#### "Target" weight norm as a function of the update norm
+
+If we treat $\|u_t\|_F \approx U$ as given by the base optimizer (Adam, Muon, etc.), the exact theory also gives a closed-form **target norm** relating $U$ and $\|W\|_F$.
+
+From the exact solution we can express
+$$
+\left(\frac{\eta\|u_t\|_F}{\|W_t\|_F}\right)^2
+=
+\frac{(1-\alpha^2)(1-\alpha\beta)}{1+\alpha\beta},
+$$
+so rearranging gives
+$$
+\boxed{
+\|W_t\|_F
+\approx
+\eta\,\|u_t\|_F\,
+\sqrt{
+\frac{1+\alpha\beta}
+     {(1-\alpha^2)(1-\alpha\beta)}
+},
+\qquad \alpha = 1-\eta\lambda.
+}
+$$
+
+This is the formula you can plug a **learning-rate schedule** into (e.g. cosine decay) to get a predicted "target radius" for each layer, assuming the update norm of that layer stays close to a constant.
+
+---
+
+### 2.4 Final Conclusion: Deriving the Effective Learning Rate
+
+In scale-invariant models, what really matters is not the raw step on $W$, but the step on the **direction**
+$$
+\hat{W}_t = \frac{W_t}{\|W_t\|_F}.
+$$
+
+For small steps, the first-order change in direction is
+$$
+\eta_{\mathrm{eff},t}
+:= \|\hat{W}_{t+1} - \hat{W}_t\|
+\approx
+\frac{\eta_t}{\|W_t\|_F}\,\|u_t\|_F.
+$$
+This is the "directional" effective learning rate: how far we move on the unit sphere per step.
+
+Using the linear–Gaussian model above, in steady state we can compute this exactly. Define
+$$
+\alpha := 1-\eta\lambda,\qquad
+r(\alpha,\beta)
+:= \frac{\eta\|u_t\|_F}{\|W_t\|_F}.
+$$
+The exact theory gives
+$$
+r^2(\alpha,\beta)
+=
+\frac{(1-\alpha^2)(1-\alpha\beta)}{1+\alpha\beta},
+$$
+so, asymptotically,
+$$
+\boxed{
+\eta_{\mathrm{eff}}
+\approx
+\frac{\eta\|u_t\|_F}{\|W_t\|_F}
+=
+\sqrt{
+\frac{(1-\alpha^2)(1-\alpha\beta)}{1+\alpha\beta}
+},
+\qquad \alpha = 1-\eta\lambda.
+}
+$$
+
+In the **small-$\eta\lambda$ regime** ($\alpha \approx 1$) this simplifies to
+$$
+\eta_{\mathrm{eff}}^2
+\approx
+2\eta\lambda\,\frac{1-\beta}{1+\beta}.
+$$
+
+So:
+
+- The **scaling in $\eta\lambda$ is always $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$**.
+- The **prefactor depends on the base optimizer** (here, through $\beta$ and the statistics of the gradients). For pure SGD ($\beta=0$) you get $\eta_{\mathrm{eff}} \approx \sqrt{2\eta\lambda}$; for Adam-style momentum with $\beta\approx 0.9$ the constant is smaller.
+
+This matches the intuition from Property 1:
+- different optimizers give different update norms $U$,
+- but given $U$, the combination of learning rate and weight decay still sets a **target radius** and hence a characteristic *directional* step size.
+
+---
+
+#### Effective step size of the full update
+
+Sometimes it's also useful to measure the **relative size of the full weight update**, including weight decay:
+$$
+s_{\mathrm{eff}}
+:= \frac{\|-\eta u_t - \eta\lambda W_t\|_F}{\|W_t\|_F}.
+$$
+
+Under the same linear–Gaussian model, this also has a closed-form expression depending only on
+$\alpha = 1-\eta\lambda$ and $\beta$:
+$$
+\boxed{
+s_{\mathrm{eff}}(\alpha,\beta)
+=
+\alpha\,
+\sqrt{
+\frac{2(1-\alpha)(1-\beta)}{1+\alpha\beta}
+},
+\qquad \alpha = 1-\eta\lambda.
+}
+$$
+
+So both notions of "effective step size" — the step on the sphere and the full relative parameter update — are **monotone in $\sqrt{\eta\lambda}$**. Weight decay is literally acting as a **hidden learning-rate controller**.
+
+<div class="key-point-box">
+
+**Takeaway:** In the steady-state regime of this simple model,
+
+- the **equilibrium weight norm** is
+  $$
+  \|W_\infty\|_F \approx \sqrt{\frac{\eta}{2\lambda}}\quad(\sigma=1),
+  $$
+- the **directional effective step size** scales like
+  $$
+  \eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda},
+  $$
+- and all optimizer specifics (momentum, adaptive scaling, etc.) only change the **constant of proportionality**.
+
+</div>
+
+---
+
+### 2.5 One Last Thing: Why Gradient Norm Increases?
+
+As we have derived, in the steady-state regime the weight norm is approximately
+$$
+\|W_t\|_F \approx \sqrt{\frac{\eta_t}{2\lambda}}\quad(\sigma=1),
+$$
+so when the learning rate $\eta_t$ decays, the equilibrium radius $\|W_t\|_F$ also shrinks.
+
+For scale-invariant layers, the loss satisfies
+$$
+L(cW) = L(W), \quad \forall c>0,
+$$
+which implies the gradient rescales as
+$$
+\nabla_W L(cW) = \frac{1}{c}\,\nabla_W L(W).
+$$
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Scale Invariance Implies Inverse Gradient Scaling $\nabla L(cW) = \nabla L(W) / c$.
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+Larger weight norm implies a smaller gradient norm – and vice versa.
+</p>
+</summary>
+<div style="margin-top: 1rem; padding-left: 1.0em; border-left: 2px solid var(--border-color);">
+
+For a scale-invariant loss, we have:
+$$
+L(cW + c\epsilon) - L(cW) = L(W + \epsilon) - L(W)
+\implies
+\nabla_W L(cW) = \frac{1}{c}\,\nabla_W L(W).
+$$
+
+So multiplying weights by $c$ divides the gradient norm by $c$.
+</div>
+</details>
+
+Therefore, in the scale-invariant regime the gradient norm scales approximately as
+$$
+\|G_t\|_F \propto \frac{1}{\|W_t\|_F}
+\propto \sqrt{\frac{\lambda}{\eta_t}}.
+$$
+
+As the learning rate decays during training, the **equilibrium weight norm shrinks**, and the **gradient norm grows**. This explains the empirical observation that:
+
+- loss keeps going down,
+- but gradient norms **go up** toward the end of training.
+
+What looks like "exploding gradients" is often just the natural consequence of **scale invariance + weight decay + LR decay**.
+
+
+
+
+
+## 3. Explaining Empirical Phenomena
+
+
+
+The classic saying goes "all models are wrong, but some are useful". In deep learning theory, whether a theory is useful should be judged by two perspectives:
+
+1. Can it predict empirical phenomena? (This section)
+2. Can it motivate algorithm that works better? (Section 4)
+
+
+**Phenomenon 1:** Weight norm tracks learning rate warmup and decay throughout training.
+
+**Explanation:** As we have derived in Section 2.3, the equilibrium weight norm is determined by learning rate  $\eta$ and weight decay $\lambda$, as $\|W_{\infty}\|_F \approx \sqrt{\frac{\eta}{2\lambda}} U$. 
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_qkv_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+**Phenomenon 2:** Gradient norm increases through training.
+
+**Explanation:** As we have derived in Section 2.5, the gradient norm is determined by the weight norm, as $\|G_t\|_F \propto \frac{1}{\|W_t\|_F} \propto \sqrt{\lambda/\eta}$. Naturally, as the weight norm decreases, the gradient norm increases.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_qkv_grad_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+**Phenomenon 3:** When $\eta \lambda$ is fixed, the model trained with AdamW converge to essentially the same loss. At the same time, the weight norm of each weight matrices is (roughly) proportional to learning rate. 
+
+**Explanation:** As we have derived in Section 2.4, the effective step size is determined by learning rate  $\eta$ and weight decay $\lambda$, as $\eta_{\mathrm{eff}} \approx \sqrt{2\eta\lambda}$. Further the equilibrium weight norm $\|W_{\infty}\|_F \approx \sqrt{\frac{\eta}{2\lambda}} U = U \eta / \sqrt{2\eta\lambda}$ is proportional to learning rate when $\eta \lambda$ is fixed.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_compare_layer9.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+
+**Phenomenon 4:** Training with weight decay leads to higher loss initially but eventually converges to a lower loss as the model trained without weight decay.
+
+**Explanation:** While this two runs appear to have same larning rate warmup and decay, because the drastic difference in weight norm, the effective step size is different.
+
+<div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="../experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+
+**Phenomenon 5:**  Contrary to the original MuP prediction, hyperparameter transfer is not sensitive to weight scale at initialization but it is sensitive to how to scale weight decay
+
+
+
+
+
+---
+
+## 4. A Better Way: Explicit Norm Control
+
+Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus $\eta_{eff}$), why not control it directly?
+
+<div class="key-point-box">
+
+We propose **Hyperball Optimization**:
+$$
+W_{t+1} = \text{Norm}(W_t - \eta_{eff} \cdot \text{Norm}(u_t)) \cdot R
+$$
+where $R$ is a fixed radius (e.g., $\|W_0\|$).
+
+**Benefits:**
+1.  **Simplified Hyperparameters:** No need to tune $\lambda$.
+2.  **Perfect Transfer:** Hyperparameters transfer predictably across model width and depth.
+3.  **Speedup:** 10-20% faster pretraining on standard benchmarks.
+
+</div>
+
+![Speedrun Results](https://hackmd.io/_uploads/SJz-EO2Cee.png)
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const markdownSource = document.getElementById('markdown-source').textContent;
+            const contentDiv = document.getElementById('content');
+
+            // Math protection logic
+            const mathBlocks = [];
+            const protectMath = (text) => {
+                return text.replace(/(\$\$[\s\S]+?\$\$)|(\$[^$\n]+\$)/g, (match) => {
+                    mathBlocks.push(match);
+                    return `MATHBLOCK${mathBlocks.length - 1}ENDMATHBLOCK`;
+                });
+            };
+
+            // SVG protection logic
+            const svgBlocks = [];
+            const protectSvg = (text) => {
+                return text.replace(/<div style="text-align: center; margin: 2rem 0;">[\s\S]*?<svg[\s\S]+?<\/svg>[\s\S]*?<\/div>/g,
+                    (match) => {
+                        svgBlocks.push(match);
+                        return `SVGBLOCK${svgBlocks.length - 1}ENDSVGBLOCK`;
+                    });
+            };
+
+            // Footnote processing logic
+            const references = [];
+            const processFootnotes = (text) => {
+                return text.replace(/\(ref\s+(https?:\/\/[^\s\)]+)\)/g, (match, url) => {
+                    references.push(url);
+                    const index = references.length;
+                    return `<sup class="footnote-ref"><a href="#ref-${index}" id="source-${index}" style="text-decoration: none; color: #3b82f6;">[${index}]</a></sup>`;
+                });
+            };
+
+            const restoreMath = (text) => {
+                return text.replace(/MATHBLOCK(\d+)ENDMATHBLOCK/g, (match, index) => {
+                    return mathBlocks[parseInt(index)];
+                });
+            };
+
+            const restoreSvg = (text) => {
+                return text.replace(/SVGBLOCK(\d+)ENDSVGBLOCK/g, (match, index) => {
+                    return svgBlocks[parseInt(index)];
+                });
+            };
+
+            // Configure marked
+            marked.use({
+                breaks: true,
+                gfm: true,
+                highlight: function (code, lang) {
+                    const language = (lang && hljs.getLanguage(lang)) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+            });
+
+            const scaleInvToken = '__SCALE_INVARIANCE_DEMO__';
+            const transformerToken = '__TRANSFORMER_DEMO__';
+            const adamwToken = '__ADAMW_DEMO__';
+
+            let parts = markdownSource.split(scaleInvToken);
+            let finalHtml = '';
+
+            if (parts.length === 2) {
+                // Process first part (before scale inv demo)
+                let part1 = protectMath(parts[0]);
+                part1 = protectSvg(part1);
+                part1 = processFootnotes(part1);
+                const html1 = marked.parse(part1);
+
+                // Split second part by transformer demo token
+                const parts2 = parts[1].split(transformerToken);
+
+                if (parts2.length === 2) {
+                    // Process part between scale inv and transformer
+                    let part2 = protectMath(parts2[0]);
+                    part2 = protectSvg(part2);
+                    part2 = processFootnotes(part2);
+                    const html2 = marked.parse(part2);
+
+                    // Split third part by AdamW demo token
+                    const parts3 = parts2[1].split(adamwToken);
+
+                    if (parts3.length === 2) {
+                        // Process part between transformer and AdamW
+                        let part3 = protectMath(parts3[0]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        // Process final part (after AdamW demo)
+                        let part4 = protectMath(parts3[1]);
+                        part4 = protectSvg(part4);
+                        part4 = processFootnotes(part4);
+                        const html4 = marked.parse(part4);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="transformer-architecture-demo"></div>' +
+                            restoreMath(html3) +
+                            '<div id="adamw-demo"></div>' +
+                            restoreMath(html4);
+                    } else {
+                        // No AdamW demo token
+                        let part3 = protectMath(parts3[0]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="transformer-architecture-demo"></div>' +
+                            restoreMath(html3);
+                    }
+                } else {
+                    // No transformer token, check for AdamW token
+                    const parts2b = parts[1].split(adamwToken);
+                    if (parts2b.length === 2) {
+                        // Process middle part (between demos)
+                        let part2 = protectMath(parts2b[0]);
+                        part2 = protectSvg(part2);
+                        part2 = processFootnotes(part2);
+                        const html2 = marked.parse(part2);
+
+                        // Process final part (after AdamW demo)
+                        let part3 = protectMath(parts2b[1]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="adamw-demo"></div>' +
+                            restoreMath(html3);
+                    } else {
+                        // No AdamW demo token, just scale inv
+                        let part2 = protectMath(parts2b[0]);
+                        part2 = protectSvg(part2);
+                        part2 = processFootnotes(part2);
+                        const html2 = marked.parse(part2);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2);
+                    }
+                }
+
+                finalHtml = restoreSvg(finalHtml);
+            } else {
+                // Fallback if token not found
+                let protectedText = protectMath(markdownSource);
+                protectedText = protectSvg(protectedText);
+                protectedText = processFootnotes(protectedText);
+                const htmlContent = marked.parse(protectedText);
+                finalHtml = restoreMath(htmlContent);
+                finalHtml = restoreSvg(finalHtml);
+            }
+
+            // Append References Section
+            if (references.length > 0) {
+                finalHtml += `
+                    <div class="references-section" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem;">References</h3>
+                        <ol style="padding-left: 1.5rem; color: #4b5563;">
+                            ${references.map((url, i) => `
+                                <li id="ref-${i + 1}" style="margin-bottom: 0.5rem;">
+                                    <a href="${url}" target="_blank" style="color: #3b82f6; text-decoration: none; word-break: break-all;">${url}</a>
+                                    <a href="#source-${i + 1}" style="text-decoration: none; color: #9ca3af; margin-left: 0.5rem;" title="Back to text">↩</a>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = finalHtml;
+
+            // Trigger MathJax to render math, but don't let failures block the demo
+            try {
+                if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+                    MathJax.typesetPromise([contentDiv]).catch((err) => {
+                        console.log('MathJax error:', err);
+                    }).finally(() => {
+                        initAllDemos();
+                    });
+                    return; // prevent calling init twice
+                }
+            } catch (e) {
+                console.log('MathJax invocation error:', e);
+            }
+
+            // Fallback: either MathJax is not ready or typesetPromise is unavailable
+            if (window.MathJax && typeof MathJax.typeset === 'function') {
+                try {
+                    MathJax.typeset([contentDiv]);
+                } catch (e) {
+                    console.log('MathJax typeset error:', e);
+                }
+            }
+
+            initAllDemos();
+        });
+
+        function initAllDemos() {
+            console.log('Initializing all demos...');
+            console.log('Scale inv container:', document.getElementById('scale-invariance-demo'));
+            console.log('Transformer container:', document.getElementById('transformer-architecture-demo'));
+            console.log('AdamW container:', document.getElementById('adamw-demo'));
+            initScaleInvarianceDemo();
+            initTransformerDemo();
+            initAdamWDemo();
+        }
+
+        function initScaleInvarianceDemo() {
+            const container = document.getElementById('scale-invariance-demo');
+            if (!container) return;
+
+            // Inject HTML structure
+            container.innerHTML = `
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <div class="control-group">
+                            <div class="control-header">
+                                <label for="scale-slider">Scale Factor (c)</label>
+                            </div>
+                            <div class="slider-container">
+                                <span style="font-size: 0.8rem; color: #9ca3af;">0.2</span>
+                                <input type="range" id="scale-slider" min="0.2" max="5.0" step="0.1" value="1.0">
+                                <span style="font-size: 0.8rem; color: #9ca3af;">5.0</span>
+                            </div>
+                        </div>
+                        <button id="randomize-btn" class="btn-primary">
+                            Randomize Weights
+                        </button>
+                    </div>
+
+                    <div class="demo-grid-layout">
+                        <div class="visual-section">
+                            <h4>Weight Matrix <span style="opacity: 0.5; font-weight: normal;">(6x6)</span></h4>
+                            <div id="w-grid" class="matrix-container" style="grid-template-columns: repeat(6, 1fr);"></div>
+                        </div>
+                        <div class="visual-section">
+                            <h4>Input Vector x <span style="opacity: 0.5; font-weight: normal;">(6)</span></h4>
+                            <div id="x-grid" class="matrix-container" style="grid-template-columns: repeat(6, 1fr);"></div>
+                        </div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="result-card">
+                            <div class="result-header">y = RMSNorm(Wx)</div>
+                            <div id="y-out" class="chip-container"></div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-header">ŷ = RMSNorm((cW)x)</div>
+                            <div id="y-scaled" class="chip-container"></div>
+                        </div>
+                    </div>
+
+                    <div id="diff-indicator" class="diff-indicator">
+                        Outputs are identical (Scale Invariance Holds)
+                    </div>
+                </div>
+            `;
+
+            // State
+            const d = 6;
+            let W = [];
+            let x = [];
+
+            // Elements
+            const wGrid = document.getElementById('w-grid');
+            const xGrid = document.getElementById('x-grid');
+            const yOut = document.getElementById('y-out');
+            const yScaled = document.getElementById('y-scaled');
+            const scaleSlider = document.getElementById('scale-slider');
+            const randomizeBtn = document.getElementById('randomize-btn');
+            const diffIndicator = document.getElementById('diff-indicator');
+
+            // Utils
+            function randn() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            function getColor(val) {
+                const intensity = Math.tanh(Math.abs(val) * 0.8);
+                const alpha = 0.2 + (intensity * 0.8);
+                if (val >= 0) {
+                    return `rgba(59, 130, 246, ${alpha})`;
+                } else {
+                    return `rgba(239, 68, 68, ${alpha})`;
+                }
+            }
+
+            function renderGrid(container, values, isMatrix = false) {
+                container.innerHTML = '';
+                if (isMatrix) {
+                    values.forEach(row => {
+                        row.forEach(val => {
+                            const cell = document.createElement('div');
+                            cell.className = 'cell';
+                            cell.style.width = '20px';
+                            cell.style.height = '20px';
+                            cell.style.margin = '1px';
+                            cell.style.borderRadius = '4px';
+                            cell.style.backgroundColor = getColor(val);
+                            container.appendChild(cell);
+                        });
+                    });
+                } else {
+                    values.forEach(val => {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.style.width = '20px';
+                        cell.style.height = '20px';
+                        cell.style.margin = '1px';
+                        cell.style.borderRadius = '4px';
+                        cell.style.backgroundColor = getColor(val);
+                        container.appendChild(cell);
+                    });
+                }
+            }
+
+            function renderChips(container, values) {
+                container.innerHTML = '';
+                values.forEach(val => {
+                    const chip = document.createElement('div');
+                    chip.className = 'chip';
+                    chip.style.display = 'inline-block';
+                    chip.style.width = '28px';
+                    chip.style.height = '20px';
+                    chip.style.margin = '2px';
+                    chip.style.borderRadius = '999px';
+                    chip.style.backgroundColor = getColor(val);
+                    container.appendChild(chip);
+                });
+            }
+
+            function matVec(Wm, xv) {
+                const out = new Float64Array(Wm.length);
+                for (let i = 0; i < Wm.length; i++) {
+                    let s = 0;
+                    for (let j = 0; j < d; j++) s += Wm[i][j] * xv[j];
+                    out[i] = s;
+                }
+                return out;
+            }
+
+            function rmsnorm(v) {
+                let ss = 0;
+                for (let i = 0; i < v.length; i++) ss += v[i] * v[i];
+                const denom = Math.sqrt(ss / v.length + 1e-12);
+                return v.map(val => val / denom);
+            }
+
+            function l2Dist(v1, v2) {
+                let s = 0;
+                for (let i = 0; i < v1.length; i++) {
+                    s += (v1[i] - v2[i]) ** 2;
+                }
+                return Math.sqrt(s);
+            }
+
+            function update() {
+                const c = parseFloat(scaleSlider.value);
+
+                const z = matVec(W, x);
+                const y = rmsnorm(z);
+
+                const scaledW = W.map(row => row.map(val => val * c));
+                renderGrid(wGrid, scaledW, true);
+
+                const z_scaled = matVec(scaledW, x);
+                const y_hat = rmsnorm(z_scaled);
+
+                renderChips(yOut, y);
+                renderChips(yScaled, y_hat);
+
+                const diff = l2Dist(y, y_hat);
+                if (diff < 1e-10) {
+                    diffIndicator.textContent = 'Outputs are identical (Scale Invariance Holds)';
+                    diffIndicator.className = 'diff-indicator';
+                } else {
+                    diffIndicator.textContent = `Outputs differ! Dist: ${diff.toExponential(2)}`;
+                    diffIndicator.className = 'diff-indicator error';
+                }
+            }
+
+            function randomizeData() {
+                x = new Float64Array(d);
+                for (let i = 0; i < d; i++) x[i] = randn();
+
+                W = new Array(d);
+                for (let i = 0; i < d; i++) {
+                    W[i] = new Float64Array(d);
+                    for (let j = 0; j < d; j++) W[i][j] = randn() * 0.5;
+                }
+
+                renderGrid(xGrid, x);
+                update();
+            }
+
+            function runTests() {
+                // Simple numerical tests for scale invariance under RMSNorm
+                const testScales = [0.5, 1.0, 2.0];
+                let allPass = true;
+                testScales.forEach((c) => {
+                    const z = matVec(W, x);
+                    const y = rmsnorm(z);
+                    const scaledW = W.map(row => row.map(val => val * c));
+                    const z_scaled = matVec(scaledW, x);
+                    const y_hat = rmsnorm(z_scaled);
+                    const diff = l2Dist(y, y_hat);
+                    const pass = diff < 1e-10;
+                    allPass = allPass && pass;
+                    console.log(`[TEST] c=${c.toFixed(1)} diff=${diff.toExponential(2)} pass=${pass}`);
+                });
+                console.assert(allPass, 'Scale invariance tests failed for some c values');
+            }
+
+            // Event Listeners
+            scaleSlider.addEventListener('input', update);
+            randomizeBtn.addEventListener('click', () => {
+                randomizeData();
+                runTests();
+            });
+
+            // Initial Render + tests
+            randomizeData();
+            runTests();
+        }
+
+        function initTransformerDemo() {
+            const container = document.getElementById('transformer-architecture-demo');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="demo-container transformer-demo">
+                    <div class="transformer-header">
+                        <h3 class="transformer-title">Where scale invariance lives in LLM Transformers</h3>
+                        <p class="transformer-subtitle">
+                            LLaMA, Gemma and Qwen all use pre-normalized decoder blocks. That means most of their weight matrices can be
+                            rescaled by any <em>c &gt; 0</em> without changing the network's function – they live on multiplicative
+                            <strong>scale orbits</strong>.
+                        </p>
+                    </div>
+
+                    <div class="transformer-controls-row">
+                        <div class="transformer-model-tabs">
+                            <button class="transformer-model-tab active" data-arch="llama">LLaMA-style</button>
+                            <button class="transformer-model-tab" data-arch="gemma">Gemma-style</button>
+                            <button class="transformer-model-tab" data-arch="qwen">Qwen-style</button>
+                        </div>
+                        <div class="transformer-scale-control">
+                            <label class="adamw-control-label" style="margin-bottom: 0.25rem;">Scale factor (c)</label>
+                            <div class="slider-container">
+                                <span class="transformer-scale-bound">0.25×</span>
+                                <input type="range" id="transformer-scale-slider" min="-0.6" max="0.6" step="0.02" value="0">
+                                <span class="transformer-scale-bound">4×</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="transformer-architecture-description">
+                        <div id="transformer-arch-summary" class="transformer-arch-summary"></div>
+                        <ul id="transformer-arch-bullets" class="transformer-arch-bullets"></ul>
+                    </div>
+
+                    <div class="transformer-demo-grid">
+                        <div class="transformer-diagram-col">
+                            <div id="transformer-diagram"></div>
+                        </div>
+                        <div class="transformer-orbit-col">
+                            <div class="transformer-orbit-card">
+                                <div class="transformer-orbit-header">
+                                    <div class="transformer-orbit-title">Scale invariance group (ℝ<sup>+</sup>, ×)</div>
+                                    <div id="transformer-invariance-badge" class="transformer-invariance-badge">
+                                        Perfectly invariant under c &gt; 0
+                                    </div>
+                                </div>
+                                <p class="transformer-orbit-text">
+                                    Click a weight matrix on the left, then drag the slider to move along its scale orbit
+                                    <code>W → cW</code>. Because the block is normalized, all these points have (almost) identical
+                                    normalized outputs.
+                                </p>
+
+                                <div class="transformer-orbit-layout">
+                                    <div id="transformer-orbit" class="transformer-orbit"></div>
+                                    <div class="transformer-orbit-metrics">
+                                        <div class="metric-row">
+                                            <span class="metric-label">Model family</span>
+                                            <span id="transformer-selected-arch-label" class="metric-value"></span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Weight matrix</span>
+                                            <span id="transformer-selected-weight-label" class="metric-value metric-value-mono"></span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Scale c</span>
+                                            <span id="transformer-scale-value" class="metric-value metric-value-mono"></span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Δ normalized output</span>
+                                            <span id="transformer-diff-value" class="metric-value metric-value-mono"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // --- Architecture definitions for LLaMA / Gemma / Qwen-style blocks ---
+
+            const architectures = {
+                llama: {
+                    key: 'llama',
+                    displayName: 'LLaMA-style (Meta)',
+                    shortName: 'LLaMA',
+                    tagline: 'RMSNorm + SwiGLU pre-norm decoder layer (LLaMA / LLaMA 2).',
+                    summary: 'Pre-norm decoder-only Transformer with RMSNorm and SwiGLU MLP. This is representative of LLaMA, LLaMA 2 and many popular open LLMs.',
+                    bullets: [
+                        'RMSNorm before both attention and MLP blocks.',
+                        'Most linear weights only see normalized activations → individually scale-invariant.',
+                        'Token embeddings feed into RMSNormed blocks so inner weights live on scale orbits.'
+                    ],
+                    blocks: [
+                        {
+                            key: 'attn',
+                            title: 'RMSNorm → Multi-Head Self-Attention',
+                            normLabel: 'RMSNorm(hₗ)',
+                            description: 'Q, K, V and O projections all see the same normalized hidden state.',
+                            weights: [
+                                { key: 'attn.W_q', label: 'W_Q (queries)' },
+                                { key: 'attn.W_k', label: 'W_K (keys)' },
+                                { key: 'attn.W_v', label: 'W_V (values)' },
+                                { key: 'attn.W_o', label: 'W_O (output)' }
+                            ]
+                        },
+                        {
+                            key: 'mlp',
+                            title: 'RMSNorm → SwiGLU MLP',
+                            normLabel: 'RMSNorm(hₗ + Attn)',
+                            description: 'Gated feed-forward expands, gates, then projects back.',
+                            weights: [
+                                { key: 'mlp.W_up', label: 'W_up (expand)' },
+                                { key: 'mlp.W_gate', label: 'W_gate (SwiGLU gate)' },
+                                { key: 'mlp.W_down', label: 'W_down (project back)' }
+                            ]
+                        }
+                    ]
+                },
+                gemma: {
+                    key: 'gemma',
+                    displayName: 'Gemma-style (Google)',
+                    shortName: 'Gemma',
+                    tagline: 'RMSNorm + GeGLU/SwiGLU pre-norm decoder layer (Gemma).',
+                    summary: 'Gemma uses a very similar pre-norm decoder stack with RMSNorm and gated MLP blocks.',
+                    bullets: [
+                        'RMSNorm before attention and MLP → same radial scale invariance pattern.',
+                        'Attention often uses standard or grouped-query layouts but still linear projections after RMSNorm.',
+                        'Feed-forward block uses two parallel projections (value + gate) then a down projection.'
+                    ],
+                    blocks: [
+                        {
+                            key: 'attn',
+                            title: 'RMSNorm → Multi-Head / GQA Attention',
+                            normLabel: 'RMSNorm(hₗ)',
+                            description: 'Q, K, V share one normalized input; O reprojects back to the residual stream.',
+                            weights: [
+                                { key: 'attn.W_q', label: 'W_Q' },
+                                { key: 'attn.W_k', label: 'W_K' },
+                                { key: 'attn.W_v', label: 'W_V' },
+                                { key: 'attn.W_o', label: 'W_O' }
+                            ]
+                        },
+                        {
+                            key: 'mlp',
+                            title: 'RMSNorm → GeGLU / SwiGLU MLP',
+                            normLabel: 'RMSNorm(hₗ + Attn)',
+                            description: 'Two projections (value + gate) followed by a down projection.',
+                            weights: [
+                                { key: 'mlp.W_ff1', label: 'W_ff1 (value)' },
+                                { key: 'mlp.W_ff_gate', label: 'W_ff_gate (gate)' },
+                                { key: 'mlp.W_ff2', label: 'W_ff2 (down)' }
+                            ]
+                        }
+                    ]
+                },
+                qwen: {
+                    key: 'qwen',
+                    displayName: 'Qwen-style (Alibaba)',
+                    shortName: 'Qwen',
+                    tagline: 'RMSNorm + GQA attention pre-norm decoder layer (Qwen).',
+                    summary: 'Qwen uses pre-norm decoder layers with RMSNorm and grouped-query attention. The scale invariance story is the same.',
+                    bullets: [
+                        'RMSNorm before attention and MLP → radial scale invariance per weight matrix.',
+                        'Grouped-query attention shares K/V across heads but still via linear projections.',
+                        'MLP is a gated feed-forward block similar to LLaMA and Gemma.'
+                    ],
+                    blocks: [
+                        {
+                            key: 'attn',
+                            title: 'RMSNorm → GQA Attention',
+                            normLabel: 'RMSNorm(hₗ)',
+                            description: 'Separate Q projection, shared K/V projections, and an output projection.',
+                            weights: [
+                                { key: 'attn.W_q', label: 'W_Q (per-head)' },
+                                { key: 'attn.W_kv', label: 'W_KV (shared K/V)' },
+                                { key: 'attn.W_o', label: 'W_O (output)' }
+                            ]
+                        },
+                        {
+                            key: 'mlp',
+                            title: 'RMSNorm → Gated MLP',
+                            normLabel: 'RMSNorm(hₗ + Attn)',
+                            description: 'Gated feed-forward (e.g. SwiGLU) similar to LLaMA and Gemma.',
+                            weights: [
+                                { key: 'mlp.W_in', label: 'W_in (expand)' },
+                                { key: 'mlp.W_gate', label: 'W_gate' },
+                                { key: 'mlp.W_out', label: 'W_out (down)' }
+                            ]
+                        }
+                    ]
+                }
+            };
+
+            // --- State & helpers ---
+
+            let currentArchKey = 'llama';
+            let currentWeightKey = architectures.llama.blocks[0].weights[0].key;
+
+            const archSummaryEl = container.querySelector('#transformer-arch-summary');
+            const archBulletsEl = container.querySelector('#transformer-arch-bullets');
+            const diagramEl = container.querySelector('#transformer-diagram');
+            const modelTabs = container.querySelectorAll('.transformer-model-tab');
+            const scaleSlider = container.querySelector('#transformer-scale-slider');
+            const scaleValueEl = container.querySelector('#transformer-scale-value');
+            const diffValueEl = container.querySelector('#transformer-diff-value');
+            const selectedWeightEl = container.querySelector('#transformer-selected-weight-label');
+            const selectedArchEl = container.querySelector('#transformer-selected-arch-label');
+            const orbitEl = container.querySelector('#transformer-orbit');
+            const invarianceBadgeEl = container.querySelector('#transformer-invariance-badge');
+
+            const nodeExponents = [-0.6, -0.3, 0.0, 0.3, 0.6];
+            const orbitNodes = [];
+            const invarianceTests = {};
+
+            function randn() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            function rmsnorm(vec) {
+                let ss = 0;
+                for (let i = 0; i < vec.length; i++) ss += vec[i] * vec[i];
+                const denom = Math.sqrt(ss / vec.length + 1e-12);
+                const out = new Float64Array(vec.length);
+                for (let i = 0; i < vec.length; i++) out[i] = vec[i] / denom;
+                return out;
+            }
+
+            function l2Distance(a, b) {
+                let s = 0;
+                for (let i = 0; i < a.length; i++) {
+                    const d = a[i] - b[i];
+                    s += d * d;
+                }
+                return Math.sqrt(s);
+            }
+
+            function formatScale(c) {
+                if (Math.abs(c - 1) < 1e-3) return '1.00×';
+                if (c < 10) return c.toFixed(2) + '×';
+                return c.toExponential(1) + '×';
+            }
+
+            function createInvarianceTest() {
+                // vector-level toy: y = RMSNorm(Wx) → RMSNorm is exactly scale-invariant
+                const dim = 32;
+                const baseVec = new Float64Array(dim);
+                for (let i = 0; i < dim; i++) baseVec[i] = randn();
+                const baseOut = rmsnorm(baseVec);
+                return {
+                    isScaleInvariant: true,
+                    baseOut,
+                    forward: function (c) {
+                        const scaled = new Float64Array(dim);
+                        for (let i = 0; i < dim; i++) scaled[i] = c * baseVec[i];
+                        return rmsnorm(scaled);
+                    }
+                };
+            }
+
+            function getInvarianceTest(archKey, weightKey) {
+                const id = `${archKey}::${weightKey}`;
+                if (!invarianceTests[id]) {
+                    invarianceTests[id] = createInvarianceTest();
+                }
+                return invarianceTests[id];
+            }
+
+            function findWeightMeta(arch, weightKey) {
+                for (const block of arch.blocks) {
+                    for (const w of block.weights) {
+                        if (w.key === weightKey) return w;
+                    }
+                }
+                return null;
+            }
+
+            function buildArchitectureHTML(arch) {
+                let html = `
+                    <div class="transformer-layer-card">
+                        <div class="transformer-layer-header">
+                            <div class="transformer-layer-title">${arch.displayName}</div>
+                            <div class="transformer-layer-tagline">${arch.tagline}</div>
+                        </div>
+                        <div class="transformer-io-row">
+                            <div class="transformer-io-pill transformer-io-pill muted">Token IDs</div>
+                            <span class="transformer-io-arrow">→</span>
+                            <div class="transformer-io-pill">Embedding lookup</div>
+                            <span class="transformer-io-arrow">→</span>
+                            <div class="transformer-io-pill">L × decoder blocks</div>
+                        </div>
+                `;
+
+                arch.blocks.forEach(block => {
+                    const normLabel = block.normLabel || 'Norm(hₗ)';
+                    const subtitle = block.description || '';
+                    html += `
+                        <div class="transformer-block">
+                            <div class="transformer-block-header">
+                                <div>
+                                    <div class="transformer-block-title">${block.title}</div>
+                                    ${subtitle ? `<div class="transformer-block-subtitle">${subtitle}</div>` : ''}
+                                </div>
+                                <div class="transformer-block-badge">scale-invariant sphere</div>
+                            </div>
+                            <div class="transformer-block-body">
+                                <div class="transformer-block-row">
+                                    <div class="transformer-norm-pill">${normLabel}</div>
+                                    <span class="transformer-io-arrow">→</span>
+                                    <div class="transformer-linear-stack">
+                                        ${block.weights.map(w => `
+                                            <button
+                                                class="transformer-weight-chip"
+                                                data-weight-key="${w.key}"
+                                            >
+                                                ${w.label}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="transformer-residual-note">
+                                    h<sub>out</sub> = h<sub>in</sub> + F(Norm(h<sub>in</sub>); W)
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                return html;
+            }
+
+            function renderArchitecture() {
+                const arch = architectures[currentArchKey];
+                diagramEl.innerHTML = buildArchitectureHTML(arch);
+
+                const chips = diagramEl.querySelectorAll('.transformer-weight-chip');
+                chips.forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const key = chip.getAttribute('data-weight-key');
+                        if (!key) return;
+                        currentWeightKey = key;
+                        updateScaleAndDiff();
+                        highlightSelectedChip();
+                    });
+                });
+
+                const allKeys = arch.blocks.flatMap(b => b.weights.map(w => w.key));
+                if (!currentWeightKey || !allKeys.includes(currentWeightKey)) {
+                    currentWeightKey = allKeys[0];
+                }
+                highlightSelectedChip();
+            }
+
+            function highlightSelectedChip() {
+                const chips = diagramEl.querySelectorAll('.transformer-weight-chip');
+                chips.forEach(chip => {
+                    const key = chip.getAttribute('data-weight-key');
+                    chip.classList.toggle('active', key === currentWeightKey);
+                });
+            }
+
+            function updateArchDescription() {
+                const arch = architectures[currentArchKey];
+                archSummaryEl.textContent = arch.summary;
+                archBulletsEl.innerHTML = '';
+                if (arch.bullets && arch.bullets.length) {
+                    arch.bullets.forEach(txt => {
+                        const li = document.createElement('li');
+                        li.textContent = txt;
+                        archBulletsEl.appendChild(li);
+                    });
+                }
+            }
+
+            function createOrbit() {
+                orbitEl.innerHTML = '';
+                const center = document.createElement('div');
+                center.className = 'transformer-orbit-center';
+                center.innerHTML = `
+                    <div class="transformer-orbit-center-dot"></div>
+                    <div class="transformer-orbit-center-label">direction on sphere</div>
+                `;
+                orbitEl.appendChild(center);
+
+                nodeExponents.forEach(exp => {
+                    const node = document.createElement('div');
+                    node.className = 'transformer-orbit-node';
+                    node.dataset.exponent = exp.toString();
+                    const c = Math.pow(10, exp);
+                    node.textContent = formatScale(c);
+                    orbitEl.appendChild(node);
+                    orbitNodes.push(node);
+                });
+
+                function positionOrbitNodes() {
+                    const rect = orbitEl.getBoundingClientRect();
+                    if (!rect.width || !rect.height) return;
+                    const cx = rect.width / 2;
+                    const cy = rect.height / 2;
+                    const radius = Math.min(cx, cy) - 22;
+
+                    orbitNodes.forEach((node, idx) => {
+                        const angle = (2 * Math.PI * idx) / nodeExponents.length - Math.PI / 2;
+                        const x = cx + radius * Math.cos(angle);
+                        const y = cy + radius * Math.sin(angle);
+                        node.style.left = `${x}px`;
+                        node.style.top = `${y}px`;
+                    });
+                }
+
+                window.requestAnimationFrame(positionOrbitNodes);
+                window.addEventListener('resize', positionOrbitNodes);
+            }
+
+            function updateOrbitHighlight() {
+                const exp = parseFloat(scaleSlider.value);
+                let bestNode = null;
+                let bestDist = Infinity;
+                orbitNodes.forEach(node => {
+                    const e = parseFloat(node.dataset.exponent);
+                    const d = Math.abs(e - exp);
+                    if (d < bestDist) {
+                        bestDist = d;
+                        bestNode = node;
+                    }
+                });
+                orbitNodes.forEach(node => {
+                    node.classList.toggle('active', node === bestNode);
+                });
+            }
+
+            function updateScaleAndDiff() {
+                const arch = architectures[currentArchKey];
+                const beta = parseFloat(scaleSlider.value);
+                const c = Math.pow(10, beta);
+
+                scaleValueEl.textContent = formatScale(c);
+                selectedArchEl.textContent = arch.displayName;
+
+                const weightMeta = findWeightMeta(arch, currentWeightKey);
+                selectedWeightEl.textContent = weightMeta ? weightMeta.label : currentWeightKey;
+
+                const test = getInvarianceTest(currentArchKey, currentWeightKey);
+                const yScaled = test.forward(c);
+                const diff = l2Distance(test.baseOut, yScaled);
+                diffValueEl.textContent = diff.toExponential(2);
+
+                const tiny = 1e-10;
+                if (diff < tiny) {
+                    invarianceBadgeEl.textContent = 'Perfectly invariant under c > 0';
+                    invarianceBadgeEl.classList.remove('warning');
+                } else {
+                    invarianceBadgeEl.textContent = 'Almost invariant (numerical noise only)';
+                    invarianceBadgeEl.classList.remove('warning');
+                }
+
+                updateOrbitHighlight();
+            }
+
+            function updateModelTabs() {
+                modelTabs.forEach(btn => {
+                    const k = btn.getAttribute('data-arch');
+                    btn.classList.toggle('active', k === currentArchKey);
+                });
+            }
+
+            // --- Event wiring ---
+
+            modelTabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const k = btn.getAttribute('data-arch');
+                    if (!k || k === currentArchKey) return;
+                    currentArchKey = k;
+                    const arch = architectures[currentArchKey];
+                    currentWeightKey = arch.blocks[0].weights[0].key;
+                    updateModelTabs();
+                    updateArchDescription();
+                    renderArchitecture();
+                    updateScaleAndDiff();
+                });
+            });
+
+            scaleSlider.addEventListener('input', () => {
+                updateScaleAndDiff();
+            });
+
+            // --- Initial render ---
+
+            updateModelTabs();
+            updateArchDescription();
+            createOrbit();
+            renderArchitecture();
+            updateScaleAndDiff();
+        }
+
+        function initAdamWDemo() {
+            const container = document.getElementById('adamw-demo');
+            if (!container) {
+                console.warn('AdamW demo container not found!');
+                return;
+            }
+
+            if (typeof Plotly === 'undefined') {
+                console.error(
+                    'Plotly is not available. Make sure the Plotly <script> tag is included in <head>.'
+                );
+                container.innerHTML = `
+                    <div class="demo-container">
+                        <p style="color:#b91c1c;">
+                            AdamW demo could not load because Plotly is missing.
+                            Check that <code>plotly-latest.min.js</code> exists locally or <code>https://cdn.plot.ly/plotly-latest.min.js</code> is reachable.
+                        </p>
+                    </div>`;
+                return;
+            }
+
+            // Plotly is ready: render the full demo
+            renderAdamWDemo(container);
+        }
+
+        function renderAdamWDemo(container) {
+            // Inject HTML structure with improved styling
+            container.innerHTML = `
+                <div class="adamw-demo-card">
+                    <div class="adamw-header">
+                        <h3 class="adamw-title">
+                            A Toy Example Validating Our Theory
+                        </h3>
+                        <p class="adamw-subtitle">
+                            Interactive simulation of a normalized linear model training.
+                            <span class="adamw-legend">
+                                <span class="legend-item">
+                                    <span class="legend-color" style="background: #2563eb;"></span> Empirical
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-line" style="border-color: #1e40af;"></span> Theory
+                                </span>
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="adamw-controls-grid">
+                        <!-- Optimizer Toggle -->
+                        <div class="adamw-control-group">
+                            <label class="adamw-control-label">Optimizer</label>
+                            <div class="uiswitch-container">
+                                <label class="uiswitch">
+                                    <input type="checkbox" id="optimizer-switch">
+                                    <span class="uiswitch-slider">
+                                        <span class="uiswitch-option uiswitch-option-adamw">AdamW</span>
+                                        <span class="uiswitch-option uiswitch-option-muon">Muon</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <!-- Controls -->
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Learning Rate (η)</label>
+                                <span id="adamw-lr-val" class="adamw-value-display">0.010000</span>
+                            </div>
+                            <input type="range" id="adamw-lr" class="adamw-range" min="0.0005" max="0.1" step="0.00001" value="0.01">
+                        </div>
+                        
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Weight Decay (λ)</label>
+                                <span id="adamw-wd-val" class="adamw-value-display">0.10000</span>
+                            </div>
+                            <input type="range" id="adamw-wd" class="adamw-range" min="0.05" max="0.15" step="0.0001" value="0.10">
+                        </div>
+
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Momentum (β₁)</label>
+                                <span id="adamw-beta1-val" class="adamw-value-display">0.9000</span>
+                            </div>
+                            <input type="range" id="adamw-beta1" class="adamw-range" min="0.5" max="0.99" step="0.001" value="0.9">
+                        </div>
+
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Speed</label>
+                                <span id="adamw-speed-val" class="adamw-value-display">20</span>
+                            </div>
+                            <input type="range" id="adamw-speed" class="adamw-range" min="1" max="100" step="1" value="100">
+                        </div>
+                    </div>
+
+                    <div class="adamw-actions">
+                        <button id="adamw-start" class="adamw-btn adamw-btn-primary">
+                            <span>▶</span> Start / Resume
+                        </button>
+                        <button id="adamw-pause" class="adamw-btn adamw-btn-secondary">
+                            <span>⏸</span> Pause
+                        </button>
+                        <button id="adamw-reset" class="adamw-btn adamw-btn-secondary">
+                            <span>↻</span> Reset
+                        </button>
+                        <div class="adamw-step-counter">
+                            Step: <span id="adamw-iter" style="font-family: 'Fira Code', monospace;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="adamw-plots-grid">
+                    <div id="adamw-loss-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-wnorm-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-updnorm-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-angle-plot" class="adamw-plot-container"></div>
+                </div>
+            `;
+
+            // Initialize the AdamW simulation
+            initAdamWSimulation();
+        }
+
+        function initAdamWSimulation() {
+            // Core simulation code adapted from game2.html
+            const inputDim = 20;
+            const outputDim = 3;
+            const batchSize = 32;
+            const beta2 = 0.999;
+            const eps = 1e-8;
+            const gradNoiseStd = 0.1;
+            const maxHistorySize = 30000;
+            const emaAlpha = 0.0005;
+
+            let teacherW, W, m, v, t, totalIterations;
+            let iters = [], lossHistory = [], wNormHistory = [], updNormHistory = [], angleHistory = [];
+            let lossEMA = [], wNormEMA = [], updNormEMA = [], angleEMA = [];
+            let wNormPredHistory = [], updNormPredHistory = [], anglePredHistory = [];
+            let running = false, loopHandle = null;
+            let cachedPredictions = null, cachedHyperparams = null;
+            let currentOptimizer = 'adamw';
+
+            // --- NEW --- Matrix utilities for Muon
+            function transpose(A) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const T = zeros(cols, rows);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        T[j][i] = A[i][j];
+                    }
+                }
+                return T;
+            }
+
+            function matMul(A, B) {
+                const A_rows = A.length;
+                const A_cols = A[0].length;
+                const B_rows = B.length;
+                const B_cols = B[0].length;
+                if (A_cols !== B_rows) {
+                    throw new Error(`Matrix multiplication dimension mismatch: ${A_cols} vs ${B_rows}`);
+                }
+                const C = zeros(A_rows, B_cols);
+                for (let i = 0; i < A_rows; i++) {
+                    for (let j = 0; j < B_cols; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < A_cols; k++) {
+                            sum += A[i][k] * B[k][j];
+                        }
+                        C[i][j] = sum;
+                    }
+                }
+                return C;
+            }
+
+            function matAdd(A, B) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const C = zeros(rows, cols);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        C[i][j] = A[i][j] + B[i][j];
+                    }
+                }
+                return C;
+            }
+
+            function scalarMul(s, A) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const C = zeros(rows, cols);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        C[i][j] = s * A[i][j];
+                    }
+                }
+                return C;
+            }
+            // --- END NEW ---
+
+            // --- NEW --- Newton-Schulz for Muon
+            function matrixZeroPower(G, steps = 10, eps = 1e-10) {
+                // Computes G^0 = UV^T where G = UΣV^T (SVD decomposition)
+                // This is the orthogonal polar factor of G, computed via Newton-Schulz iteration
+                // The result is equivalent to doing SVD and returning U @ V^T
+                const rows = G.length;
+                const cols = G[0].length;
+                // const a = 3.4445, b = -4.7750, c = 2.0315;
+                const a = 2.0, b = -1.5, c = 0.5;
+
+                let X = G.map(row => new Float64Array(row)); // copy
+
+                const norm = frobNorm(X);
+                X = scalarMul(1.0 / (norm + eps), X);
+
+                let transposed = false;
+                if (rows > cols) {
+                    X = transpose(X);
+                    transposed = true;
+                }
+
+                // Newton-Schulz iteration: converges to the orthogonal polar factor
+                for (let i = 0; i < steps; i++) {
+                    const XT = transpose(X);
+                    const A = matMul(X, XT);
+                    const A2 = matMul(A, A);
+                    const B = matAdd(scalarMul(b, A), scalarMul(c, A2));
+                    const BX = matMul(B, X);
+                    X = matAdd(scalarMul(a, X), BX);
+                }
+
+                if (transposed) {
+                    X = transpose(X);
+                }
+                return X;
+            }
+            // --- END NEW ---
+
+            // Utility functions
+            function randn() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            function zeros(rows, cols) {
+                const arr = new Array(rows);
+                for (let i = 0; i < rows; i++) arr[i] = new Float64Array(cols);
+                return arr;
+            }
+
+            function randnMatrix(rows, cols) {
+                const arr = new Array(rows);
+                for (let i = 0; i < rows; i++) {
+                    const row = new Float64Array(cols);
+                    for (let j = 0; j < cols; j++) row[j] = randn();
+                    arr[i] = row;
+                }
+                return arr;
+            }
+
+            function matVec(W, x) {
+                const k = W.length, d = x.length, y = new Float64Array(k);
+                for (let i = 0; i < k; i++) {
+                    let s = 0.0;
+                    for (let j = 0; j < d; j++) s += W[i][j] * x[j];
+                    y[i] = s;
+                }
+                return y;
+            }
+
+            function norm(v) {
+                let s = 0.0;
+                for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+                return Math.sqrt(s);
+            }
+
+            function frobNorm(W) {
+                let s = 0.0;
+                for (let i = 0; i < W.length; i++)
+                    for (let j = 0; j < W[i].length; j++) s += W[i][j] * W[i][j];
+                return Math.sqrt(s);
+            }
+
+            function cosineBetweenMatrices(A, B) {
+                let dot = 0.0, na = 0.0, nb = 0.0;
+                for (let i = 0; i < A.length; i++) {
+                    for (let j = 0; j < A[i].length; j++) {
+                        const a = A[i][j], b = B[i][j];
+                        dot += a * b;
+                        na += a * a;
+                        nb += b * b;
+                    }
+                }
+                if (na === 0 || nb === 0) return 0.0;
+                return Math.max(-1.0, Math.min(1.0, dot / Math.sqrt(na * nb)));
+            }
+
+            function initWeights() {
+                teacherW = randnMatrix(outputDim, inputDim);
+                for (let i = 0; i < outputDim; i++) {
+                    const n = norm(teacherW[i]);
+                    if (n > 0) for (let j = 0; j < inputDim; j++) teacherW[i][j] /= n;
+                }
+
+                const initScale = 0.01;
+                W = randnMatrix(outputDim, inputDim);
+                for (let i = 0; i < outputDim; i++)
+                    for (let j = 0; j < inputDim; j++) W[i][j] *= initScale;
+
+                m = zeros(outputDim, inputDim);
+                v = zeros(outputDim, inputDim);
+                t = 0;
+                totalIterations = 0;
+                iters = []; lossHistory = []; wNormHistory = []; updNormHistory = []; angleHistory = [];
+                lossEMA = []; wNormEMA = []; updNormEMA = []; angleEMA = [];
+                wNormPredHistory = []; updNormPredHistory = []; anglePredHistory = [];
+            }
+
+            function forwardAndGrad() {
+                const X = randnMatrix(batchSize, inputDim);
+                let totalLoss = 0.0;
+                const gradW = zeros(outputDim, inputDim);
+
+                for (let b = 0; b < batchSize; b++) {
+                    const x = X[b];
+                    let zT = matVec(teacherW, x);
+                    let nT = norm(zT) + 1e-12;
+                    for (let i = 0; i < zT.length; i++) zT[i] /= nT;
+
+                    let zS = matVec(W, x);
+                    let nS = norm(zS) + 1e-12;
+                    const yS = new Float64Array(outputDim);
+                    for (let i = 0; i < outputDim; i++) yS[i] = zS[i] / nS;
+
+                    const gy = new Float64Array(outputDim);
+                    let sampleLoss = 0.0;
+                    for (let i = 0; i < outputDim; i++) {
+                        const diff = yS[i] - zT[i];
+                        sampleLoss += 0.5 * diff * diff;
+                        gy[i] = diff;
+                    }
+                    totalLoss += sampleLoss;
+
+                    let zDotGy = 0.0;
+                    for (let i = 0; i < outputDim; i++) zDotGy += zS[i] * gy[i];
+                    const nS3 = nS * nS * nS;
+
+                    const gz = new Float64Array(outputDim);
+                    for (let i = 0; i < outputDim; i++) gz[i] = gy[i] / nS - (zS[i] * zDotGy) / nS3;
+
+                    for (let i = 0; i < outputDim; i++) {
+                        const gzi = gz[i];
+                        for (let j = 0; j < inputDim; j++) gradW[i][j] += gzi * x[j] / batchSize;
+                    }
+                }
+
+                for (let i = 0; i < outputDim; i++)
+                    for (let j = 0; j < inputDim; j++) gradW[i][j] += gradNoiseStd * randn();
+
+                return { loss: totalLoss / batchSize, gradW };
+            }
+
+            function stepAdamW(gradW, lr, weightDecay, beta1) {
+                t += 1;
+                const oneMinusB1 = 1.0 - beta1, oneMinusB2 = 1.0 - beta2;
+                const b1t = Math.pow(beta1, t), b2t = Math.pow(beta2, t);
+                const lr_t = lr * Math.sqrt(1.0 - b2t) / (1.0 - b1t);
+                const adamStepMatrix = zeros(outputDim, inputDim);
+
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        const g = gradW[i][j];
+                        m[i][j] = beta1 * m[i][j] + oneMinusB1 * g;
+                        v[i][j] = beta2 * v[i][j] + oneMinusB2 * g * g;
+                        const adamStep = m[i][j] / (Math.sqrt(v[i][j]) + eps);
+                        adamStepMatrix[i][j] = adamStep;
+                        W[i][j] -= lr_t * (adamStep + weightDecay * W[i][j]);
+                    }
+                }
+                return adamStepMatrix;
+            }
+
+            function stepMuon(gradW, lr, weightDecay, beta1) {
+                t += 1; // Muon also needs to track time for bias correction if we were to use it.
+                const oneMinusB1 = 1.0 - beta1;
+
+                // SGD with momentum
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        const g = gradW[i][j];
+                        m[i][j] = beta1 * m[i][j] + oneMinusB1 * g;
+                    }
+                }
+
+                // Orthogonalize the momentum update
+                const muonUpdate = matrixZeroPower(m);
+
+                // Apply update and weight decay
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        W[i][j] -= lr * (muonUpdate[i][j] + weightDecay * W[i][j]);
+                    }
+                }
+                return muonUpdate;
+            }
+
+            function equilibriumPredictions(lr, wd, beta1) {
+                const numel = outputDim * inputDim;
+                const U = Math.sqrt(numel * (1 - beta1) / (1 + beta1));
+                const alpha = 1 - lr * wd, beta = beta1;
+                const tiny = 1e-12;
+                const denom1 = 1 - alpha * alpha, denom2 = 1 - alpha * beta, denom3 = 1 + alpha * beta;
+
+                let W_inf = denom1 > tiny && denom2 > tiny ?
+                    lr * U * Math.sqrt(Math.max(denom3 / (denom1 * denom2), tiny)) :
+                    U * Math.sqrt(lr / (2 * Math.max(wd, tiny)));
+
+                let s_eff = denom3 > tiny ?
+                    alpha * Math.sqrt(Math.max(2 * (1 - alpha) * (1 - beta) / denom3, 0)) :
+                    Math.sqrt((lr * wd * W_inf) ** 2 + (lr * U) ** 2) / Math.max(W_inf, tiny);
+
+                const updInf = s_eff * W_inf;
+                let cosineInf = Math.max(-1, Math.min(1, - Math.sqrt(denom1 / (1 - alpha * alpha * beta * beta)))); 
+
+                return { W_inf, U, cosineInf };
+            }
+
+            function recomputePredictionHistories() {
+                const lr = parseFloat(document.getElementById("adamw-lr").value);
+                const wd = parseFloat(document.getElementById("adamw-wd").value);
+                const beta1 = parseFloat(document.getElementById("adamw-beta1").value);
+                const optimizer = currentOptimizer;
+                const currentHyperparams = `${optimizer}_${lr}_${wd}_${beta1}`;
+
+                if (currentHyperparams === cachedHyperparams && cachedPredictions) {
+                    const { W_inf, U, cosineInf } = cachedPredictions;
+                    const n = iters.length;
+                    wNormPredHistory = new Array(n).fill(W_inf);
+                    updNormPredHistory = new Array(n).fill(U);
+                    anglePredHistory = new Array(n).fill(cosineInf);
+                    return;
+                }
+
+                const scaling = optimizer === 'muon'
+                    ? Math.sqrt((1 + beta1) / (1 - beta1)) / Math.sqrt(inputDim)
+                    : 1.0;
+
+                let { W_inf, U, cosineInf } = equilibriumPredictions(lr, wd, beta1);
+                W_inf *= scaling;
+                U *= scaling;
+
+                cachedPredictions = { W_inf, U, cosineInf };
+                cachedHyperparams = currentHyperparams;
+                const n = iters.length;
+                wNormPredHistory = new Array(n).fill(W_inf);
+                updNormPredHistory = new Array(n).fill(U);
+                anglePredHistory = new Array(n).fill(cosineInf);
+            }
+
+            function initPlots() {
+                const layoutBase = (title, yTitle) => ({
+                    title: {
+                        text: title,
+                        font: { size: 14, family: 'Inter, sans-serif', color: '#111827', weight: 600 },
+                        x: 0.05,
+                        xanchor: 'left'
+                    },
+                    xaxis: {
+                        title: "Iteration",
+                        gridcolor: '#f3f4f6',
+                        zerolinecolor: '#f3f4f6',
+                        tickfont: { size: 10, color: '#6b7280', family: 'Inter, sans-serif' },
+                        titlefont: { size: 11, color: '#4b5563', family: 'Inter, sans-serif' }
+                    },
+                    yaxis: {
+                        title: yTitle,
+                        gridcolor: '#f3f4f6',
+                        zerolinecolor: '#f3f4f6',
+                        tickfont: { size: 10, color: '#6b7280', family: 'Inter, sans-serif' },
+                        titlefont: { size: 11, color: '#4b5563', family: 'Inter, sans-serif' }
+                    },
+                    margin: { l: 50, r: 20, t: 40, b: 40 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    showlegend: true,
+                    legend: {
+                        x: 1,
+                        xanchor: 'right',
+                        y: 1,
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        bordercolor: '#e5e7eb',
+                        borderwidth: 1,
+                        font: { size: 10, family: 'Inter, sans-serif', color: '#4b5563' }
+                    },
+                    hoverlabel: {
+                        bgcolor: '#ffffff',
+                        bordercolor: '#e5e7eb',
+                        font: { family: 'Inter, sans-serif', size: 12 }
+                    }
+                });
+
+                const config = { displayModeBar: false, responsive: true };
+
+                Plotly.newPlot("adamw-loss-plot", [
+                    { x: [], y: [], mode: "lines", name: "Loss (raw)", line: { color: "rgba(59, 130, 246, 0.2)", width: 1 }, hoverinfo: 'y' },
+                    { x: [], y: [], mode: "lines", name: "Loss (EMA)", line: { color: "#2563eb", width: 2 } }
+                ], layoutBase("Training Loss", "Loss"), config);
+
+                Plotly.newPlot("adamw-wnorm-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(37, 99, 235, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#2563eb", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#1e40af", dash: "dash", width: 2 } }
+                ], layoutBase("Weight Norm ||W||", "||W||₂"), config);
+
+                Plotly.newPlot("adamw-updnorm-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(22, 163, 74, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#16a34a", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#15803d", dash: "dash", width: 2 } }
+                ], layoutBase("Update Norm ||u||", "||u||₂"), config);
+
+                Plotly.newPlot("adamw-angle-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(220, 38, 38, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#dc2626", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#991b1b", dash: "dash", width: 2 } }
+                ], layoutBase("Angle between W and u cos(θ)", "cos(θ)"), config);
+            }
+
+            function updatePlots() {
+                Plotly.update("adamw-loss-plot", { x: [iters, iters], y: [lossHistory, lossEMA] }, {}, [0, 1]);
+                Plotly.update("adamw-wnorm-plot", { x: [iters, iters, iters], y: [wNormHistory, wNormEMA, wNormPredHistory] }, {}, [0, 1, 2]);
+                Plotly.update("adamw-updnorm-plot", { x: [iters, iters, iters], y: [updNormHistory, updNormEMA, updNormPredHistory] }, {}, [0, 1, 2]);
+                Plotly.update("adamw-angle-plot", { x: [iters, iters, iters], y: [angleHistory, angleEMA, anglePredHistory] }, {}, [0, 1, 2]);
+                
+                // Ensure minimum y-axis range of 0.01 for all plots
+                // Use only EMA and theory traces to determine range (ignore raw data outliers)
+                const plotConfigs = [
+                    { id: "adamw-loss-plot", traceIndices: [1] },        // EMA only
+                    { id: "adamw-wnorm-plot", traceIndices: [1, 2] },    // EMA and theory
+                    { id: "adamw-updnorm-plot", traceIndices: [1, 2] },  // EMA and theory
+                    { id: "adamw-angle-plot", traceIndices: [1, 2] }     // EMA and theory
+                ];
+                
+                plotConfigs.forEach(config => {
+                    const plotDiv = document.getElementById(config.id);
+                    if (plotDiv && plotDiv.data) {
+                        let yMin = Infinity, yMax = -Infinity;
+                        config.traceIndices.forEach(traceIdx => {
+                            const trace = plotDiv.data[traceIdx];
+                            if (trace && trace.y && trace.y.length > 0) {
+                                const traceMin = Math.min(...trace.y);
+                                const traceMax = Math.max(...trace.y);
+                                yMin = Math.min(yMin, traceMin);
+                                yMax = Math.max(yMax, traceMax);
+                            }
+                        });
+                        
+                        if (isFinite(yMin) && isFinite(yMax)) {
+                            const range = yMax - yMin;
+                            if (range < 0.2) {
+                                const center = (yMin + yMax) / 2;
+                                const newMin = center - 0.1;
+                                const newMax = center + 0.1;
+                                Plotly.relayout(config.id, { 'yaxis.range': [newMin, newMax] });
+                            } else {
+                                // Add 5% padding to the range
+                                const padding = range * 0.05;
+                                Plotly.relayout(config.id, { 'yaxis.range': [yMin - padding, yMax + padding] });
+                            }
+                        }
+                    }
+                });
+            }
+
+            function trainStep() {
+                if (!running) return;
+
+                const lr = parseFloat(document.getElementById("adamw-lr").value);
+                const wd = parseFloat(document.getElementById("adamw-wd").value);
+                const beta1 = parseFloat(document.getElementById("adamw-beta1").value);
+                const stepsPerFrame = parseInt(document.getElementById("adamw-speed").value);
+                const optimizer = document.getElementById("optimizer-switch").checked ? 'muon' : 'adamw';
+
+                for (let step = 0; step < stepsPerFrame; step++) {
+                    const { loss, gradW } = forwardAndGrad();
+
+                    let upd;
+                    if (optimizer === 'adamw') {
+                        upd = stepAdamW(gradW, lr, wd, beta1);
+                    } else {
+                        upd = stepMuon(gradW, lr, wd, beta1);
+                    }
+
+                    totalIterations++;
+                    iters.push(totalIterations);
+                    lossHistory.push(loss);
+                    const wNorm = frobNorm(W);
+                    wNormHistory.push(wNorm);
+                    const updNorm = frobNorm(upd);
+                    updNormHistory.push(updNorm);
+                    const cosineAngle = updNorm > 0 ? cosineBetweenMatrices(W, upd) : 0.0;
+                    angleHistory.push(cosineAngle);
+
+                    if (lossEMA.length === 0) {
+                        lossEMA.push(loss);
+                        wNormEMA.push(wNorm);
+                        updNormEMA.push(updNorm);
+                        angleEMA.push(cosineAngle);
+                    } else {
+                        lossEMA.push(emaAlpha * loss + (1 - emaAlpha) * lossEMA[lossEMA.length - 1]);
+                        wNormEMA.push(Math.sqrt(emaAlpha * wNorm * wNorm + (1 - emaAlpha) * wNormEMA[wNormEMA.length - 1] * wNormEMA[wNormEMA.length - 1]));
+                        updNormEMA.push(Math.sqrt(emaAlpha * updNorm * updNorm + (1 - emaAlpha) * updNormEMA[updNormEMA.length - 1] * updNormEMA[updNormEMA.length - 1]));
+                        angleEMA.push(emaAlpha * cosineAngle + (1 - emaAlpha) * angleEMA[angleEMA.length - 1]);
+                    }
+                }
+
+                if (iters.length > maxHistorySize) {
+                    const trimCount = iters.length - maxHistorySize;
+                    iters = iters.slice(trimCount);
+                    lossHistory = lossHistory.slice(trimCount);
+                    wNormHistory = wNormHistory.slice(trimCount);
+                    updNormHistory = updNormHistory.slice(trimCount);
+                    angleHistory = angleHistory.slice(trimCount);
+                    lossEMA = lossEMA.slice(trimCount);
+                    wNormEMA = wNormEMA.slice(trimCount);
+                    updNormEMA = updNormEMA.slice(trimCount);
+                    angleEMA = angleEMA.slice(trimCount);
+                }
+
+                recomputePredictionHistories();
+                document.getElementById("adamw-iter").textContent = totalIterations.toString();
+                updatePlots();
+                loopHandle = window.requestAnimationFrame(trainStep);
+            }
+
+            function updateSliderLabels() {
+                document.getElementById("adamw-lr-val").textContent =
+                    parseFloat(document.getElementById("adamw-lr").value).toFixed(6);
+                document.getElementById("adamw-wd-val").textContent =
+                    parseFloat(document.getElementById("adamw-wd").value).toFixed(5);
+                document.getElementById("adamw-beta1-val").textContent =
+                    parseFloat(document.getElementById("adamw-beta1").value).toFixed(4);
+                document.getElementById("adamw-speed-val").textContent =
+                    document.getElementById("adamw-speed").value;
+            }
+
+            function onHyperparamChange() {
+                updateSliderLabels();
+                cachedHyperparams = null;
+                recomputePredictionHistories();
+                updatePlots();
+            }
+
+            function onOptimizerChange() {
+                const newOptimizer = document.getElementById("optimizer-switch").checked ? 'muon' : 'adamw';
+                if (newOptimizer !== currentOptimizer) {
+                    console.log(`Switching optimizer from ${currentOptimizer} to ${newOptimizer}`);
+                    if (newOptimizer === 'adamw') {
+                        // Switching to AdamW: keep m, re-initialize v
+                        v = zeros(outputDim, inputDim);
+                        t = 0; // Reset t for AdamW bias correction
+                    }
+                    // When switching to Muon from AdamW, m is already there and used.
+                    // v is not used by Muon.
+                    currentOptimizer = newOptimizer;
+                }
+            }
+
+            document.getElementById("optimizer-switch").addEventListener("change", onOptimizerChange);
+            document.getElementById("adamw-lr").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-wd").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-beta1").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-speed").addEventListener("input", updateSliderLabels);
+
+            document.getElementById("adamw-start").addEventListener("click", () => {
+                if (!running) {
+                    running = true;
+                    trainStep();
+                }
+            });
+
+            document.getElementById("adamw-pause").addEventListener("click", () => {
+                running = false;
+                if (loopHandle !== null) {
+                    window.cancelAnimationFrame(loopHandle);
+                    loopHandle = null;
+                }
+            });
+
+            document.getElementById("adamw-reset").addEventListener("click", () => {
+                running = false;
+                if (loopHandle !== null) {
+                    window.cancelAnimationFrame(loopHandle);
+                    loopHandle = null;
+                }
+                initWeights();
+                initPlots();
+                document.getElementById("adamw-iter").textContent = "0";
+                updateSliderLabels();
+            });
+
+            initWeights();
+            initPlots();
+            updateSliderLabels();
+        }
+    </script>
+</body>
+
+</html>

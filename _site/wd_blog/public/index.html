@@ -1,0 +1,3779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Decay in Deep Learning</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Fira+Code&display=swap"
+        rel="stylesheet">
+
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- MathJax for LaTeX -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Plotly for the AdamW demo -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Minimal inline styles so the demo is visible even without style.css -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        .citation {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .reference-list {
+            margin: 2rem 0 0;
+            padding-left: 1.25rem;
+        }
+
+        .reference-list li {
+            margin-bottom: 0.5rem;
+            color: #374151;
+            line-height: 1.45;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 4rem;
+        }
+
+        .content-layout {
+            display: flex;
+            align-items: flex-start;
+            gap: 2.5rem;
+        }
+
+        .article-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #content {
+            position: relative;
+            overflow: visible;
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                padding-left: 1.25rem;
+            }
+
+            .content-layout {
+                flex-direction: column;
+            }
+        }
+
+        .demo-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            flex: 1 1 220px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.25rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            font-weight: 500;
+        }
+
+        .demo-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .visual-section h4 {
+            margin: 0 0 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .matrix-container {
+            display: grid;
+            background: #ffffff;
+            padding: 0.35rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .output-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-header {
+            font-size: 0.85rem;
+            margin-bottom: 0.35rem;
+            color: #1f2937;
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .diff-indicator {
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(34, 197, 94, 0.12);
+            color: #000000;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .diff-indicator.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        details {
+            margin: 1.75rem 0;
+            padding: 1.25rem 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #dbeafe;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            box-shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.25);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        details:hover {
+            border-color: #bfdbfe;
+        }
+
+        details[open] {
+            border-color: #93c5fd;
+            box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.3);
+        }
+
+        details summary {
+            list-style: none;
+            display: block;
+            position: relative;
+            padding-right: 110px;
+            margin: 0;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        details summary>p {
+            margin: 0.4rem 0 0;
+            font-weight: 400;
+            color: #4b5563;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::after {
+            content: 'expand';
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.12);
+            border-radius: 999px;
+            padding: 0.15rem 0.85rem;
+            position: absolute;
+            top: 0.35rem;
+            right: 0;
+        }
+
+        details[open] summary::after {
+            content: 'hide';
+            background: rgba(37, 99, 235, 0.24);
+        }
+
+        /* Enhanced Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 16px;
+            background: transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value, 0%), #e5e7eb var(--value, 0%), #e5e7eb 100%);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            margin-top: -6px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="range"]::-moz-range-progress {
+            background: #3b82f6;
+            height: 4px;
+            border-radius: 3px;
+        }
+
+        .adamw-demo-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        .adamw-control-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .adamw-value-display {
+            font-family: 'Fira Code', monospace;
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .adamw-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .adamw-btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .adamw-btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .adamw-btn-secondary {
+            background: #ffffff;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .adamw-btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .adamw-plot-container {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            height: 320px;
+            overflow: hidden;
+        }
+
+        .uiswitch-container {
+            display: flex;
+            align-items: center;
+            height: 38px;
+        }
+
+        .uiswitch {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 34px;
+            background-color: #e5e7eb;
+            border-radius: 17px;
+            cursor: pointer;
+        }
+
+        .uiswitch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .uiswitch-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4b5563;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .uiswitch-slider::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: calc(50% - 2px);
+            height: 30px;
+            background-color: white;
+            border-radius: 15px;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .uiswitch input:checked+.uiswitch-slider::before {
+            transform: translateX(100%);
+        }
+
+        .uiswitch-option {
+            width: 50%;
+            text-align: center;
+            z-index: 1;
+            transition: color 0.2s ease-in-out;
+            user-select: none;
+        }
+
+        .uiswitch input:not(:checked)+.uiswitch-slider .uiswitch-option-adamw {
+            color: #2563eb;
+        }
+
+        .uiswitch input:checked+.uiswitch-slider .uiswitch-option-muon {
+            color: #2563eb;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body.has-outline {
+            padding-right: 0;
+            padding-bottom: 0;
+        }
+
+        body.has-outline.outline-right {
+            padding-right: 320px;
+        }
+
+        body.has-outline.outline-floating {
+            padding-bottom: clamp(200px, 30vh, 320px);
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: 72px;
+            right: 32px;
+            width: 260px;
+            max-height: calc(100vh - 96px);
+            overflow-y: auto;
+            padding: 1.25rem 1rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 20px 45px -20px rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+        }
+
+        .toc-header {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+
+        .toc-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .toc-link {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            text-decoration: none;
+            padding: 0.35rem 0.45rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s ease, color 0.2s ease;
+            line-height: 1.3;
+        }
+
+        .toc-link:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+        }
+
+        .toc-link.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1d4ed8;
+        }
+
+        .toc-link.level-1 {
+            font-size: 0.9rem;
+            color: #1f2937;
+        }
+
+        .toc-link.level-2 {
+            padding-left: 1rem;
+        }
+
+        .toc-link.level-3 {
+            padding-left: 1.75rem;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .toc-sidebar.toc-floating {
+            top: auto;
+            bottom: 24px;
+            right: 24px;
+            left: 24px;
+            width: auto;
+            max-width: none;
+            max-height: 50vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toc-sidebar.toc-compact {
+            right: 16px;
+            left: 16px;
+            bottom: 16px;
+            padding: 1rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="content-layout">
+                        <div class="article-area">
+                <div class="author-tab" role="navigation" aria-label="Authors">
+                    <span class="author-tab-label">Authors:</span>
+                    <div class="author-links">
+                        <a href="https://whenwen.github.io/" target="_blank" rel="noopener noreferrer">Kaiyue Wen</a>
+                        <a href="https://dangxingyu.github.io/" target="_blank" rel="noopener noreferrer">Xingyu Dang</a>
+                        <a href="https://kaifeng.ac/" target="_blank" rel="noopener noreferrer">Kaifeng Lyu</a>
+                        <a href="https://ai.stanford.edu/~tengyuma/" target="_blank" rel="noopener noreferrer">Tengyu Ma</a>
+                        <a href="https://cs.stanford.edu/~pliang/" target="_blank" rel="noopener noreferrer">Percy Liang</a>
+                    </div>
+                </div>
+                <div id="content" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Markdown Content -->
+    <script type="text/template" id="markdown-source">
+# Fantastic Pretraining Optimizers and Where to Find Them II:  From Weight Decay to Hyperball Optimization
+
+Weight decay is a standard component of training, yet its role in modern deep learning is often misunderstood. In this post, we will show how recent deep learning research reveals that for scale-invariant models (like Transformers), weight decay does not control capacity. Instead, it controls the **effective step size** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-2">[2]</a><a class="citation" href="#ref-3">[3]</a><a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-5">[5]</a>.
+<div class="key-point-box">
+
+
+1.  **Debunk** the classical "capacity control" view. 
+
+<img src="../assets/images/fig0.png" alt="Illustrative figure showing weight decay concepts" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
+
+
+2.  **Derive** the modern view: weight decay regulates weight norm, which then controls the effective update size. This can lead to unexpected phenomena. For example, gradient norms may increase as loss decreases <a class="citation" href="#ref-6">[6]</a>!
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot"></iframe>
+</div>
+
+3.  **Demonstrate** a new outer optimizer called **Hyperball** that removes weight decay entirely by controlling weight norms directly. The corresponding version for Adam is called **AdamH** and for Muon is called **MuonH**. This allows for faster convergence and predictable weight norms compared to runs with weight decay and strong hyperparameter transfer across depths and widths using standard parameterizations.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
+</div>
+
+
+
+</div>
+
+---
+
+## 1. The Paradox of Weight Decay
+
+Standard weight decay updates parameters $W$ by:
+$$
+W_{t+1} = (1 - \eta_t \lambda) W_t - \eta_t u_t
+$$
+where $\eta_t$ is the learning rate, $\lambda$ is the decay coefficient, and $u_t$ is the update direction given by the base optimizer. This is equivalent to minimizing $L(W) + \frac{\lambda}{2}\|W\|_F^2$<a class="citation" href="#ref-7">[7]</a>.
+
+<div class="key-point-box">
+
+**Classical View:** This penalty keeps weights small, limiting model capacity and preventing overfitting.
+
+**Modern Reality:** Most weight matrices in modern architectures (Transformers, ResNets with BatchNorm/LayerNorm) are **scale-invariant** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-3">[3]</a>. Multiplying weights by a constant $c$ does not change the output or the loss:
+$$
+L(cW) = L(W), \quad \forall c > 0
+$$
+
+
+
+</div>
+
+__SCALE_INVARIANCE_DEMO__
+
+So how scale-invariant are modern architectures, really? Let's take a look at the Transformer architecture.
+
+__TRANSFORMER_DEMO__
+
+If the neural network function and hence the loss is unchanged by the scale of $W$, penalizing $\|W\|_F$ cannot constrain capacity. Yet, people continue to use weight decay. Why?
+
+## 2. The Mechanism: How Weight Decay Sets the Effective Step Size
+
+<div style="display: flex; align-items: flex-start; gap: 1.5rem; margin: 1em 0;">
+<div style="flex: 1.2; min-width: 0;">
+
+For scale-invariant losses $L(cW)=L(W)$, optimization depends only on the **direction** of the weights
+$$
+\hat{W} = W / \|W\|_F.
+$$
+This direction-only view follows the intrinsic learning-rate analysis of <a class="citation" href="#ref-4">[4]</a>. 
+
+Define the **effective step size** $\eta_{\text{eff}}$ as the magnitude of the change in the weight direction:
+$$
+\eta_{\text{eff}} := \|\hat{W}_{t+1} - \hat{W}_t\|.
+$$
+
+
+</div>
+<div style="flex: 0.8; min-width: 280px; max-width: 380px;">
+<img src="../assets/images/fig1_output.png" alt="Illustrative figure showing weight decay concepts" style="width: 100%; height: auto;">
+</div>
+</div>
+
+The key mechanism is:
+
+1. The **weight norm** $\|W\|_F$ determines how large a step we take in direction space.
+2. The **weight decay** coefficient $\lambda$ determines the equilibrium value of $\|W\|_F$.
+
+Together these imply that $\lambda$ directly sets the effective step size. This calculation has been explored in detail in <a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>. For readers who can read Chinese, excellent explanations have been provided in JianLin Su's blogs <a class="citation" href="#ref-9">[9]</a> <a class="citation" href="#ref-10">[10]</a> and <a class="citation" href="#ref-11">[11]</a>.
+
+Before we dive into the calculations, let's showcase how current theory aligns with an interactive simulation. The demo below trains a simple normalized linear model using AdamW / Muon with gradient noise. Watch how the **empirical measurements** (solid lines) closely track the **theoretical predictions** (dashed lines). You can adjust the hyperparameters in real-time to see how $\eta$, $\lambda$, and $\beta_1$ affect the equilibrium behavior.
+
+__ADAMW_DEMO__
+ 
+<p style="margin: 3rem 0 1rem; color: var(--secondary-text);">
+The expressions below summarize the steady-state behavior of the three optimizers (Adam/AdamW, Muon, Moonlight) in the noise-dominated regime discussed above—this is the final outcome, so feel free to skip the following proof and jump straight to Section 2.6 if you want to skip the math for now.
+</p>
+<div style="overflow-x: auto; margin: 1.5rem 0;">
+<table style="margin: 0 auto; border-collapse: collapse; min-width: 70%;">
+  <thead>
+    <tr style="background-color: var(--primary-color);">
+      <th style="padding: 0.75rem 1.25rem; text-align: left; border: 1px solid var(--border-color);">Quantity</th>
+      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Adam / AdamW</th>
+      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Moonlight</th>
+      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Muon</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background-color: var(--bg-color);">
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\|W_t\|_F$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;" colspan="2">$\eta \sqrt{\frac{1-\beta_1}{1+\beta_1}}\sqrt{d_{\mathrm{in}}d_{\mathrm{out}}}\sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;">$\eta \sqrt{d_{\mathrm{out}}}\sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}$</td>
+    </tr>
+    <tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\|u_t\|_F$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;" colspan="2">$\sqrt{\frac{1-\beta_1}{1+\beta_1}}\sqrt{d_{\mathrm{in}}d_{\mathrm{out}}}$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{d_{\mathrm{out}}}$</td>
+    </tr>
+    <tr style="background-color: var(--bg-color);">
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\cos(W_t,u_t)$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color);" colspan="3">
+        <div style="text-align: center;">$-\beta_1 \sqrt{\frac{1-\alpha^2}{(1+\alpha\beta_1)(1-\alpha\beta_1)}}$ </div>
+      </td>
+    </tr>
+    <tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">Effective step size $\eta_{\mathrm{eff}}$</td>
+      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color);" colspan="3">
+        <div style="text-align: center;">$\frac{1}{1+\alpha\beta_1}\sqrt{(1-\alpha^2)(1-\beta_1^2)} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1+\beta_1}}$ </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="margin-top: 0.75rem; color: var(--secondary-text); font-size: 0.9rem;">
+Here $\alpha = 1 - \eta\lambda$ and $d_{\mathrm{in}}, d_{\mathrm{out}}$ are the layer dimensions; Muon and Moonlight share the same correlation structure as AdamW, so only the update norm $U$ differs.
+</p>
+
+
+### 2.1 Basic Assumption: Noise-Dominated Training
+
+Throughout this section we work in the **noise-dominated regime**: the stochasticity of the gradients is much larger than the signal. Concretely, for a single scalar gradient entry we assume
+$$
+g_t \in \mathbb{R},\quad
+g_t \sim \mathcal N(0,\sigma^2)\ \text{i.i.d. over } t,
+$$
+and for a whole layer we treat the gradient as
+$$
+g_t \in \mathbb{R}^d,\quad
+g_t \sim \mathcal N(0,\sigma^2 I_d).
+$$
+
+This assumption may look outrageous at first glance, because it ignores any structure in the loss and assumes there is “no signal.” However, **for the specific quantities we care about** (stationary update norms, angles, equilibrium weight norms, effective step size), this is a good approximation when the noise level is much larger than the signal. It is the standard toy model: simple enough to be solvable, but rich enough to capture the scaling behavior with $\eta$ and $\lambda$. It is also interesting to note that a similar assumption has been used in <a class="citation" href="#ref-12">[12]</a> to study how batch size affects the effective step size.
+
+
+---
+
+### 2.2 Predicting Optimizer Update Norm 
+
+Let $u_t$ be the **base optimizer update** *before* adding weight decay (the Adam part of AdamW). We show that, under the noise-dominated model, the update norm is approximately **constant over time**, depending only on the optimizer hyperparameters and the layer dimension.
+
+For Muon, this is already guaranteed by design, as all of the singular values of Muon's update before scaling are $1$. Assuming the shape of $W$ is $d_{\mathrm{in}} \times d_{\mathrm{out}}$, we can derive the update norm as follows:
+
+In the speedrun implementation of Muon, the update is scaled by $\max(\sqrt{\frac{d_{\mathrm{out}}}{d_{\mathrm{in}}}}, 1)$ <a class="citation" href="#ref-13">[13]</a>, giving
+$$
+\|u_t\|_F = \sqrt{d_{\mathrm{out}}}.
+$$
+
+For the Moonlight implementation <a class="citation" href="#ref-14">[14]</a>, the update is scaled by $0.2\sqrt{\max(d_{\mathrm{out}}, d_{\mathrm{in}})}$, giving
+$$
+\|u_t\|_F = 0.2\sqrt{d_{\mathrm{out}} d_{\mathrm{in}}}.
+$$
+
+For Adam/AdamW, focusing on a **single scalar coordinate** $\bar u_{t}$, we can write the (bias-corrected) update in the “infinite history” limit as
+$$
+\bar u_{t}
+= \frac{m_t}{\sqrt{v_t}}, m_t = (1 - \beta_1)\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}, v_t = (1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2
+$$
+where $\beta_1$ is the momentum coefficient, $\beta_2$ is the second-moment coefficient, and $\bar g_t$ is a scalar entry of the gradient, assumed i.i.d. $\mathcal N(0,\sigma^2)$ as in §2.1.
+
+Under this assumption, the denominator is approximately constant:
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+For a matrix $W_t$ with $d = d_{\mathrm{in}} d_{\mathrm{out}}$ number of parameters, 
+$$
+\mathbb{E}[\bar u_t^2]
+\approx
+d\frac{1-\beta_1}{1+\beta_1},
+$$
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+Assuming the denominator in AdamW converges to the variance of the gradient, we can compute the update norm by considering the variance of the momentum in the nominator in AdamW.
+</p>
+</summary>
+
+We first compute the expected value of the denominator:
+$$
+\begin{align*}
+(1-\beta_2)\mathbb{E}[v_t] &= 
+(1-\beta_2)\mathbb{E}[(1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
+&=
+(1-\beta_2)\mathbb{E}[\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
+&=
+(1-\beta_2)\sigma^2 \sum_{i=0}^{\infty} \beta_2^i =
+\sigma^2.
+\end{align*}
+$$
+
+
+Plugging this approximation into the update gives
+$$
+\bar u_{t}
+\approx
+(1-\beta_1),
+\frac{\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma},
+$$
+
+Then
+$$
+\mathbb{E}\Big[
+\Big(\frac{\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma}\Big)^2
+\Big]
+=
+\frac{1}{\sigma^2}\sum_{i=0}^{\infty} \beta_1^{2i} \mathbb{E}[\bar g_{t-i}^2]
+=
+\sum_{i=0}^{\infty} \beta_1^{2i}
+=
+\frac{1}{1-\beta_1^2}.
+$$
+
+Therefore
+$$
+\mathbb{E}[\bar u_t^2]
+\approx
+(1-\beta_1)^2 \cdot \frac{1}{1-\beta_1^2}
+=
+\frac{1-\beta_1}{1+\beta_1}.
+$$
+
+</details>
+
+
+
+<div class="key-point-box">
+
+**Property 1 (Approximately Constant Update Norm):** In the Gaussian noise model, common base optimizers like AdamW, Adam, Muon have a **time-independent RMS**, so we can treat
+$$
+\|u_t\|_F \approx U
+$$
+as a **constant per layer**. 
+
+<div style="overflow-x: auto; margin: 1.5rem 0;">
+<table style="margin: 0 auto; border-collapse: collapse; min-width: 60%;">
+<thead>
+<tr style="background-color: var(--primary-color);">
+<th style="padding: 0.75rem 1.5rem; text-align: left; border: 1px solid var(--border-color);">Optimizer</th>
+<th style="padding: 0.75rem 1.5rem; text-align: center; border: 1px solid var(--border-color);">Update Norm $\|u_t\|_F$</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: var(--bg-color);">
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Adam / AdamW</td>
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{\frac{1-\beta_1}{1+\beta_1}} \sqrt{d_{\mathrm{in}} \times d_{\mathrm{out}}}$</td>
+</tr>
+<tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Muon</td>
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{d_{\mathrm{out}}}$</td>
+</tr>
+<tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Moonlight</td>
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$0.2\sqrt{d_{\mathrm{out}} d_{\mathrm{in}}}$</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- <p style="margin-top: 0.5rem; text-align: center; color: var(--secondary-text); font-size: 0.9rem;"> -->
+Here $d_{\mathrm{in}}$ is the input dimension and $d_{\mathrm{out}}$ is the output dimension of the linear layer and $\beta_1$ is the momentum parameter.
+</p>
+
+</div>
+
+---
+
+### 2.3 Predicting the Correlation Between Update and Weight
+
+We now turn to the relationship between the update vector $u_t$ and the weight vector $W_t$. A crucial observation is that they exhibit a **stable correlation**.
+
+We quantify this via the projection coefficient $\gamma_t$:
+$$
+\gamma_t
+:=
+\frac{\langle u_t, W_t \rangle}{\|u_t\|_F^2}
+\approx
+\text{const}.
+$$
+
+**Intuition:** Why are they correlated?
+1.  **Weights accumulate history:** The weight vector $W_t$ is an exponentially weighted sum of **past updates** ($u_{t-1}, u_{t-2}, \dots$).
+2.  **Momentum creates memory:** Due to momentum, the current update $u_t$ is not independent of the past; it is strongly correlated with **recent past updates** ($u_{t-1}, u_{t-2}, \dots$).
+3.  **Correlation is inevitable:** Since $W_t$ is built from vectors that $u_t$ is correlated with, the projection of $W_t$ onto $u_t$ is non-zero and stable relative to the update scale.
+
+Mathematically, with decoupled weight decay $W_{t+1} = \alpha W_t - \eta u_t$ (where $\alpha = 1-\eta\lambda$), we can write $W_t$ as a sum:
+$$
+W_t
+=
+-\eta\sum_{k=1}^{t} \alpha^{k-1} u_{t-k}.
+$$
+The inner product $\langle u_t, W_t \rangle$ becomes a weighted sum of auto-correlations $\langle u_t, u_{t-k} \rangle$. In a stationary noise regime, these auto-correlations are stable and scale with $U^2$, so $\gamma_t$ converges to a fixed value determined by $(\eta,\lambda,\beta_1)$.
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+    In the same noise-dominated regime, the correlation between $u_t$ and $W_t$ converges to a layer-wise constant determined by $(\eta,\lambda,\beta_1)$. Concretely, 
+    <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+        $$
+        \gamma_t \approx -\frac{\eta\beta_1}{1-\alpha\beta_1}.
+        $$
+        Conceptually, the calculation is the same kind of “Gaussian covariance algebra” as in §2.2: we write down a linear recurrence for $u_t$ and $W_t$, assume Gaussian noise for the gradients, and solve for the stationary covariance.
+    </p>
+</summary>
+
+Start from SGD with momentum (for a single coordinate) and decoupled weight decay:
+$$
+\begin{aligned}
+u_t &= (1-\beta_1)\sum_{i=0}^t \beta_1^{t-i} g_i, \\
+W_{t+1} &= \alpha W_t - \eta u_t,
+\end{aligned}
+$$
+with $g_t \sim \mathcal N(0,\sigma^2 I_d)$ i.i.d. as before.
+
+In high dimension we have
+$$
+\langle g_i, g_j \rangle \approx \sigma^2 d\,\delta_{ij},
+$$
+so for any two times $t,t'$,
+$$
+\begin{aligned}
+\langle u_t, u_{t'} \rangle
+&=
+\Big\langle
+(1-\beta_1)\sum_{i=0}^t \beta_1^{t-i} g_i,\,
+(1-\beta_1)\sum_{j=0}^{t'} \beta_1^{t'-j} g_j
+\Big\rangle \\
+&=
+\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
+\sum_{i=0}^t \sum_{j=0}^{t'} \beta_1^{t+t'-i-j}
+\langle g_i, g_j \rangle \\
+&\approx
+\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
+\sum_{i=0}^{\min(t,t')} \beta_1^{t+t'-2i} \sigma^2 d \\
+&=
+\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
+\sigma^2 d\,
+\beta_1^{t+t'-2\min(t,t')}
+\frac{1-\beta_1^{2\min(t,t')+2}}{1-\beta_1^2} \\   
+&=
+\frac{(1-\beta_1)(1-\beta_1^{2\min(t,t')+2})\beta_1^{t+t'-2\min(t,t')}}
+{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
+\sigma^2 d.
+\end{aligned}
+$$
+
+This shows that the correlation between $u_t$ and $u_{t'}$ **decays geometrically** with $|t-t'|$, controlled by $\beta_1$. Since
+$$
+W_t = -\eta\sum_{k=0}^{t-1} \alpha^{t-1-k} u_k,
+$$
+we can write
+$$
+\langle W_t, u_t \rangle
+=
+-\eta \sum_{k=0}^{t-1} \alpha^{t-1-k} \langle u_k, u_t \rangle.
+$$
+
+Plugging in $\langle u_k, u_t \rangle \approx \|u_t\|_F^2 \beta_1^{t-k}$ (valid for large $t$):
+$$
+\begin{aligned}
+\langle W_t, u_t \rangle
+&\approx
+-\eta \sum_{k=0}^{t-1} \alpha^{t-1-k} \left( \|u_t\|_F^2 \beta_1^{t-k} \right) \\
+&=
+-\eta \|u_t\|_F^2 \beta_1 \sum_{k=0}^{t-1} (\alpha\beta_1)^{t-1-k}.
+\end{aligned}
+$$
+As $t\to\infty$, the sum becomes a geometric series $\sum_{j=0}^\infty (\alpha\beta_1)^j = \frac{1}{1-\alpha\beta_1}$. Thus:
+$$
+\langle W_t, u_t \rangle
+\approx
+-\eta \|u_t\|_F^2 \frac{\beta_1}{1-\alpha\beta_1}.
+$$
+Dividing by $\|u_t\|_F^2$ gives the constant projection coefficient:
+$$
+\gamma 
+= \frac{\langle W_t, u_t \rangle}{\|u_t\|_F^2}
+\approx
+-\frac{\eta\beta_1}{1-\alpha\beta_1}.
+$$
+
+</details>
+
+In practice, for the regimes of interest this projection is stable.
+
+<div class="key-point-box">
+
+Because $W_t$ accumulates past updates and momentum ensures $u_t$ correlates with those same past updates, the **projection of $W_t$ onto $u_t$** stabilizes. Specifically, 
+
+$$
+\langle W_t, u_t \rangle \approx -\frac{\eta\beta_1}{1-\alpha\beta_1} \|u_t\|_F^2.
+$$
+
+
+
+This projection term is the same across AdamW and Muon. 
+</div>
+
+---
+
+### 2.4 Solving the Equilibrium Weight Norm
+
+We are now ready to close the loop. The dynamics of the weight norm are driven by a tension between two forces: **weight decay**, which shrinks the weights, and **optimizer updates**, which drive the weights away from zero.
+
+Combining our findings from the previous sections, we can reduce the high-dimensional vector dynamics to a simple **scalar recursion**.
+
+Recall our two key properties:
+1.  **Constant Update Size (§2.2):** The update norm is constant, $\|u_t\|_F \approx U$.
+2.  **Stable Projection (§2.3):** The alignment between weights and updates is fixed, $\langle W_t, u_t \rangle \approx \gamma U^2$.
+
+With decoupled weight decay, the weight evolves as $W_{t+1} = \alpha W_t - \eta u_t$. Squaring this equation gives the evolution of the norm $r_t := \|W_t\|_F$:
+
+$$
+\begin{aligned}
+r_{t+1}^2 
+&= \|\alpha W_t - \eta u_t\|_F^2 \\
+&= \alpha^2 \|W_t\|_F^2 + \eta^2 \|u_t\|_F^2 - 2\alpha\eta \langle W_t, u_t \rangle.
+\end{aligned}
+$$
+
+Substituting our approximations for $\|u_t\|_F$ and $\langle W_t, u_t \rangle$, we obtain a closed 1-D system:
+
+$$
+r_{t+1}^2 \approx \alpha^2 r_t^2 + \underbrace{(\eta^2 - 2\alpha\eta \gamma) U^2}_{\text{effective norm increase}}. \quad (\star)
+$$
+
+<div class="key-point-box">
+
+**Interpretation:** The term $(\eta^2 - 2\alpha\eta \gamma) U^2$ represents the *effective* amount of norm increase at each step. It is less than the raw update norm times learning rate(i.e. $\eta^2 U^2$) because the update $u_t$ is **anti-correlated** with $W_t$ (due to momentum), which dampens the expansion.
+</div>
+
+#### The Steady State
+
+At equilibrium, the expected norm stabilizes ($r_{t+1} \approx r_t \approx r_\star$). Solving $(\star)$ for the stationary value $r_\star$:
+
+$$
+r_\star^2 (1 - \alpha^2) \approx (\eta^2 - 2\alpha\eta\gamma) U^2 
+\implies 
+r_\star \approx U \sqrt{\frac{\eta^2 - 2\alpha\eta\gamma}{1-\alpha^2}}.
+$$
+
+Finally, we plug in the specific projection coefficient $\gamma \approx -\frac{\eta\beta_1}{1-\alpha\beta_1}$ derived in §2.3. After simplifying the algebra, we arrive at the **exact equilibrium norm** for a scale-invariant layer trained with AdamW/Muon:
+
+$$
+\boxed{
+\|W_\infty\|_F 
+\approx 
+\eta U \sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}
+}
+$$
+
+This formula is powerful because it depends *only* on the hyperparameters ($\eta, \lambda, \beta_1$) and the layer geometry (through $U$). It requires no empirical fitting.
+
+<div class="key-point-box">
+
+The equilibrium weight norm with respect to the expected update norm $U$ is fully determined by the optimizer settings.
+$$
+\|W_\infty\|_F 
+\approx 
+\eta U \sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}
+$$
+
+</div>
+
+---
+
+### 2.5 Solving the Effective Step Size
+
+We finally translate the norm dynamics into an **effective step size**, defined as the magnitude of the change in the *direction* of the weights:
+$$
+\eta_{\mathrm{eff},t}
+:=
+\|\hat{W}_{t+1} - \hat{W}_t\|_F.
+$$
+This measures how fast the model traverses the function landscape, independent of the weight scale.
+
+#### Deriving the Step Size
+
+The step size is determined by the projection of the update onto the tangent space of the unit sphere.
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Given that we know the relative norm ratio between the update and the weight and their correlation, we can calculate the effective step size.
+    <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+    The effective step size is given by:
+        $$
+        \begin{align*}
+        \eta_{\mathrm{eff},t}
+        &= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}
+        \end{align*}
+        $$
+    Note that $\alpha = 1 - \eta\lambda$ and $\beta_1$ is the momentum coefficient. If we assume that $\eta\lambda$ is small, then we can approximately get $\eta_{\mathrm{eff},t} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1 + \beta_1}}$.
+</summary>
+
+<div style="margin-top: 1rem;">
+<p><strong>Step 1: Geometric Approximation</strong></p>
+<p>
+The effective step size is the magnitude of the update projected onto the tangent space of the unit sphere. Let $P_{w^\perp} = I - \hat{w}\hat{w}^\top$ (noted here we view weight as a vector instead of a matrix).
+</p>
+$$
+\eta_{\mathrm{eff},t} \approx \frac{\eta}{\|w_t\|_F} \|P_{w_t^\perp} u_t\|_F.
+$$
+
+<p><strong>Step 2: Tangential Component</strong></p>
+<p>
+Let $k = \|u_t\|_F / \|W_t\|_F$ and using the projection coefficient $\gamma$ from Section 2.3, we can express the tangential norm as:
+</p>
+$$
+\begin{align*}
+\|P_{W_t^\perp} u_t\|_F^2 &= \|u_t - \frac{\langle u_t, W_t \rangle}{\|W_t\|_F^2} W_t\|_F^2\\
+&= \| u_t \|^2 - \frac{(\langle u_t, W_t \rangle)^2}{\|W_t\|_F^2} \\
+&\approx \| u_t \|^2 (1 - \gamma^2 k^2)
+\end{align*}
+$$
+
+Therefore, the effective step size is:
+$$
+\eta_{\mathrm{eff},t} = \eta k \sqrt{1 - \gamma^2 k^2}
+$$
+
+<p><strong>Step 3: Steady-State Substitution</strong></p>
+<p>
+
+From previous section, we have the equilibrium condition:
+$$
+\begin{align*}
+k^2 &= \frac{(1 - \alpha^2)(1 - \alpha\beta_1)}{\eta^2 (1 + \alpha\beta_1)} \\
+\gamma^2 &= \frac{\eta^2\beta_1^2}{(1-\alpha\beta_1)^2}
+\end{align*}
+$$
+
+Therefore we can simplify the expression for the effective step size to 
+
+$$
+\begin{align*}
+\eta_{\mathrm{eff},t}
+& =
+\sqrt{\frac{(1 - \alpha^2)(1 - \alpha \beta_1)}{1 + \alpha \beta_1}}
+\sqrt{
+1 -
+\frac{\beta_1^2 (1 - \alpha^2)}
+{(1 + \alpha \beta_1)(1 - \alpha \beta_1)}
+} \\
+&= \frac{1}{1 + \alpha \beta_1} 
+\sqrt{
+(1 - \alpha^2) \big((1 - \alpha^2 \beta_1^2) - \beta_1^2 (1 - \alpha^2)\big)
+}  \\
+&= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}
+\end{align*}
+$$
+
+This makes it explicit that the tangential move grows with the hidden product $\eta\lambda$ (recall $\alpha = 1 - \eta\lambda$) until the correlation term collapses it.
+
+</p>
+</div>
+</details>
+
+<div class="key-point-box">
+
+In steady state, the effective step size on the unit sphere scales like
+$$
+\eta_{\mathrm{eff},t} \approx \frac{1}{1 + \alpha \beta_1} \sqrt{{(1 - \alpha^2)(1 - \beta_1^2)}} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1 + \beta_1}}.
+$$
+Weight decay $\lambda$ and learning rate $\eta$ together define a **hidden effective step size**: tuning $\eta\lambda$ directly controls how aggressively the model moves in direction space.
+<a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>
+
+
+</div>
+
+
+
+
+
+---
+
+### 2.6 One Last Thing: How Gradient Norms Scale
+
+Finally, we explain why **gradient norms tend to grow** toward the end of training when the learning rate decays, even as the loss keeps decreasing. This calculation was shown previously.
+
+From §2.4, in the steady-state regime we have (up to a layer-dependent constant $C(\alpha,\beta)$)
+$$
+\|W_t\|_F
+\approx
+C(\alpha,\beta)\sqrt{\frac{\eta_t}{\lambda}}.
+$$
+
+For a **scale-invariant** layer, the loss satisfies
+$$
+L(cW) = L(W)\quad\forall c>0,
+$$
+which implies the gradient rescales inversely:
+$$
+\nabla_W L(cW) = \frac{1}{c} \nabla_W L(W).
+$$
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Scale invariance implies inverse gradient scaling
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+A larger weight norm means that a fixed norm update makes less change to the direction of the feature.
+</p>
+</summary>
+
+For scale-invariant loss, by definition
+$$
+L(cW + c\epsilon) - L(cW)
+=
+L(W + \epsilon) - L(W)
+$$
+for any perturbation $\epsilon$. Differentiating w.r.t. $\epsilon$ at $\epsilon=0$ gives
+$$
+\langle \nabla_W L(cW), c\epsilon \rangle
+=
+\langle \nabla_W L(W), \epsilon \rangle
+\quad\forall \epsilon,
+$$
+so
+$$
+\nabla_W L(cW) = \frac{1}{c}\,\nabla_W L(W).
+$$
+
+Thus, multiplying weights by $c$ divides the gradient norm by $c$.
+
+</details>
+
+Therefore, in the scale-invariant regime
+$$
+\|G_t\|_F
+:=
+\|\nabla_W L(W_t)\|_F
+\propto
+\frac{1}{\|W_t\|_F}
+\propto
+\sqrt{\frac{\lambda}{\eta_t}}.
+$$
+
+So as the **learning rate decays** during training, the **equilibrium weight norm shrinks**, and the **gradient norm grows**:
+
+* loss can keep going down,
+* but $\|G_t\|_F$ naturally increases as $\eta_t$ decreases.
+
+This looks like “gradient explosion” in the logs, but in this model it is simply the **expected behavior of scale invariance + weight decay + LR decay**. This calculation was previously shown in  <a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-6">[6]</a>.
+
+<div class="key-point-box">
+
+**Key point (2.6):** In scale-invariant layers with weight decay, the steady-state weight norm scales like
+$$
+\|W_t\|_F \propto \sqrt{\eta_t/\lambda},
+$$
+so the gradient norm scales like
+$$
+\|G_t\|_F \propto \sqrt{\lambda/\eta_t}.
+$$
+When the learning rate decays, the **equilibrium radius shrinks and the gradient norm rises**, explaining the empirically observed increase in gradient norms late in training.
+
+</div>
+
+
+
+
+
+## 3. Explaining Empirical Phenomena
+
+
+
+The classic saying goes "all models are wrong, but some are useful". In deep learning theory, whether a theory is useful should be judged by two perspectives:
+
+1. Can it predict empirical phenomena? (This section)
+2. Can it motivate algorithm that works better? (Section 4)
+
+Most of the empirical figures in this section re-run the optimizer sweeps from Wen et al.'s systematic study of pretraining optimizers so that comparisons stay consistent across model sizes and data-to-model ratios.<a class="citation" href="#ref-15">[15]</a>
+
+
+### Phenomenon 1: Weight norm tracks learning rate warmup and decay throughout training.
+
+**Explanation:** As we have derived in Section 2.3, the equilibrium weight norm is determined by learning rate $\eta$ and weight decay $\lambda$, as $\|W_{\infty}\|_F \approx \sqrt{\frac{\eta}{2\lambda}} U$. 
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_qkv_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+### Phenomenon 2: Gradient norm increases through training.
+
+**Explanation:** As we have derived in Section 2.5, the gradient norm is determined by the weight norm, as $\|G_t\|_F \propto \frac{1}{\|W_t\|_F} \propto \sqrt{\lambda/\eta}$. Naturally, as the weight norm decreases, the gradient norm increases.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_qkv_grad_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+### Phenomenon 3: When $\eta \lambda$ is fixed, the model trained with AdamW converges to essentially the same loss. At the same time, the weight norm of each weight matrix is (roughly) proportional to the learning rate. 
+
+**Explanation:** As we have derived in Section 2.5, the effective step size is determined by learning rate $\eta$ and weight decay $\lambda$, as $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$. Further, as derived in Section 2.4, the equilibrium weight norm $\|W_{\infty}\|_F \propto \sqrt{\frac{\eta}{\lambda}} U$ is proportional to the learning rate when $\eta \lambda$ is fixed <a class="citation" href="#ref-13">[13]</a>.
+
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_compare_layer9.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+
+### Phenomenon 4: Despite sharing the same learning-rate schedule, the run with weight decay starts with a higher loss but ultimately converges to a strictly lower loss than the run without weight decay.
+
+**Explanation:** Although these two runs use the same nominal learning-rate warmup and decay schedule, weight decay changes the weight norms and therefore induces a substantially different effective step size over training. Empirically (and in a our theory in Section 2), we find that training with weight decay yields a larger effective step size throughout training than training without weight decay. In the <em>river valley landscape</em> picture<a class="citation" href="#ref-16">[16]</a>, the loss decomposes into a “river” component, capturing progress along a relatively flat direction where long-term optimization happens, and a “hill” component, capturing excursions in steep directions caused by stochastic gradients. 
+
+<div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; margin: 1rem 0;">
+<div style="flex: 1.4 1 420px; min-width: 360px; max-width: 720px;">
+<p>A larger effective step size amplifies these hill-direction oscillations, which raises the observed loss early in training, but it also accelerates motion along the river. When the learning rate decays, the oscillations in the hill directions shrink and the iterate settles closer to the riverbed, revealing the additional progress that has already been made along the river. In our setting, the run with weight decay therefore starts with a higher loss but ultimately reaches a lower loss, because its larger effective step size allows it to move faster down the river before the decay phase suppresses the oscillations.</p>
+</div>
+<figure style="flex: 0.8 1 280px; min-width: 200px; margin: 0; text-align: center;">
+<img src="../assets/images/function2.png" alt="River valley landscape schematic comparing hill and river directions" style="width: 100%; max-width: 480px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);" loading="lazy">
+<figcaption style="font-size: 0.9rem; color: #6b7280; margin-top: 0.5rem;">
+Visual intuition for the river valley landscape conjecture.
+</figcaption>
+</figure>
+</div>
+
+<div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+
+### Phenomenon 5: Contrary to the original MuP prediction, hyperparameter transfer is not sensitive to weight scale at initialization but it is sensitive to how weight decay is scaled
+
+**Explanation:** Weight decay has emerged as the key driver of hyperparameter transfer in recent work <a class="citation" href="#ref-17">[17]</a><a class="citation" href="#ref-18">[18]</a><a class="citation" href="#ref-19">[19]</a><a class="citation" href="#ref-20">[20]</a>, overshadowing MuP initialization <a class="citation" href="#ref-21">[21]</a>. This isn't surprising: the weight norm rapidly settles into the equilibrium predicted by theory, a value set solely by the learning rate and weight decay and it does **not** depend on the initial scale. Because Tensor Program theory assumes hyperparameter transfer is enabled by the weight norm and the properly rescaled update norm staying stable across network width and depth, weight decay naturally becomes more influential than initialization.
+
+
+<div style="margin: 2rem auto; text-align: center;">
+    <img src="../assets/images/llama_ind_vs_std_vs_nowd_teaser.png" alt="Comparison of learning rate transfer strategies with and without weight decay" style="width: 100%; max-width: 900px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);" loading="lazy">
+    <p style="font-size: 0.95rem; color: #6b7280; margin-top: 0.5rem;">
+        Figure 1 in <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">Kosson et al., 2025</a><a class="citation" href="#ref-17">[17]</a>.
+    </p>
+</div>
+
+
+---
+
+## 4. Hyperball Optimization: Normalizing Both Weight Norm and Update Norm 
+
+Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus $\eta_{eff}$), why not control it directly?
+
+
+We propose **Hyperball Optimization**:
+$$
+W_{t+1} = \text{Norm}(W_t - \eta_{eff} \cdot \text{Norm}(u_t) \|W_0\|_F) \|W_0\|_F,
+$$
+where $\|W_0\|_F$ is the initial weight norm and $\text{Norm}(x) = x / \|x\|_F$ is the normalization operator that projects $x$ to the unit sphere. Here $u_t$ is the standard Adam/Muon update. We will apply this optimizer for every linear projection matrix in the Transformer model and use Adam for the rest scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
+
+This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a>  and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
+
+
+This method has the following benefits:
+1.  **Native Hyperparameter Transfer:** Hyperparameters transfer predictably across model width and depth.
+2.  **Empirical Speedup:** We show that this method can lead to faster loss reduction compared to decoupled weight decay across model scale and training duration.
+
+### 4.1 Hyperparameter Transfer across Width and Depth
+
+As mentioned in Phenomenon 5 in Section 3, hyperparameter transfer should be a byproduct of constant ratio between weight norm and update norm. We validate this hypothesis by running the following width and depth scaling experiments.
+
+
+
+
+1. **Depth Scaling:** We fix the number of hidden dimensions to be 128 and vary the number of layers from 4 to 512. We observe that the maximal drift of optimal learning rate window is 1.4x, where as the drift is 3x for Adam and 4x for Muon.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/depth_scaling_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Depth Scaling Plot"></iframe>
+</div>
+
+
+
+2. **Width Scaling:** We fix the number of layers to be 4 and vary the number of hidden dimensions from 128 to 2048. We observe that the maximal drift of optimal learning rate window is 1.4x for AdamH and MuonH, whereas the drift is 2x for Adam and 4x for Muon.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/width_scaling_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Width Scaling Plot"></iframe>
+</div>
+
+### 4.2 Empirical Speedup 
+
+We further validate Hyperball in the same setup as <a href="https://marin.community/speedrun/" target="_blank" rel="noopener">Marin's speedrun</a> and observe that Hyperball leads to empirical speedup over AdamW and MuonW using a Gemma-like architecture.
+
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/c4_en_loss_interactive.html" style="width: 100%; height: 640px; border: none; display: block;" title="Interactive C4/en Loss Plot"></iframe>
+</div>
+
+
+Further, we heavily overtrained a small 130M model with MuonH and Muon and observe a consistent speedup across different data sizes.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
+</div>
+
+
+
+
+### 4.3 Commonly Asked Questions
+
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Q1: Why does Hyperball speed up training?
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+The explicitly chosen effective step-size schedule works better than the implicit one induced by weight decay and learning rate decay.
+</p>
+</summary>
+
+<p>
+A natural question is why we should expect any speedup here. After all, what we prove in Section 2 is that the raw optimizer with weight decay is already implicitly optimizing on the hyperball, especially when we assume scale invariance.
+</p>
+
+<p>
+The key difference is the effective step-size schedule. In the raw optimizer with weight decay, the effective step size emerges indirectly from the weight decay coefficient and the learning-rate schedule, making it hard to reason about—even under a constant learning rate. Adding learning-rate decay introduces more lag in the weight norm and makes the effective schedule even murkier. With Hyperball, we can directly tune how each new update blends with the existing weight norm, which makes it much easier to design a good schedule. In practice, a simple cosine or linear schedule already performs well for both AdamH and MuonH.
+
+
+Our finding is also consistent with the finding in <a class="citation" href="#ref-32">[32]</a> that hyperparameter transfer can enable consistent gains of matrix-preconditioned optimizers across scales as with hyperball optimization, the effective step size now naturally extends to the larger scale, as evidenced by the hyperparameter transfer experiment in Section 4.2.
+</p>
+
+</details>
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Q2: Will weight normalization hurt representation power?
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+No, in most cases. RMSNorm’s trainable affine term keeps the model expressive even with fixed weight norms.
+</p>
+</summary>
+
+<p>
+The commonly used RMSNorm affine transformation provides an explicit way to control the norm. Concretely, pre-norm neural networks consist of linear projections that look like
+$$
+f(h; W, \gamma) = W (\gamma \odot \mathrm{RMSNorm}(h))
+$$
+where $W$ is the weight matrix, $\gamma$ is the scaling vector, and $\mathrm{RMSNorm}(h)$ is the RMSNorm normalization. Because $\gamma$ is trainable, fixing the norm of $W$ doesn't hurt representation power as we have
+$$
+f(h; cW, \gamma/c) = f(h; W, \gamma).
+$$
+</p>
+
+</details>
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">
+Q3: Why don't we control the spectral norm instead of the Frobenius norm?
+<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
+In practice, the two norms track each other because transformer weight matrices stay close to full rank, so constraining $\|W\|_F$ already constrains $\|W\|_{\mathrm{op}}$.
+</p>
+</summary>
+
+<p>
+If you focus on steepest-descent methods such as Muon and related spectral condition theory <a class="citation" href="#ref-25">[25]</a>, it feels more natural to constrain the spectral norm. That intuition is correct for update matrices. Here, however, we are constraining the <em>weight</em> matrices themselves, and doing so through the Frobenius norm is almost equivalent when those matrices remain well-conditioned.
+</p>
+
+<p>
+Assume a singular value decomposition $W = U \Sigma V^\top$ with $\Sigma = \mathrm{diag}(\sigma_1, \ldots, \sigma_d)$. Then
+</p>
+$$
+\|W\|_F^2 = \sum_{i=1}^d \sigma_i^2, \qquad \|W\|_{\mathrm{op}}^2 = \sigma_1^2.
+$$
+
+<p>
+The ratio
+</p>
+$$
+r = \frac{\|W\|_F^2}{d \|W\|_{\mathrm{op}}^2} = \frac{\sum_{i=1}^d \sigma_i^2}{d \sigma_1^2} \in \left[\frac{1}{d}, 1\right]
+$$
+<p>
+measures how concentrated the singular values are. Low-rank matrices push $r$ toward $1/d$, while full-rank matrices keep it near $1$.
+</p>
+
+<p>
+In the deep-learning regime of interest, weight matrices empirically hover near full rank, so $r$ stays far from $0$ <a class="citation" href="#ref-14">[14]</a>. That makes Frobenius-norm control an excellent proxy for spectral-norm control without needing additional machinery <a class="citation" href="#ref-26">[26]</a><a class="citation" href="#ref-27">[27]</a><a class="citation" href="#ref-28">[28]</a><a class="citation" href="#ref-29">[29]</a><a class="citation" href="#ref-30">[30]</a>.
+</p>
+
+<div style="text-align: center; margin: 2rem 0;">
+    <img src="../assets/images/svd_dist_attn_final_v2.png"
+        alt="Empirical SVD of weight matrix"
+        loading="lazy"
+        style="max-width: 100%; height: auto;">
+    <p style="font-size: 0.9rem; color: #6b7280; margin-top: 0.5rem;">
+        Empirical SVD of weight matrix. Figure from
+        <a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">
+            Muon is Scalable for LLM Training
+        </a><a class="citation" href="#ref-14">[14]</a>.
+    </p>
+</div>
+
+Further, theoretically, <a class="citation" href="#ref-31">[31]</a> shows that Muon with decoupled weight decay implicitly optimize weights under spectral norm constraints. As we show in Section 2, our method corresponds to Muon with decoupled weight decay with a special effective step size schedule, and therefore we expect it to have similar behavior.
+
+</details>
+
+## Acknowledgments
+
+The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/), [Zihan Qiu](https://www.linkedin.com/in/zihan-qiu-33a172249/), and [Liliang Ren](https://renll.github.io/) for motivating this blog post into existence. To some extent, this work is a proof to show that it is possible to remove weight decay altogether by designing the optimizer to explicitly control weight norms. The authors would also like to thank [William Held](https://williamheld.com/), [Suhas Kotha](https://kothasuhas.github.io/), [Tatsunori Hashimoto](https://thashim.github.io/), [Jason Lee](https://jasondlee88.github.io/), [Zhiyuan Li](https://zhiyuanli.ttic.edu/), [Lijie Chen](https://chen-lijie.github.io/), [Huaqing Zhang](https://scholar.google.com/citations?user=_E9tcTkAAAAJ), [Jeremy Bernstein](https://jeremybernste.in/) and [Samuel Schoenholz](https://www.linkedin.com/in/samuel-schoenholz-379830a0/) for helpful discussions.
+
+
+## References
+
+<ol class="reference-list">
+    <li id="ref-1"><strong>Twan van Laarhoven</strong>. "L2 Regularization versus Batch and Weight Normalization." arXiv (2017). <a href="https://arxiv.org/abs/1706.05350" target="_blank" rel="noopener">https://arxiv.org/abs/1706.05350</a></li>
+    <li id="ref-2"><strong>Guodong Zhang, Chaoqi Wang, Bowen Xu, Roger Grosse</strong>. "Three Mechanisms of Weight Decay Regularization." ICLR (2019). <a href="https://openreview.net/forum?id=B1lz-3Rct7" target="_blank" rel="noopener">https://openreview.net/forum?id=B1lz-3Rct7</a></li>
+    <li id="ref-3"><strong>Elad Hoffer, Ron Banner, Itay Golan, Daniel Soudry</strong>. "Norm matters: efficient and accurate normalization schemes in deep networks." (2018). <a href="https://arxiv.org/abs/1803.01814" target="_blank" rel="noopener">https://arxiv.org/abs/1803.01814</a></li>
+    <li id="ref-4"><strong>Zhiyuan Li, Kaifeng Lyu, Sanjeev Arora</strong>. "Reconciling Modern Deep Learning with Traditional Optimization Analyses: The Intrinsic Learning Rate." NeurIPS (2020). <a href="https://arxiv.org/abs/2010.02916" target="_blank" rel="noopener">https://arxiv.org/abs/2010.02916</a></li>
+    <li id="ref-5"><strong>Francesco D'Angelo, Maksym Andriushchenko, Aditya Varre, Nicolas Flammarion</strong>. "Why Do We Need Weight Decay in Modern Deep Learning?" (2023). <a href="https://arxiv.org/abs/2310.04415" target="_blank" rel="noopener">https://arxiv.org/abs/2310.04415</a></li>
+    <li id="ref-6"><strong>Aaron Defazio</strong>. "Why Gradients Rapidly Increase Near the End of Training." (2025). <a href="https://arxiv.org/abs/2506.02285" target="_blank" rel="noopener">https://arxiv.org/abs/2506.02285</a></li>
+    <li id="ref-7"><strong>Ilya Loshchilov, Frank Hutter</strong>. "Decoupled Weight Decay Regularization (AdamW)." (2019). <a href="https://arxiv.org/abs/1711.05101" target="_blank" rel="noopener">https://arxiv.org/abs/1711.05101</a></li>
+    <li id="ref-8"><strong>Atli Kosson, Bettina Messmer, Martin Jaggi</strong>. "Rotational Equilibrium: How Weight Decay Balances Learning Across Neural Networks." (2024). <a href="https://arxiv.org/abs/2305.17212" target="_blank" rel="noopener">https://arxiv.org/abs/2305.17212</a></li> 
+    <li id="ref-9"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part I)." (2025). <a href="https://kexue.fm/archives/11307" target="_blank" rel="noopener">https://kexue.fm/archives/11307</a></li>
+    <li id="ref-10"><strong>Jianlin Su</strong>. "Why Adam's Update RMS Is 0.2?" (2025). <a href="https://kexue.fm/archives/11267" target="_blank" rel="noopener">https://kexue.fm/archives/11267</a></li>
+    <li id="ref-11"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part II)." (2025). <a href="https://kexue.fm/archives/11404" target="_blank" rel="noopener">https://kexue.fm/archives/11404</a></li>
+    <li id="ref-12"><strong>Sadhika Malladi, Kaifeng Lyu, Abhishek Panigrahi, Sanjeev Arora</strong>. "On the SDEs and Scaling Rules for Adaptive Gradient Algorithms." (2024). <a href="https://arxiv.org/abs/2205.10287" target="_blank" rel="noopener">https://arxiv.org/abs/2205.10287</a></li>
+    <li id="ref-13"><strong>Keller Jordan</strong>. "Muon: An optimizer for hidden layers in neural networks." (2023). <a href="https://kellerjordan.github.io/posts/muon/" target="_blank" rel="noopener">https://kellerjordan.github.io/posts/muon/</a></li>
+    <li id="ref-14"><strong>Jingyuan Liu, Jianlin Su, Xingcheng Yao, Zhejun Jiang, Guokun Lai, Yulun Du, Yidao Qin, Weixin Xu, Enzhe Lu, Junjie Yan, Yanru Chen, Huabin Zheng, Yibo Liu, Shaowei Liu, Bohong Yin, Weiran He, Han Zhu, Yuzhi Wang, Jianzhou Wang, Mengnan Dong, Zheng Zhang, Yongsheng Kang, Hao Zhang, Xinran Xu, Yutao Zhang, Yuxin Wu, Xinyu Zhou, Zhilin Yang</strong>. "Muon is Scalable for LLM Training." (2025). <a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">https://arxiv.org/abs/2502.16982</a></li>
+    <li id="ref-15"><strong>Kaiyue Wen, David Hall, Tengyu Ma, Percy Liang</strong>. "Fantastic Pretraining Optimizers and Where to Find Them." (2025). <a href="https://arxiv.org/abs/2509.02046" target="_blank" rel="noopener">https://arxiv.org/abs/2509.02046</a></li>
+    <li id="ref-16"><strong>Kaiyue Wen, Zhiyuan Li, Jason Wang, David Hall, Percy Liang, Tengyu Ma</strong>. "Understanding Warmup-Stable-Decay Learning Rates: A River Valley Loss Landscape Perspective." (2024). <a href="https://arxiv.org/abs/2410.05192" target="_blank" rel="noopener">https://arxiv.org/abs/2410.05192</a></li>
+    <li id="ref-17"><strong>Atli Kosson, Jeremy Welborn, Yang Liu, Martin Jaggi, Xi Chen</strong>. "Weight Decay may matter more than μP for Learning Rate Transfer in Practice." (2025). <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">https://arxiv.org/abs/2510.19093</a></li>
+    <li id="ref-18"><strong>Charlie Blake, Constantin Eichenberg, Josef Dean, Lukas Balles, Luke Y. Prince, Björn Deiseroth, Andres Felipe Cruz-Salinas, Carlo Luschi, Samuel Weinbach, Douglas Orr</strong>. "u-μP: The Unit-Scaled Maximal Update Parametrization." (2024). <a href="https://arxiv.org/abs/2407.17465" target="_blank" rel="noopener">https://arxiv.org/abs/2407.17465</a></li>
+    <li id="ref-19"><strong>Ziyuan Fan, Yifeng Liu, Qingyue Zhao, Angela Yuan, Quanquan Gu</strong>. "Robust Layerwise Scaling Rules by Proper Weight Decay Tuning." (2025). <a href="https://arxiv.org/abs/2510.15262" target="_blank" rel="noopener">https://arxiv.org/abs/2510.15262</a></li>
+    <li id="ref-20"><strong>Xi Wang, Laurence Aitchison</strong>. "How to set AdamW's weight decay as you scale model and dataset size." (2024). <a href="https://arxiv.org/abs/2405.13698" target="_blank" rel="noopener">https://arxiv.org/abs/2405.13698</a></li>
+    <li id="ref-21"><strong>Greg Yang, Edward J. Hu, Igor Babuschkin, Szymon Sidor, Xiaodong Liu, David Farhi, Nick Ryder, Jakub Pachocki, Weizhu Chen, Jianfeng Gao</strong>. "Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer." (2021). <a href="https://arxiv.org/abs/2203.03466" target="_blank" rel="noopener">https://arxiv.org/abs/2203.03466</a></li>
+    <li id="ref-22"><strong>Tim Salimans, Diederik P. Kingma</strong>. "Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks." (2016). <a href="https://arxiv.org/abs/1602.07868" target="_blank" rel="noopener">https://arxiv.org/abs/1602.07868</a></li>
+    <li id="ref-23"><strong>Tero Karras, Miika Aittala, Jaakko Lehtinen, Janne Hellsten, Timo Aila, Samuli Laine</strong>. "Analyzing and Improving the Training Dynamics of Diffusion Models." (2023). <a href="https://arxiv.org/abs/2312.02696" target="_blank" rel="noopener">https://arxiv.org/abs/2312.02696</a></li>
+    <li id="ref-24"><strong>Yonggan Fu, Xin Dong, Shizhe Diao, Matthijs Van Keirsbilck, Hanrong Ye, Wonmin Byeon, Yashaswi Karnati, Lucas Liebenwein, Hannah Zhang, Nikolaus Binder, Maksim Khadkevich, Alexander Keller, Jan Kautz, Yingyan Celine Lin, Pavlo Molchanov</strong>. "Nemotron-Flash: Towards Latency-Optimal Hybrid Small Language Models." (2025). <a href="https://arxiv.org/abs/2511.18890" target="_blank" rel="noopener">https://arxiv.org/abs/2511.18890</a></li>
+    <li id="ref-25"><strong>Greg Yang, James B. Simon, Jeremy Bernstein</strong>. "A Spectral Condition for Feature Learning." (2023). <a href="https://arxiv.org/abs/2310.17813" target="_blank" rel="noopener">https://arxiv.org/abs/2310.17813</a></li>
+    <li id="ref-26"><strong>Jeremy Bernstein</strong>. "Modular Manifolds." Thinking Machines Lab (2025). <a href="https://thinkingmachines.ai/blog/modular-manifolds/" target="_blank" rel="noopener">https://thinkingmachines.ai/blog/modular-manifolds/</a></li>
+    <li id="ref-27"><strong>Jianlin Su</strong>. "Muon + Stiefel." Scientific Spaces (2025). <a href="https://kexue.fm/archives/11221" target="_blank" rel="noopener">https://kexue.fm/archives/11221</a></li>
+    <li id="ref-28"><strong>Jeremy Bernstein</strong>. "Orthogonal manifold." Modula Systems Docs (2025). <a href="https://docs.modula.systems/algorithms/manifold/orthogonal/#open-problem-extending-to-the-stiefel-manifold" target="_blank" rel="noopener">https://docs.modula.systems/algorithms/manifold/orthogonal/#open-problem-extending-to-the-stiefel-manifold</a></li>
+    <li id="ref-29"><strong>Franz Louis Cesista</strong>. "Heuristic Solutions for Steepest Descent on the Stiefel Manifold." (2025). <a href="https://leloykun.github.io/ponder/steepest-descent-stiefel/" target="_blank" rel="noopener">https://leloykun.github.io/ponder/steepest-descent-stiefel/</a></li>
+    <li id="ref-30"><strong>Jianlin Su</strong>. "Thinking about Spectral Norm Gradient and Spectral Weight Decay." Scientific Spaces (2024). <a href="https://kexue.fm/archives/10648" target="_blank" rel="noopener">https://kexue.fm/archives/10648</a></li>
+    <li id="ref-31"><strong>Lizhang Chen, Jonathan Li, Qiang Liu</strong>. "Muon Optimizes Under Spectral Norm Constraints." (2025). <a href="https://arxiv.org/abs/2506.15054" target="_blank" rel="noopener">https://arxiv.org/abs/2506.15054</a></li>
+    <li id="ref-32"><strong>Shikai Qiu, Zixi Chen, Hoang Phan, Qi Lei, Andrew Gordon Wilson    </strong>. "Hyperparameter Transfer Enables Consistent Gains of Matrix-Preconditioned Optimizers Across Scale." (2025). <a href="https://arxiv.org/abs/2512.05620" target="_blank" rel="noopener">https://arxiv.org/abs/2512.05620</a></li>
+</ol>
+
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const markdownSource = document.getElementById('markdown-source').textContent;
+            const contentDiv = document.getElementById('content');
+
+            // Math protection logic
+            const mathBlocks = [];
+            const protectMath = (text) => {
+                return text.replace(/(\$\$[\s\S]+?\$\$)|(\$[^$\n]+\$)/g, (match) => {
+                    mathBlocks.push(match);
+                    return `MATHBLOCK${mathBlocks.length - 1}ENDMATHBLOCK`;
+                });
+            };
+
+            // SVG protection logic
+            const svgBlocks = [];
+            const protectSvg = (text) => {
+                return text.replace(/<div style="text-align: center; margin: 2rem 0;">[\s\S]*?<svg[\s\S]+?<\/svg>[\s\S]*?<\/div>/g,
+                    (match) => {
+                        svgBlocks.push(match);
+                        return `SVGBLOCK${svgBlocks.length - 1}ENDSVGBLOCK`;
+                    });
+            };
+
+            // Footnote processing logic
+            const references = [];
+            const processFootnotes = (text) => {
+                return text.replace(/\(ref\s+(https?:\/\/[^\s\)]+)\)/g, (match, url) => {
+                    references.push(url);
+                    const index = references.length;
+                    return `<sup class="footnote-ref"><a href="#ref-${index}" id="source-${index}" style="text-decoration: none; color: #3b82f6;">[${index}]</a></sup>`;
+                });
+            };
+
+            const restoreMath = (text) => {
+                return text.replace(/MATHBLOCK(\d+)ENDMATHBLOCK/g, (match, index) => {
+                    return mathBlocks[parseInt(index)];
+                });
+            };
+
+            const restoreSvg = (text) => {
+                return text.replace(/SVGBLOCK(\d+)ENDSVGBLOCK/g, (match, index) => {
+                    return svgBlocks[parseInt(index)];
+                });
+            };
+
+            // Configure marked
+            marked.use({
+                breaks: true,
+                gfm: true,
+                highlight: function (code, lang) {
+                    const language = (lang && hljs.getLanguage(lang)) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+            });
+
+            const scaleInvToken = '__SCALE_INVARIANCE_DEMO__';
+            const transformerToken = '__TRANSFORMER_DEMO__';
+            const adamwToken = '__ADAMW_DEMO__';
+
+            const slugifyHeading = (text) => {
+                return text.toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-');
+            };
+
+            const getHeadingDisplayText = (text) => {
+                const phenomenonMatch = text.match(/^(Phenomenon\s+\d+)/i);
+                return phenomenonMatch ? phenomenonMatch[0] : text;
+            };
+
+            const outlineLayoutBreakpoints = {
+                floating: 1280,
+                compact: 640
+            };
+
+            let outlineResizeListenerBound = false;
+
+            const scheduleOutlineLayoutUpdate = (() => {
+                let rafId = null;
+                return () => {
+                    if (rafId) {
+                        return;
+                    }
+                    rafId = requestAnimationFrame(() => {
+                        rafId = null;
+                        const toc = document.querySelector('.toc-sidebar');
+                        if (!toc) {
+                            return;
+                        }
+                        const width = window.innerWidth;
+                        const isFloating = width < outlineLayoutBreakpoints.floating;
+                        const isCompact = width < outlineLayoutBreakpoints.compact;
+
+                        document.body.classList.toggle('outline-right', !isFloating);
+                        document.body.classList.toggle('outline-floating', isFloating);
+                        toc.classList.toggle('toc-floating', isFloating);
+                        toc.classList.toggle('toc-compact', isCompact);
+                    });
+                };
+            })();
+
+            const bindOutlineLayoutListeners = () => {
+                if (outlineResizeListenerBound) {
+                    return;
+                }
+                outlineResizeListenerBound = true;
+                window.addEventListener('resize', scheduleOutlineLayoutUpdate);
+                window.addEventListener('orientationchange', scheduleOutlineLayoutUpdate);
+            };
+
+            const initOutlineNavigation = () => {
+                const existingSidebar = document.querySelector('.toc-sidebar');
+                if (existingSidebar) {
+                    document.body.classList.add('has-outline');
+                    bindOutlineLayoutListeners();
+                    scheduleOutlineLayoutUpdate();
+                    return;
+                }
+
+                const headingSelector = 'h1, h2, h3';
+                const headings = Array.from(contentDiv.querySelectorAll(headingSelector))
+                    .filter(h => h.textContent.trim().length > 0);
+
+                if (!headings.length) {
+                    return;
+                }
+
+                const toc = document.createElement('nav');
+                toc.className = 'toc-sidebar';
+                toc.setAttribute('aria-label', 'Page outline');
+                toc.innerHTML = '<div class="toc-header">Outline</div>';
+
+                const tocItems = document.createElement('div');
+                tocItems.className = 'toc-items';
+
+                const trackedHeadings = [];
+
+                headings.forEach((heading, index) => {
+                    const level = parseInt(heading.tagName.replace('H', ''), 10);
+                    if (level < 1 || level > 3) return;
+
+                    const fullText = heading.textContent.trim();
+                    if (!fullText) return;
+
+                    let slug = heading.id;
+                    if (!slug) {
+                        slug = slugifyHeading(fullText) || `section-${index}`;
+                        if (document.getElementById(slug)) {
+                            slug = `${slug}-${index}`;
+                        }
+                        heading.id = slug;
+                    }
+
+                    const link = document.createElement('a');
+                    link.href = `#${slug}`;
+                    link.textContent = getHeadingDisplayText(fullText);
+                    link.className = `toc-link level-${level}`;
+
+                    link.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        document.getElementById(slug)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        history.replaceState(null, '', `#${slug}`);
+                    });
+
+                    tocItems.appendChild(link);
+                    trackedHeadings.push({ heading, link });
+                });
+
+                if (!trackedHeadings.length) {
+                    return;
+                }
+
+                toc.appendChild(tocItems);
+                document.body.appendChild(toc);
+                document.body.classList.add('has-outline');
+                bindOutlineLayoutListeners();
+                scheduleOutlineLayoutUpdate();
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.id;
+                            trackedHeadings.forEach(item => {
+                                if (item.heading.id === id) {
+                                    item.link.classList.add('active');
+                                } else {
+                                    item.link.classList.remove('active');
+                                }
+                            });
+                        }
+                    });
+                }, {
+                    rootMargin: '-35% 0px -55% 0px',
+                    threshold: 0
+                });
+
+                trackedHeadings.forEach(item => observer.observe(item.heading));
+            };
+
+
+            let parts = markdownSource.split(scaleInvToken);
+            let finalHtml = '';
+
+            if (parts.length === 2) {
+                // Process first part (before scale inv demo)
+                let part1 = protectMath(parts[0]);
+                part1 = protectSvg(part1);
+                part1 = processFootnotes(part1);
+                const html1 = marked.parse(part1);
+
+                // Split second part by transformer demo token
+                const parts2 = parts[1].split(transformerToken);
+
+                if (parts2.length === 2) {
+                    // Process part between scale inv and transformer
+                    let part2 = protectMath(parts2[0]);
+                    part2 = protectSvg(part2);
+                    part2 = processFootnotes(part2);
+                    const html2 = marked.parse(part2);
+
+                    // Split third part by AdamW demo token
+                    const parts3 = parts2[1].split(adamwToken);
+
+                    if (parts3.length === 2) {
+                        // Process part between transformer and AdamW
+                        let part3 = protectMath(parts3[0]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        // Process final part (after AdamW demo)
+                        let part4 = protectMath(parts3[1]);
+                        part4 = protectSvg(part4);
+                        part4 = processFootnotes(part4);
+                        const html4 = marked.parse(part4);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="transformer-architecture-demo"></div>' +
+                            restoreMath(html3) +
+                            '<div id="adamw-demo"></div>' +
+                            restoreMath(html4);
+                    } else {
+                        // No AdamW demo token
+                        let part3 = protectMath(parts3[0]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="transformer-architecture-demo"></div>' +
+                            restoreMath(html3);
+                    }
+                } else {
+                    // No transformer token, check for AdamW token
+                    const parts2b = parts[1].split(adamwToken);
+                    if (parts2b.length === 2) {
+                        // Process middle part (between demos)
+                        let part2 = protectMath(parts2b[0]);
+                        part2 = protectSvg(part2);
+                        part2 = processFootnotes(part2);
+                        const html2 = marked.parse(part2);
+
+                        // Process final part (after AdamW demo)
+                        let part3 = protectMath(parts2b[1]);
+                        part3 = protectSvg(part3);
+                        part3 = processFootnotes(part3);
+                        const html3 = marked.parse(part3);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2) +
+                            '<div id="adamw-demo"></div>' +
+                            restoreMath(html3);
+                    } else {
+                        // No AdamW demo token, just scale inv
+                        let part2 = protectMath(parts2b[0]);
+                        part2 = protectSvg(part2);
+                        part2 = processFootnotes(part2);
+                        const html2 = marked.parse(part2);
+
+                        finalHtml = restoreMath(html1) +
+                            '<div id="scale-invariance-demo"></div>' +
+                            restoreMath(html2);
+                    }
+                }
+
+                finalHtml = restoreSvg(finalHtml);
+            } else {
+                // Fallback if token not found
+                let protectedText = protectMath(markdownSource);
+                protectedText = protectSvg(protectedText);
+                protectedText = processFootnotes(protectedText);
+                const htmlContent = marked.parse(protectedText);
+                finalHtml = restoreMath(htmlContent);
+                finalHtml = restoreSvg(finalHtml);
+            }
+
+            // Append References Section
+            if (references.length > 0) {
+                finalHtml += `
+                    <div class="references-section" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
+                        <h3 style="margin-bottom: 1rem;">References</h3>
+                        <ol style="padding-left: 1.5rem; color: #4b5563;">
+                            ${references.map((url, i) => `
+                                <li id="ref-${i + 1}" style="margin-bottom: 0.5rem;">
+                                    <a href="${url}" target="_blank" style="color: #3b82f6; text-decoration: none; word-break: break-all;">${url}</a>
+                                    <a href="#source-${i + 1}" style="text-decoration: none; color: #9ca3af; margin-left: 0.5rem;" title="Back to text">↩</a>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = finalHtml;
+
+            const authorTab = document.querySelector('.author-tab');
+            const primaryHeading = contentDiv.querySelector('h1');
+            if (authorTab && primaryHeading) {
+                primaryHeading.insertAdjacentElement('afterend', authorTab);
+            }
+            initOutlineNavigation();
+
+            // Trigger MathJax to render math, but don't let failures block the demo
+            try {
+                if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+                    MathJax.typesetPromise([contentDiv]).catch((err) => {
+                        console.log('MathJax error:', err);
+                    }).finally(() => {
+                        initAllDemos();
+                    });
+                    return; // prevent calling init twice
+                }
+            } catch (e) {
+                console.log('MathJax invocation error:', e);
+            }
+
+            // Fallback: either MathJax is not ready or typesetPromise is unavailable
+            if (window.MathJax && typeof MathJax.typeset === 'function') {
+                try {
+                    MathJax.typeset([contentDiv]);
+                } catch (e) {
+                    console.log('MathJax typeset error:', e);
+                }
+            }
+
+            initAllDemos();
+        });
+
+        function initAllDemos() {
+            console.log('Initializing all demos...');
+            console.log('Scale inv container:', document.getElementById('scale-invariance-demo'));
+            console.log('Transformer container:', document.getElementById('transformer-architecture-demo'));
+            console.log('AdamW container:', document.getElementById('adamw-demo'));
+            initScaleInvarianceDemo();
+            initTransformerDemo();
+            initAdamWDemo();
+        }
+
+        function initScaleInvarianceDemo() {
+            const container = document.getElementById('scale-invariance-demo');
+            if (!container) return;
+
+            // Inject HTML structure
+            container.innerHTML = `
+                <div class="demo-container">
+                    <div class="demo-controls">
+                        <div class="control-group">
+                            <div class="control-header">
+                                <label for="scale-slider">Scale Factor (c)</label>
+                            </div>
+                            <div class="slider-container">
+                                <span style="font-size: 0.8rem; color: #9ca3af;">0.2</span>
+                                <input type="range" id="scale-slider" min="0.2" max="5.0" step="0.1" value="1.0">
+                                <span style="font-size: 0.8rem; color: #9ca3af;">5.0</span>
+                            </div>
+                        </div>
+                        <button id="randomize-btn" class="btn-primary">
+                            Randomize Weights
+                        </button>
+                    </div>
+
+                    <div class="demo-grid-layout">
+                        <div class="visual-section">
+                            <h4>Weight Matrix <span style="opacity: 0.5; font-weight: normal;">(6x6)</span></h4>
+                            <div id="w-grid" class="matrix-container" style="grid-template-columns: repeat(6, 1fr);"></div>
+                        </div>
+                        <div class="visual-section">
+                            <h4>Input Vector x <span style="opacity: 0.5; font-weight: normal;">(6)</span></h4>
+                            <div id="x-grid" class="matrix-container" style="grid-template-columns: repeat(6, 1fr);"></div>
+                        </div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="result-card">
+                            <div class="result-header">y = RMSNorm(Wx)</div>
+                            <div id="y-out" class="chip-container"></div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-header">ŷ = RMSNorm((cW)x)</div>
+                            <div id="y-scaled" class="chip-container"></div>
+                        </div>
+                    </div>
+
+                    <div id="diff-indicator" class="diff-indicator">
+                        Outputs are identical (Scale Invariance Holds)
+                    </div>
+                </div>
+            `;
+
+            // State
+            const d = 6;
+            let W = [];
+            let x = [];
+
+            // Elements
+            const wGrid = document.getElementById('w-grid');
+            const xGrid = document.getElementById('x-grid');
+            const yOut = document.getElementById('y-out');
+            const yScaled = document.getElementById('y-scaled');
+            const scaleSlider = document.getElementById('scale-slider');
+            const randomizeBtn = document.getElementById('randomize-btn');
+            const diffIndicator = document.getElementById('diff-indicator');
+
+            // Utils
+            function randn() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            function getColor(val) {
+                const intensity = Math.tanh(Math.abs(val) * 0.8);
+                const alpha = 0.2 + (intensity * 0.8);
+                if (val >= 0) {
+                    return `rgba(59, 130, 246, ${alpha})`;
+                } else {
+                    return `rgba(239, 68, 68, ${alpha})`;
+                }
+            }
+
+            function renderGrid(container, values, isMatrix = false) {
+                container.innerHTML = '';
+                if (isMatrix) {
+                    values.forEach(row => {
+                        row.forEach(val => {
+                            const cell = document.createElement('div');
+                            cell.className = 'cell';
+                            cell.style.width = '20px';
+                            cell.style.height = '20px';
+                            cell.style.margin = '1px';
+                            cell.style.borderRadius = '4px';
+                            cell.style.backgroundColor = getColor(val);
+                            container.appendChild(cell);
+                        });
+                    });
+                } else {
+                    values.forEach(val => {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.style.width = '20px';
+                        cell.style.height = '20px';
+                        cell.style.margin = '1px';
+                        cell.style.borderRadius = '4px';
+                        cell.style.backgroundColor = getColor(val);
+                        container.appendChild(cell);
+                    });
+                }
+            }
+
+            function renderChips(container, values) {
+                container.innerHTML = '';
+                values.forEach(val => {
+                    const chip = document.createElement('div');
+                    chip.className = 'chip';
+                    chip.style.display = 'inline-block';
+                    chip.style.width = '28px';
+                    chip.style.height = '20px';
+                    chip.style.margin = '2px';
+                    chip.style.borderRadius = '999px';
+                    chip.style.backgroundColor = getColor(val);
+                    container.appendChild(chip);
+                });
+            }
+
+            function matVec(Wm, xv) {
+                const out = new Float64Array(Wm.length);
+                for (let i = 0; i < Wm.length; i++) {
+                    let s = 0;
+                    for (let j = 0; j < d; j++) s += Wm[i][j] * xv[j];
+                    out[i] = s;
+                }
+                return out;
+            }
+
+            function rmsnorm(v) {
+                let ss = 0;
+                for (let i = 0; i < v.length; i++) ss += v[i] * v[i];
+                const denom = Math.sqrt(ss / v.length + 1e-12);
+                return v.map(val => val / denom);
+            }
+
+            function l2Dist(v1, v2) {
+                let s = 0;
+                for (let i = 0; i < v1.length; i++) {
+                    s += (v1[i] - v2[i]) ** 2;
+                }
+                return Math.sqrt(s);
+            }
+
+            function update() {
+                const c = parseFloat(scaleSlider.value);
+
+                const z = matVec(W, x);
+                const y = rmsnorm(z);
+
+                const scaledW = W.map(row => row.map(val => val * c));
+                renderGrid(wGrid, scaledW, true);
+
+                const z_scaled = matVec(scaledW, x);
+                const y_hat = rmsnorm(z_scaled);
+
+                renderChips(yOut, y);
+                renderChips(yScaled, y_hat);
+
+                const diff = l2Dist(y, y_hat);
+                if (diff < 1e-10) {
+                    diffIndicator.textContent = 'Outputs are identical (Scale Invariance Holds)';
+                    diffIndicator.className = 'diff-indicator';
+                } else {
+                    diffIndicator.textContent = `Outputs differ! Dist: ${diff.toExponential(2)}`;
+                    diffIndicator.className = 'diff-indicator error';
+                }
+            }
+
+            function randomizeData() {
+                x = new Float64Array(d);
+                for (let i = 0; i < d; i++) x[i] = randn();
+
+                W = new Array(d);
+                for (let i = 0; i < d; i++) {
+                    W[i] = new Float64Array(d);
+                    for (let j = 0; j < d; j++) W[i][j] = randn() * 0.5;
+                }
+
+                renderGrid(xGrid, x);
+                update();
+            }
+
+            function runTests() {
+                // Simple numerical tests for scale invariance under RMSNorm
+                const testScales = [0.5, 1.0, 2.0];
+                let allPass = true;
+                testScales.forEach((c) => {
+                    const z = matVec(W, x);
+                    const y = rmsnorm(z);
+                    const scaledW = W.map(row => row.map(val => val * c));
+                    const z_scaled = matVec(scaledW, x);
+                    const y_hat = rmsnorm(z_scaled);
+                    const diff = l2Dist(y, y_hat);
+                    const pass = diff < 1e-10;
+                    allPass = allPass && pass;
+                    console.log(`[TEST] c=${c.toFixed(1)} diff=${diff.toExponential(2)} pass=${pass}`);
+                });
+                console.assert(allPass, 'Scale invariance tests failed for some c values');
+            }
+
+            // Event Listeners
+            scaleSlider.addEventListener('input', update);
+            randomizeBtn.addEventListener('click', () => {
+                randomizeData();
+                runTests();
+            });
+
+            // Initial Render + tests
+            randomizeData();
+            runTests();
+        }
+
+        function initTransformerDemo() {
+            const container = document.getElementById('transformer-architecture-demo');
+            if (!container) return;
+
+            container.innerHTML = `
+                <style>
+                    #transformer-architecture-demo {
+                        --border: #d2c4b5;
+                        --bg-page: #faf6f0;
+                        --bg-box: #fffcf6;
+                        --bg-rms: #f6e3c6;
+                        --bg-attn: #fdf7c0;
+                        --bg-mlp: #dfe8ff;
+                        --bg-linear: #e7ebff;
+                        --bg-activation: #ffe5fb;
+                        --bg-embed: #f0f5ff;
+                        --bg-head: #ffeae1;
+                        --bg-output: #e4f7f1;
+                        --text-main: #333333;
+                        --text-muted: #777777;
+                    }
+
+                    #transformer-architecture-demo {
+                        background: var(--bg-page);
+                        border-radius: 24px;
+                        padding: 32px;
+                        margin: 48px 0;
+                    }
+
+                    #transformer-architecture-demo * {
+                        box-sizing: border-box;
+                        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+                    }
+
+                    #transformer-architecture-demo .architecture-top {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 16px;
+                        flex-wrap: wrap;
+                        margin-bottom: 20px;
+                    }
+
+                    #transformer-architecture-demo .architecture-copy h3 {
+                        margin: 0;
+                        font-size: 20px;
+                        font-weight: 600;
+                    }
+
+                    #transformer-architecture-demo .architecture-intro {
+                        margin: 4px 0 0;
+                        font-size: 14px;
+                        color: var(--text-muted);
+                    }
+
+                    #transformer-architecture-demo .architecture-toggle {
+                        display: flex;
+                        gap: 8px;
+                        padding: 4px;
+                        border-radius: 999px;
+                        border: 1px solid var(--border);
+                        background: #fff;
+                    }
+
+                    #transformer-architecture-demo .arch-btn {
+                        border: none;
+                        background: transparent;
+                        border-radius: 999px;
+                        padding: 8px 18px;
+                        font-weight: 600;
+                        color: var(--text-muted);
+                        cursor: pointer;
+                        transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+                    }
+
+                    #transformer-architecture-demo .arch-btn.active {
+                        background: #1d4ed8;
+                        color: #ffffff;
+                        box-shadow: 0 12px 26px rgba(29, 78, 216, 0.25);
+                    }
+
+                    #transformer-architecture-demo .architecture-summary {
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 1px solid var(--border);
+                        border-radius: 16px;
+                        padding: 16px 20px;
+                        margin-bottom: 24px;
+                    }
+
+                    #transformer-architecture-demo .architecture-summary h4 {
+                        margin: 0 0 4px;
+                        font-size: 17px;
+                    }
+
+                    #transformer-architecture-demo .architecture-summary p {
+                        margin: 0 0 8px;
+                        color: var(--text-main);
+                        font-size: 14px;
+                    }
+
+                    #transformer-architecture-demo .architecture-summary ul {
+                        margin: 0;
+                        padding-left: 18px;
+                        color: var(--text-muted);
+                        font-size: 13px;
+                    }
+
+                    #transformer-architecture-demo .diagram {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        display: flex;
+                        gap: 32px;
+                        color: var(--text-main);
+                    }
+
+                    #transformer-architecture-demo .column {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 24px;
+                    }
+
+                    #transformer-architecture-demo .column-primary {
+                        flex: 1.3;
+                    }
+
+                    #transformer-architecture-demo .column-secondary {
+                        flex: 0.7;
+                    }
+
+                    #transformer-architecture-demo .column.outer {
+                        flex: 0.85;
+                        min-width: 220px;
+                    }
+
+                    #transformer-architecture-demo .inline-block-wrapper {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 8px;
+                    }
+
+                    #transformer-architecture-demo .inline-block-title {
+                        font-size: 16px;
+                        font-weight: 600;
+                        text-align: center;
+                    }
+
+                    #transformer-architecture-demo .inline-block-title span {
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: var(--text-muted);
+                        margin-left: 6px;
+                    }
+
+                    #transformer-architecture-demo .inline-block-box {
+                        margin: 0;
+                    }
+
+                    #transformer-architecture-demo .column-title {
+                        font-size: 18px;
+                        font-weight: 600;
+                        margin-bottom: 4px;
+                    }
+
+                    #transformer-architecture-demo .column-title span {
+                        font-size: 16px;
+                        font-weight: 500;
+                        color: var(--text-muted);
+                        margin-left: 8px;
+                    }
+
+                    #transformer-architecture-demo .dashed-box {
+                        border: 2px dashed var(--border);
+                        border-radius: 20px;
+                        padding: 20px 24px;
+                        background: var(--bg-box);
+                        position: relative;
+                    }
+
+                    #transformer-architecture-demo .block-label {
+                        position: absolute;
+                        top: 10px;
+                        right: 18px;
+                        font-size: 11px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.06em;
+                        color: var(--text-muted);
+                    }
+
+                    #transformer-architecture-demo .module {
+                        border-radius: 12px;
+                        border: 2px solid var(--border);
+                        padding: 8px 12px;
+                        text-align: center;
+                        font-size: 14px;
+                        font-weight: 500;
+                        background: #f7f4ec;
+                        margin: 4px 0;
+                        position: relative;
+                    }
+
+                    #transformer-architecture-demo .module.small {
+                        font-size: 12px;
+                        padding: 6px 10px;
+                    }
+
+                    #transformer-architecture-demo .module.tiny {
+                        font-size: 11px;
+                        padding: 4px 8px;
+                    }
+
+                    #transformer-architecture-demo .module.rmsnorm {
+                        background: var(--bg-rms);
+                    }
+
+                    #transformer-architecture-demo .module.attention {
+                        background: var(--bg-attn);
+                    }
+
+                    #transformer-architecture-demo .module.mlp {
+                        background: var(--bg-mlp);
+                    }
+
+                    #transformer-architecture-demo .module.linear {
+                        background: var(--bg-linear);
+                    }
+
+                    #transformer-architecture-demo .module.activation {
+                        background: var(--bg-activation);
+                    }
+
+                    #transformer-architecture-demo .module.embedding {
+                        background: var(--bg-embed);
+                    }
+
+                    #transformer-architecture-demo .module.head {
+                        background: var(--bg-head);
+                    }
+
+                    #transformer-architecture-demo .module.output {
+                        background: var(--bg-output);
+                    }
+
+                    #transformer-architecture-demo .module.note {
+                        border-style: dashed;
+                        background: #ffffff;
+                        font-weight: 400;
+                    }
+
+                    #transformer-architecture-demo .scale-legend-wrapper {
+                        border: 1px solid var(--border);
+                        border-radius: 16px;
+                        padding: 14px 18px;
+                        background: #fffaf2;
+                        margin: 16px 0 24px;
+                    }
+
+                    #transformer-architecture-demo .scale-legend-heading {
+                        font-size: 12px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                    }
+
+                    #transformer-architecture-demo .scale-legend-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 12px 18px;
+                    }
+
+                    @media (max-width: 720px) {
+                        #transformer-architecture-demo .scale-legend-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+
+                    #transformer-architecture-demo .scale-legend-row {
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 10px;
+                    }
+
+                    #transformer-architecture-demo .scale-legend-text {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                    }
+
+                    #transformer-architecture-demo .scale-legend-text .title {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: var(--text-main);
+                    }
+
+                    #transformer-architecture-demo .scale-legend-text .desc {
+                        font-size: 15px;
+                        color: var(--text-muted);
+                        line-height: 1.55;
+                    }
+
+                    #transformer-architecture-demo .scale-chip {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 26px;
+                        height: 26px;
+                        border-radius: 50%;
+                        border: 2px solid currentColor;
+                        font-size: 13px;
+                        font-weight: 700;
+                        background: #ffffff;
+                        flex-shrink: 0;
+                    }
+
+                    #transformer-architecture-demo .module .scale-chip {
+                        position: absolute;
+                        top: -10px;
+                        right: -10px;
+                        box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+                    }
+
+                    #transformer-architecture-demo .scale-chip.scale-none {
+                        color: #c2410c;
+                        background: #fff7ed;
+                    }
+
+                    #transformer-architecture-demo .scale-chip.scale-group {
+                        color: #1d4ed8;
+                        background: #eef2ff;
+                    }
+
+                    #transformer-architecture-demo .scale-chip.scale-approx {
+                        color: #0f766e;
+                        background: #ecfdf5;
+                    }
+
+                    #transformer-architecture-demo .scale-chip.scale-individual {
+                        color: #a21caf;
+                        background: #fdf2f8;
+                    }
+
+                    #transformer-architecture-demo .module.highlight {
+                        border-color: #2563eb;
+                        background: rgba(37, 99, 235, 0.08);
+                        box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25) inset;
+                    }
+
+                    #transformer-architecture-demo .sub-label {
+                        display: block;
+                        font-size: 11px;
+                        font-weight: 400;
+                        color: var(--text-muted);
+                        margin-top: 2px;
+                    }
+
+                    #transformer-architecture-demo .arrow {
+                        text-align: center;
+                        font-size: 16px;
+                        line-height: 1;
+                        margin: 2px 0;
+                    }
+
+                    #transformer-architecture-demo .arrow.small {
+                        font-size: 12px;
+                        color: var(--text-muted);
+                    }
+
+                    #transformer-architecture-demo .feature-cluster {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 4px;
+                    }
+
+                    #transformer-architecture-demo .feature-cluster.mini {
+                        gap: 2px;
+                    }
+
+                    #transformer-architecture-demo .feature-hidden {
+                        display: none !important;
+                    }
+
+                    #transformer-architecture-demo .residual-group {
+                        text-align: center;
+                        margin: 6px 0 2px;
+                    }
+
+                    #transformer-architecture-demo .residual-circle {
+                        width: 26px;
+                        height: 26px;
+                        border-radius: 50%;
+                        border: 2px solid var(--border);
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 16px;
+                        font-weight: 600;
+                        background: #ffffff;
+                        margin-bottom: 2px;
+                    }
+
+                    #transformer-architecture-demo .residual-text {
+                        font-size: 11px;
+                        color: var(--text-muted);
+                    }
+
+                    #transformer-architecture-demo .detail-title {
+                        font-size: 15px;
+                        font-weight: 600;
+                        text-align: center;
+                        margin-bottom: 10px;
+                    }
+
+                    #transformer-architecture-demo .detail-subtitle {
+                        font-size: 11px;
+                        text-align: center;
+                        color: var(--text-muted);
+                        margin-top: -4px;
+                        margin-bottom: 6px;
+                    }
+
+                    #transformer-architecture-demo .row {
+                        display: flex;
+                        gap: 10px;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-top: 6px;
+                    }
+
+                    #transformer-architecture-demo .path {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 4px;
+                    }
+
+                    #transformer-architecture-demo .symbol-label {
+                        font-style: italic;
+                        font-size: 13px;
+                        margin-top: -2px;
+                    }
+
+                    #transformer-architecture-demo .legend {
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        margin-top: 6px;
+                        text-align: right;
+                    }
+
+                    #transformer-architecture-demo .pipeline-flow {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 6px;
+                    }
+
+                    #transformer-architecture-demo .pipeline-note {
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        text-align: center;
+                        margin-top: 8px;
+                    }
+
+                    #transformer-architecture-demo .diagram-caption {
+                        max-width: 1200px;
+                        margin: 18px auto 0;
+                        font-size: 12px;
+                        color: var(--text-muted);
+                        text-align: center;
+                    }
+
+                    @media (max-width: 900px) {
+                        #transformer-architecture-demo {
+                            padding: 24px 16px;
+                        }
+
+                        #transformer-architecture-demo .diagram {
+                            flex-direction: column;
+                        }
+                    }
+                </style>
+                <div class="architecture-top">
+                    <div class="architecture-copy">
+                        <h3>Transformer architecture dial</h3>
+                        <p class="architecture-intro">
+                            Switch between LLaMA, Qwen3, and Gemma3 to highlight how each block changes.
+                        </p>
+                    </div>
+                    <div class="architecture-toggle" role="tablist" aria-label="Select transformer family">
+                        <button type="button" class="arch-btn active" data-arch="llama" role="tab" aria-selected="true">LLaMA</button>
+                        <button type="button" class="arch-btn" data-arch="qwen3" role="tab" aria-selected="false">Qwen3</button>
+                        <button type="button" class="arch-btn" data-arch="gemma3" role="tab" aria-selected="false">Gemma3</button>
+                    </div>
+                </div>
+                <div class="architecture-summary">
+                    <h4 id="arch-title">LLaMA baseline</h4>
+                    <p id="arch-description">
+                        Standard pre-norm transformer block used in LLaMA-family models.
+                    </p>
+                    <ul id="arch-diffs"></ul>
+                </div>
+                <div class="scale-legend-wrapper">
+                    <div class="scale-legend-heading">Scale invariance key</div>
+                    <div class="scale-legend-grid" id="scale-legend"></div>
+                </div>
+                <div class="diagram">
+                    <div class="column column-primary">
+                        <div class="column-title">
+                            Token Pipeline <span>(embedding → logits)</span>
+                        </div>
+                        <div class="dashed-box">
+                            <div class="block-label">Global flow</div>
+                            <div class="pipeline-flow">
+                                <div class="module note tiny">Context tokens</div>
+                                <div class="arrow">↓</div>
+                                <div class="module embedding" data-weight-id="word-embed" data-scale-note="Tied to LM head logits">
+                                    Word Embedding Matrix
+                                    <span class="sub-label">shared weights (V × d)</span>
+                                </div>
+                                <div class="arrow small">↓ residual stream</div>
+                                <div class="feature-cluster" data-feature="input-rms">
+                                    <div class="module rmsnorm small highlight">
+                                        Input RMSNorm
+                                        <span class="sub-label">Gemma3 boundary norm</span>
+                                    </div>
+                                    <div class="arrow small">↓</div>
+                                </div>
+                                <div class="inline-block-wrapper">
+                                    <div class="inline-block-title">
+                                        Transformer Block <span>(stacked × N)</span>
+                                    </div>
+                                    <div class="dashed-box inline-block-box">
+                                        <div class="block-label">Per-layer structure</div>
+                                        <div class="arrow small">Input token representation</div>
+                                        <div class="module rmsnorm">RMSNorm</div>
+                                        <div class="arrow">↓</div>
+                                        <div class="module attention">
+                                            Multi-Head Self-Attention
+                                            <span class="sub-label">with RoPE on q, k</span>
+                                        </div>
+                                        <div class="residual-group">
+                                            <div class="residual-circle">+</div>
+                                            <div class="residual-text">Residual add</div>
+                                        </div>
+                                        <div class="module rmsnorm">RMSNorm</div>
+                                        <div class="arrow">↓</div>
+                                        <div class="module mlp">
+                                            MLP (SwiGLU)
+                                            <span class="sub-label">gate_proj / up_proj / down_proj</span>
+                                        </div>
+                                        <div class="residual-group">
+                                            <div class="residual-circle">+</div>
+                                            <div class="residual-text">Residual add</div>
+                                        </div>
+                                        <div class="arrow small">Pass to next block</div>
+                                    </div>
+                                </div>
+                                <div class="arrow">↓</div>
+                                <div class="module rmsnorm small">Final RMSNorm</div>
+                                <div class="arrow">↓</div>
+                                <div class="module head" data-weight-id="lm-head" data-scale-note="Scales logits directly">
+                                    LM Head
+                                    <span class="sub-label">tied to embeddings</span>
+                                </div>
+                                <div class="arrow">↓</div>
+                                <div class="module output">
+                                    Logits / next-token probs
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column column-secondary">
+                        <div class="dashed-box">
+                            <div class="detail-title">Self-Attention (inside each block)</div>
+                            <div class="detail-subtitle">pre-norm with shared RMSNorm</div>
+                            <div class="module rmsnorm small">RMSNorm</div>
+                            <div class="arrow">↓</div>
+                            <div class="row">
+                                <div class="path">
+                                    <div class="module linear small" data-weight-id="wq" data-scale-note="Pairs with W_k through attention logits">
+                                        Linear
+                                        <span class="sub-label">W<sub>q</sub></span>
+                                    </div>
+                                    <div class="feature-cluster mini" data-feature="qk-norm">
+                                        <div class="module rmsnorm tiny highlight">
+                                            QK Norm
+                                            <span class="sub-label">normalize q</span>
+                                        </div>
+                                    </div>
+                                    <div class="module note tiny">RoPE (phase)</div>
+                                    <div class="symbol-label">q</div>
+                                </div>
+                                <div class="path">
+                                    <div class="module linear small" data-weight-id="wk" data-scale-note="Pairs with W_q through attention logits">
+                                        Linear
+                                        <span class="sub-label">W<sub>k</sub></span>
+                                    </div>
+                                    <div class="feature-cluster mini" data-feature="qk-norm">
+                                        <div class="module rmsnorm tiny highlight">
+                                            QK Norm
+                                            <span class="sub-label">normalize k</span>
+                                        </div>
+                                    </div>
+                                    <div class="module note tiny">RoPE (phase)</div>
+                                    <div class="symbol-label">k</div>
+                                </div>
+                                <div class="path">
+                                    <div class="module linear small" data-weight-id="wv" data-scale-note="Value path shares scale with output projection">
+                                        Linear
+                                        <span class="sub-label">W<sub>v</sub></span>
+                                    </div>
+                                    <div class="symbol-label">v</div>
+                                </div>
+                            </div>
+                            <div class="arrow">↓</div>
+                            <div class="module attention">
+                                Scaled Dot-Product Attention
+                                <span class="sub-label">heads merged</span>
+                            </div>
+                            <div class="arrow">↓</div>
+                            <div class="module linear small" data-weight-id="wo" data-scale-note="Maps attention output back to the residual stream">
+                                Output Projection
+                                <span class="sub-label">W<sub>o</sub></span>
+                            </div>
+                            <div class="feature-cluster mini feature-hidden" data-feature="output-rms">
+                                <div class="module rmsnorm tiny highlight">
+                                    Output RMSNorm
+                                    <span class="sub-label">Gemma3 boundary norm</span>
+                                </div>
+                                <div class="module note tiny">before residual add</div>
+                            </div>
+                            <div class="arrow small">↓ residual path</div>
+                        </div>
+                        <div class="dashed-box">
+                            <div class="detail-title">MLP with SwiGLU (inside each block)</div>
+                            <div class="detail-subtitle">
+                                pre-norm followed by gated feedforward network
+                            </div>
+                            <div class="module rmsnorm small">RMSNorm</div>
+                            <div class="arrow">↓</div>
+                            <div class="row">
+                                <div class="path">
+                                    <div class="module linear small" data-weight-id="gate-proj" data-scale-note="SwiGLU gate path (approx positive-homogeneous)">
+                                        Linear
+                                        <span class="sub-label">gate_proj</span>
+                                    </div>
+                                </div>
+                                <div class="path">
+                                    <div class="module linear small" data-weight-id="up-proj" data-scale-note="SwiGLU activation path (approx positive-homogeneous)">
+                                        Linear
+                                        <span class="sub-label">up_proj</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arrow">↓</div>
+                            <div class="module activation">
+                                SwiGLU
+                                <span class="sub-label">SiLU(gate) ⊙ up</span>
+                            </div>
+                            <div class="arrow">↓</div>
+                            <div class="module linear small" data-weight-id="down-proj" data-scale-note="Feeds residual update; Gemma adds boundary RMSNorm">
+                                Linear
+                                <span class="sub-label">down_proj</span>
+                            </div>
+                            <div class="feature-cluster mini feature-hidden" data-feature="output-rms">
+                                <div class="module rmsnorm tiny highlight">
+                                    Output RMSNorm
+                                    <span class="sub-label">Gemma3 boundary norm</span>
+                                </div>
+                                <div class="module note tiny">before residual add</div>
+                            </div>
+                            <div class="arrow small">↓ residual path</div>
+                            <div class="legend">
+                                Output is added back to the block input through the residual path.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="diagram-caption" id="transformer-arch-caption">
+                    Diagram: toggle the family switch to see how modern transformer blocks evolve from the LLaMA baseline.
+                </div>
+            `;
+
+            const archConfigs = {
+                llama: {
+                    title: 'LLaMA (baseline)',
+                    description: 'Pre-norm residual transformer with RMSNorm before attention/MLP and a single final RMSNorm.',
+                    differences: [
+                        'No QK Norm between the q/k projections and attention.',
+                        'Only the per-block pre-attention and pre-MLP RMSNorms.',
+                        'Only the last layer adds RMSNorm before the LM head.'
+                    ],
+                    features: [],
+                    caption: 'Diagram currently shows the LLaMA-style pre-norm block.'
+                },
+                qwen3: {
+                    title: 'Qwen3 (adds QK Norm)',
+                    description: 'Normalizes queries and keys after their linear projections to clamp attention logits.',
+                    differences: [
+                        'Adds QK Norm on both q and k paths.',
+                        'Rest of the block matches the LLaMA baseline.'
+                    ],
+                    features: ['qk-norm'],
+                    caption: 'Highlighted QK Norm modules show the Qwen3 addition inside attention.'
+                },
+                gemma3: {
+                    title: 'Gemma3 (extra RMSNorms)',
+                    description: 'Adds boundary RMSNorms around every block to stabilize deep stacks.',
+                    differences: [
+                        'Keeps the QK Norm additions from Qwen3.',
+                        'Adds an input RMSNorm on the residual stream entering each block.',
+                        'Adds an output RMSNorm before passing activations to the next block.'
+                    ],
+                    features: ['qk-norm', 'input-rms', 'output-rms'],
+                    caption: "Highlighted RMSNorms mark Gemma3's boundary normalization."
+                }
+            };
+
+            const scaleLegendEntries = [
+                {
+                    key: 'none',
+                    symbol: '⊘',
+                    label: 'Not scale invariant',
+                    description: 'Scaling this matrix changes logits or residual magnitudes.<br>E.g. LM Head is not scale invariant because there is no normalization after it anymore.'
+                },
+                {
+                    key: 'group',
+                    symbol: '⇄',
+                    label: 'Partial scale invariance',
+                    description: 'Needs some other weights to be scaled by the same factor to stay invariant.<br>E.g. Jointly scaling down_proj, W_o and Embedding by the same factor to keep the output invariant thanks to the final RMSNorm.'
+                },
+                {
+                    key: 'approx',
+                    symbol: '≈',
+                    label: 'Approximated scale invariance',
+                    description: 'Holds when SwiGLU behaves like a positive-homogeneous ReLU.<br>E.g. Jointly scaling gate_proj, down_proj and W_o by the same factor to keep the output approximately invariant thanks to the final activation.'
+                },
+                {
+                    key: 'individual',
+                    symbol: '◎',
+                    label: 'Individual scale invariance',
+                    description: 'Single matrix can be rescaled without changing the block output.<br>E.g. With QK Norm, the q and k projections can be scaled independently to keep the attention logits invariant.'
+                }
+            ];
+
+            const scaleLegendMap = scaleLegendEntries.reduce((acc, entry) => {
+                acc[entry.key] = entry;
+                return acc;
+            }, {});
+
+            const weightScaleMap = {
+                'word-embed': { default: 'group', "gemma3": "individual"},
+                'lm-head': { default: 'none' },
+                wq: { default: 'none', qwen3: 'individual', gemma3: 'individual' },
+                wk: { default: 'none', qwen3: 'individual', gemma3: 'individual' },
+                wv: { default: 'group', gemma3: 'individual' },
+                wo: { default: 'group', gemma3: 'individual' },
+                'gate-proj': { default: 'approx' },
+                'up-proj': { default: 'group', gemma3: 'individual' },
+                'down-proj': { default: 'group', gemma3: 'individual' }
+            };
+
+            const featureKeys = ['qk-norm', 'input-rms', 'output-rms'];
+            const featureNodes = {};
+            featureKeys.forEach((key) => {
+                featureNodes[key] = Array.from(container.querySelectorAll(`[data-feature="${key}"]`));
+            });
+
+            const buttons = Array.from(container.querySelectorAll('.arch-btn'));
+            const summaryTitle = container.querySelector('#arch-title');
+            const summaryDescription = container.querySelector('#arch-description');
+            const summaryList = container.querySelector('#arch-diffs');
+            const captionEl = container.querySelector('#transformer-arch-caption');
+            const defaultCaption = 'Diagram: toggle the family switch to see how modern transformer blocks evolve from the LLaMA baseline.';
+            const legendContainer = container.querySelector('#scale-legend');
+
+            if (legendContainer) {
+                legendContainer.innerHTML = scaleLegendEntries.map((entry) => `
+                    <div class="scale-legend-row">
+                        <span class="scale-chip scale-${entry.key}" aria-hidden="true">${entry.symbol}</span>
+                        <div class="scale-legend-text">
+                            <div class="title">${entry.label}</div>
+                            <div class="desc">${entry.description}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const badgeMap = new Map();
+            const weightNodes = Array.from(container.querySelectorAll('[data-weight-id]'));
+            weightNodes.forEach((node) => {
+                const weightId = node.dataset.weightId;
+                if (!weightId) return;
+                const badge = document.createElement('span');
+                badge.className = 'scale-chip';
+                badge.setAttribute('role', 'img');
+                node.appendChild(badge);
+                badgeMap.set(weightId, {
+                    badge,
+                    note: node.dataset.scaleNote || ''
+                });
+            });
+
+            function resolveScaleLevel(weightId, archKey) {
+                const config = weightScaleMap[weightId];
+                if (!config) {
+                    return 'none';
+                }
+                return config[archKey] || config.default || 'none';
+            }
+
+            function updateScaleBadges(archKey) {
+                badgeMap.forEach(({ badge, note }, weightId) => {
+                    const level = resolveScaleLevel(weightId, archKey);
+                    const meta = scaleLegendMap[level] || scaleLegendMap.none;
+                    badge.textContent = meta.symbol;
+                    badge.className = `scale-chip scale-${level}`;
+                    const tooltip = note ? `${meta.label} — ${note}` : meta.label;
+                    badge.setAttribute('title', tooltip);
+                    badge.setAttribute('aria-label', tooltip);
+                });
+            }
+
+            function applyArchitecture(key) {
+                const config = archConfigs[key] || archConfigs.llama;
+
+                buttons.forEach((btn) => {
+                    const isActive = btn.dataset.arch === key;
+                    btn.classList.toggle('active', isActive);
+                    btn.setAttribute('aria-selected', String(isActive));
+                });
+
+                summaryTitle.textContent = config.title;
+                summaryDescription.textContent = config.description;
+                summaryList.innerHTML = config.differences.map((diff) => `<li>${diff}</li>`).join('');
+                captionEl.textContent = config.caption || defaultCaption;
+
+                featureKeys.forEach((feature) => {
+                    const shouldShow = config.features.includes(feature);
+                    featureNodes[feature].forEach((node) => {
+                        node.classList.toggle('feature-hidden', !shouldShow);
+                    });
+                });
+
+                updateScaleBadges(key);
+            }
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => applyArchitecture(btn.dataset.arch));
+            });
+
+            applyArchitecture('llama');
+        }
+
+        function initAdamWDemo() {
+            const container = document.getElementById('adamw-demo');
+            if (!container) {
+                console.warn('AdamW demo container not found!');
+                return;
+            }
+
+            if (typeof Plotly === 'undefined') {
+                console.error(
+                    'Plotly is not available. Make sure the Plotly <script> tag is included in <head>.'
+                );
+                container.innerHTML = `
+                    <div class="demo-container">
+                        <p style="color:#b91c1c;">
+                            AdamW demo could not load because Plotly is missing.
+                            Check that <code>plotly-latest.min.js</code> exists locally or <code>https://cdn.plot.ly/plotly-latest.min.js</code> is reachable.
+                        </p>
+                    </div>`;
+                return;
+            }
+
+            // Plotly is ready: render the full demo
+            renderAdamWDemo(container);
+        }
+
+        function renderAdamWDemo(container) {
+            // Inject HTML structure with improved styling
+            container.innerHTML = `
+                <div class="adamw-demo-card">
+                    <div class="adamw-header">
+                        <h3 class="adamw-title">
+                            A Toy Example Validating Our Theory
+                        </h3>
+                        <p class="adamw-subtitle">
+                            Interactive simulation of a normalized linear model training.
+                            <span class="adamw-legend">
+                                <span class="legend-item">
+                                    <span class="legend-color" style="background: #2563eb;"></span> Empirical
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-line" style="border-color: #1e40af;"></span> Theory
+                                </span>
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="adamw-controls-grid">
+                        <!-- Optimizer Toggle -->
+                        <div class="adamw-control-group">
+                            <label class="adamw-control-label">Optimizer</label>
+                            <div class="uiswitch-container">
+                                <label class="uiswitch">
+                                    <input type="checkbox" id="optimizer-switch">
+                                    <span class="uiswitch-slider">
+                                        <span class="uiswitch-option uiswitch-option-adamw">AdamW</span>
+                                        <span class="uiswitch-option uiswitch-option-muon">Muon</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <!-- Controls -->
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Learning Rate (η)</label>
+                                <span id="adamw-lr-val" class="adamw-value-display">0.010000</span>
+                            </div>
+                            <input type="range" id="adamw-lr" class="adamw-range" min="0.0005" max="0.1" step="0.00001" value="0.01">
+                        </div>
+                        
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Weight Decay (λ)</label>
+                                <span id="adamw-wd-val" class="adamw-value-display">0.10000</span>
+                            </div>
+                            <input type="range" id="adamw-wd" class="adamw-range" min="0.05" max="0.15" step="0.0001" value="0.10">
+                        </div>
+
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Momentum (β₁)</label>
+                                <span id="adamw-beta1-val" class="adamw-value-display">0.9000</span>
+                            </div>
+                            <input type="range" id="adamw-beta1" class="adamw-range" min="0.5" max="0.99" step="0.001" value="0.9">
+                        </div>
+
+                        <div class="adamw-control-group">
+                            <div class="adamw-label-row">
+                                <label class="adamw-control-label">Speed</label>
+                                <span id="adamw-speed-val" class="adamw-value-display">20</span>
+                            </div>
+                            <input type="range" id="adamw-speed" class="adamw-range" min="1" max="100" step="1" value="100">
+                        </div>
+                    </div>
+
+                    <div class="adamw-actions">
+                        <button id="adamw-start" class="adamw-btn adamw-btn-primary">
+                            <span>▶</span> Start / Resume
+                        </button>
+                        <button id="adamw-pause" class="adamw-btn adamw-btn-secondary">
+                            <span>⏸</span> Pause
+                        </button>
+                        <button id="adamw-reset" class="adamw-btn adamw-btn-secondary">
+                            <span>↻</span> Reset
+                        </button>
+                        <div class="adamw-step-counter">
+                            Step: <span id="adamw-iter" style="font-family: 'Fira Code', monospace;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="adamw-plots-grid">
+                    <div id="adamw-loss-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-wnorm-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-updnorm-plot" class="adamw-plot-container"></div>
+                    <div id="adamw-angle-plot" class="adamw-plot-container"></div>
+                </div>
+            `;
+
+            // Initialize the AdamW simulation
+            initAdamWSimulation();
+        }
+
+        function initAdamWSimulation() {
+            // Core simulation code adapted from game2.html
+            const inputDim = 20;
+            const outputDim = 3;
+            const batchSize = 32;
+            const beta2 = 0.999;
+            const eps = 1e-8;
+            const gradNoiseStd = 0.1;
+            const maxHistorySize = 30000;
+            const emaAlpha = 0.0005;
+
+            let teacherW, W, m, v, t, totalIterations;
+            let iters = [], lossHistory = [], wNormHistory = [], updNormHistory = [], angleHistory = [];
+            let lossEMA = [], wNormEMA = [], updNormEMA = [], angleEMA = [];
+            let wNormPredHistory = [], updNormPredHistory = [], anglePredHistory = [];
+            let running = false, loopHandle = null;
+            let cachedPredictions = null, cachedHyperparams = null;
+            let currentOptimizer = 'adamw';
+
+            // --- NEW --- Matrix utilities for Muon
+            function transpose(A) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const T = zeros(cols, rows);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        T[j][i] = A[i][j];
+                    }
+                }
+                return T;
+            }
+
+            function matMul(A, B) {
+                const A_rows = A.length;
+                const A_cols = A[0].length;
+                const B_rows = B.length;
+                const B_cols = B[0].length;
+                if (A_cols !== B_rows) {
+                    throw new Error(`Matrix multiplication dimension mismatch: ${A_cols} vs ${B_rows}`);
+                }
+                const C = zeros(A_rows, B_cols);
+                for (let i = 0; i < A_rows; i++) {
+                    for (let j = 0; j < B_cols; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < A_cols; k++) {
+                            sum += A[i][k] * B[k][j];
+                        }
+                        C[i][j] = sum;
+                    }
+                }
+                return C;
+            }
+
+            function matAdd(A, B) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const C = zeros(rows, cols);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        C[i][j] = A[i][j] + B[i][j];
+                    }
+                }
+                return C;
+            }
+
+            function scalarMul(s, A) {
+                const rows = A.length;
+                const cols = A[0].length;
+                const C = zeros(rows, cols);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        C[i][j] = s * A[i][j];
+                    }
+                }
+                return C;
+            }
+            // --- END NEW ---
+
+            // --- NEW --- Newton-Schulz for Muon
+            function matrixZeroPower(G, steps = 10, eps = 1e-10) {
+                // Computes G^0 = UV^T where G = UΣV^T (SVD decomposition)
+                // This is the orthogonal polar factor of G, computed via Newton-Schulz iteration
+                // The result is equivalent to doing SVD and returning U @ V^T
+                const rows = G.length;
+                const cols = G[0].length;
+                // const a = 3.4445, b = -4.7750, c = 2.0315;
+                const a = 2.0, b = -1.5, c = 0.5;
+
+                let X = G.map(row => new Float64Array(row)); // copy
+
+                const norm = frobNorm(X);
+                X = scalarMul(1.0 / (norm + eps), X);
+
+                let transposed = false;
+                if (rows > cols) {
+                    X = transpose(X);
+                    transposed = true;
+                }
+
+                // Newton-Schulz iteration: converges to the orthogonal polar factor
+                for (let i = 0; i < steps; i++) {
+                    const XT = transpose(X);
+                    const A = matMul(X, XT);
+                    const A2 = matMul(A, A);
+                    const B = matAdd(scalarMul(b, A), scalarMul(c, A2));
+                    const BX = matMul(B, X);
+                    X = matAdd(scalarMul(a, X), BX);
+                }
+
+                if (transposed) {
+                    X = transpose(X);
+                }
+                return X;
+            }
+            // --- END NEW ---
+
+            // Utility functions
+            function randn() {
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            function zeros(rows, cols) {
+                const arr = new Array(rows);
+                for (let i = 0; i < rows; i++) arr[i] = new Float64Array(cols);
+                return arr;
+            }
+
+            function randnMatrix(rows, cols) {
+                const arr = new Array(rows);
+                for (let i = 0; i < rows; i++) {
+                    const row = new Float64Array(cols);
+                    for (let j = 0; j < cols; j++) row[j] = randn();
+                    arr[i] = row;
+                }
+                return arr;
+            }
+
+            function matVec(W, x) {
+                const k = W.length, d = x.length, y = new Float64Array(k);
+                for (let i = 0; i < k; i++) {
+                    let s = 0.0;
+                    for (let j = 0; j < d; j++) s += W[i][j] * x[j];
+                    y[i] = s;
+                }
+                return y;
+            }
+
+            function norm(v) {
+                let s = 0.0;
+                for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+                return Math.sqrt(s);
+            }
+
+            function frobNorm(W) {
+                let s = 0.0;
+                for (let i = 0; i < W.length; i++)
+                    for (let j = 0; j < W[i].length; j++) s += W[i][j] * W[i][j];
+                return Math.sqrt(s);
+            }
+
+            function cosineBetweenMatrices(A, B) {
+                let dot = 0.0, na = 0.0, nb = 0.0;
+                for (let i = 0; i < A.length; i++) {
+                    for (let j = 0; j < A[i].length; j++) {
+                        const a = A[i][j], b = B[i][j];
+                        dot += a * b;
+                        na += a * a;
+                        nb += b * b;
+                    }
+                }
+                if (na === 0 || nb === 0) return 0.0;
+                return Math.max(-1.0, Math.min(1.0, dot / Math.sqrt(na * nb)));
+            }
+
+            function initWeights() {
+                teacherW = randnMatrix(outputDim, inputDim);
+                for (let i = 0; i < outputDim; i++) {
+                    const n = norm(teacherW[i]);
+                    if (n > 0) for (let j = 0; j < inputDim; j++) teacherW[i][j] /= n;
+                }
+
+                const initScale = 0.01;
+                W = randnMatrix(outputDim, inputDim);
+                for (let i = 0; i < outputDim; i++)
+                    for (let j = 0; j < inputDim; j++) W[i][j] *= initScale;
+
+                m = zeros(outputDim, inputDim);
+                v = zeros(outputDim, inputDim);
+                t = 0;
+                totalIterations = 0;
+                iters = []; lossHistory = []; wNormHistory = []; updNormHistory = []; angleHistory = [];
+                lossEMA = []; wNormEMA = []; updNormEMA = []; angleEMA = [];
+                wNormPredHistory = []; updNormPredHistory = []; anglePredHistory = [];
+            }
+
+            function forwardAndGrad() {
+                const X = randnMatrix(batchSize, inputDim);
+                let totalLoss = 0.0;
+                const gradW = zeros(outputDim, inputDim);
+
+                for (let b = 0; b < batchSize; b++) {
+                    const x = X[b];
+                    let zT = matVec(teacherW, x);
+                    let nT = norm(zT) + 1e-12;
+                    for (let i = 0; i < zT.length; i++) zT[i] /= nT;
+
+                    let zS = matVec(W, x);
+                    let nS = norm(zS) + 1e-12;
+                    const yS = new Float64Array(outputDim);
+                    for (let i = 0; i < outputDim; i++) yS[i] = zS[i] / nS;
+
+                    const gy = new Float64Array(outputDim);
+                    let sampleLoss = 0.0;
+                    for (let i = 0; i < outputDim; i++) {
+                        const diff = yS[i] - zT[i];
+                        sampleLoss += 0.5 * diff * diff;
+                        gy[i] = diff;
+                    }
+                    totalLoss += sampleLoss;
+
+                    let zDotGy = 0.0;
+                    for (let i = 0; i < outputDim; i++) zDotGy += zS[i] * gy[i];
+                    const nS3 = nS * nS * nS;
+
+                    const gz = new Float64Array(outputDim);
+                    for (let i = 0; i < outputDim; i++) gz[i] = gy[i] / nS - (zS[i] * zDotGy) / nS3;
+
+                    for (let i = 0; i < outputDim; i++) {
+                        const gzi = gz[i];
+                        for (let j = 0; j < inputDim; j++) gradW[i][j] += gzi * x[j] / batchSize;
+                    }
+                }
+
+                for (let i = 0; i < outputDim; i++)
+                    for (let j = 0; j < inputDim; j++) gradW[i][j] += gradNoiseStd * randn();
+
+                return { loss: totalLoss / batchSize, gradW };
+            }
+
+            function stepAdamW(gradW, lr, weightDecay, beta1) {
+                t += 1;
+                const oneMinusB1 = 1.0 - beta1, oneMinusB2 = 1.0 - beta2;
+                const b1t = Math.pow(beta1, t), b2t = Math.pow(beta2, t);
+                const lr_t = lr * Math.sqrt(1.0 - b2t) / (1.0 - b1t);
+                const adamStepMatrix = zeros(outputDim, inputDim);
+
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        const g = gradW[i][j];
+                        m[i][j] = beta1 * m[i][j] + oneMinusB1 * g;
+                        v[i][j] = beta2 * v[i][j] + oneMinusB2 * g * g;
+                        const adamStep = m[i][j] / (Math.sqrt(v[i][j]) + eps);
+                        adamStepMatrix[i][j] = adamStep;
+                        W[i][j] -= lr_t * (adamStep + weightDecay * W[i][j]);
+                    }
+                }
+                return adamStepMatrix;
+            }
+
+            function stepMuon(gradW, lr, weightDecay, beta1) {
+                t += 1; // Muon also needs to track time for bias correction if we were to use it.
+                const oneMinusB1 = 1.0 - beta1;
+
+                // SGD with momentum
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        const g = gradW[i][j];
+                        m[i][j] = beta1 * m[i][j] + oneMinusB1 * g;
+                    }
+                }
+
+                // Orthogonalize the momentum update
+                const muonUpdate = matrixZeroPower(m);
+
+                // Apply update and weight decay
+                for (let i = 0; i < outputDim; i++) {
+                    for (let j = 0; j < inputDim; j++) {
+                        W[i][j] -= lr * (muonUpdate[i][j] + weightDecay * W[i][j]);
+                    }
+                }
+                return muonUpdate;
+            }
+
+            function equilibriumPredictions(lr, wd, beta1) {
+                const numel = outputDim * inputDim;
+                const U = Math.sqrt(numel * (1 - beta1) / (1 + beta1));
+                const alpha = 1 - lr * wd, beta = beta1;
+                const tiny = 1e-12;
+                const denom1 = 1 - alpha * alpha, denom2 = 1 - alpha * beta, denom3 = 1 + alpha * beta;
+
+                let W_inf = denom1 > tiny && denom2 > tiny ?
+                    lr * U * Math.sqrt(Math.max(denom3 / (denom1 * denom2), tiny)) :
+                    U * Math.sqrt(lr / (2 * Math.max(wd, tiny)));
+
+                let s_eff = denom3 > tiny ?
+                    alpha * Math.sqrt(Math.max(2 * (1 - alpha) * (1 - beta) / denom3, 0)) :
+                    Math.sqrt((lr * wd * W_inf) ** 2 + (lr * U) ** 2) / Math.max(W_inf, tiny);
+
+                const updInf = s_eff * W_inf;
+                let cosineInf = Math.max(-1, Math.min(1, - Math.sqrt(denom1 / (1 - alpha * alpha * beta * beta))));
+
+                return { W_inf, U, cosineInf };
+            }
+
+            function recomputePredictionHistories() {
+                const lr = parseFloat(document.getElementById("adamw-lr").value);
+                const wd = parseFloat(document.getElementById("adamw-wd").value);
+                const beta1 = parseFloat(document.getElementById("adamw-beta1").value);
+                const optimizer = currentOptimizer;
+                const currentHyperparams = `${optimizer}_${lr}_${wd}_${beta1}`;
+
+                if (currentHyperparams === cachedHyperparams && cachedPredictions) {
+                    const { W_inf, U, cosineInf } = cachedPredictions;
+                    const n = iters.length;
+                    wNormPredHistory = new Array(n).fill(W_inf);
+                    updNormPredHistory = new Array(n).fill(U);
+                    anglePredHistory = new Array(n).fill(cosineInf);
+                    return;
+                }
+
+                const scaling = optimizer === 'muon'
+                    ? Math.sqrt((1 + beta1) / (1 - beta1)) / Math.sqrt(inputDim)
+                    : 1.0;
+
+                let { W_inf, U, cosineInf } = equilibriumPredictions(lr, wd, beta1);
+                W_inf *= scaling;
+                U *= scaling;
+
+                cachedPredictions = { W_inf, U, cosineInf };
+                cachedHyperparams = currentHyperparams;
+                const n = iters.length;
+                wNormPredHistory = new Array(n).fill(W_inf);
+                updNormPredHistory = new Array(n).fill(U);
+                anglePredHistory = new Array(n).fill(cosineInf);
+            }
+
+            function initPlots() {
+                const sampleContainer = document.querySelector('.adamw-plot-container');
+                let basePlotHeight = 300;
+                if (sampleContainer && typeof window !== 'undefined') {
+                    const styles = window.getComputedStyle(sampleContainer);
+                    const paddingTop = parseFloat(styles.paddingTop || '0');
+                    const paddingBottom = parseFloat(styles.paddingBottom || '0');
+                    basePlotHeight = Math.max(220, sampleContainer.clientHeight - (paddingTop + paddingBottom));
+                }
+
+                const layoutBase = (title, yTitle) => ({
+                    title: {
+                        text: title,
+                        font: { size: 14, family: 'Inter, sans-serif', color: '#111827', weight: 600 },
+                        x: 0.05,
+                        xanchor: 'left'
+                    },
+                    xaxis: {
+                        title: "Iteration",
+                        gridcolor: '#f3f4f6',
+                        zerolinecolor: '#f3f4f6',
+                        tickfont: { size: 10, color: '#6b7280', family: 'Inter, sans-serif' },
+                        titlefont: { size: 11, color: '#4b5563', family: 'Inter, sans-serif' }
+                    },
+                    yaxis: {
+                        title: yTitle,
+                        gridcolor: '#f3f4f6',
+                        zerolinecolor: '#f3f4f6',
+                        tickfont: { size: 10, color: '#6b7280', family: 'Inter, sans-serif' },
+                        titlefont: { size: 11, color: '#4b5563', family: 'Inter, sans-serif' }
+                    },
+                    height: basePlotHeight,
+                    autosize: true,
+                    margin: { l: 50, r: 20, t: 40, b: 40 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    showlegend: true,
+                    legend: {
+                        x: 0.98,
+                        xanchor: 'right',
+                        y: 0.98,
+                        yanchor: 'top',
+                        bgcolor: 'rgba(255,255,255,0.9)',
+                        bordercolor: '#e5e7eb',
+                        borderwidth: 1,
+                        font: { size: 10, family: 'Inter, sans-serif', color: '#4b5563' }
+                    },
+                    hoverlabel: {
+                        bgcolor: '#ffffff',
+                        bordercolor: '#e5e7eb',
+                        font: { family: 'Inter, sans-serif', size: 12 }
+                    }
+                });
+
+                const config = { displayModeBar: false, responsive: true };
+
+                Plotly.newPlot("adamw-loss-plot", [
+                    { x: [], y: [], mode: "lines", name: "Loss (raw)", line: { color: "rgba(59, 130, 246, 0.2)", width: 1 }, hoverinfo: 'y' },
+                    { x: [], y: [], mode: "lines", name: "Loss (EMA)", line: { color: "#2563eb", width: 2 } }
+                ], layoutBase("Training Loss", "Loss"), config);
+
+                Plotly.newPlot("adamw-wnorm-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(37, 99, 235, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#2563eb", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#1e40af", dash: "dash", width: 2 } }
+                ], layoutBase("Weight Norm ||W||", "||W||₂"), config);
+
+                Plotly.newPlot("adamw-updnorm-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(22, 163, 74, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#16a34a", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#15803d", dash: "dash", width: 2 } }
+                ], layoutBase("Update Norm ||u||", "||u||₂"), config);
+
+                Plotly.newPlot("adamw-angle-plot", [
+                    { x: [], y: [], mode: "lines", name: "Raw", line: { color: "rgba(220, 38, 38, 0.2)", width: 1 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: [], y: [], mode: "lines", name: "Empirical", line: { color: "#dc2626", width: 2 } },
+                    { x: [], y: [], mode: "lines", name: "Theory", line: { color: "#991b1b", dash: "dash", width: 2 } }
+                ], layoutBase("Angle between W and u cos(θ)", "cos(θ)"), config);
+            }
+
+            function updatePlots() {
+                Plotly.update("adamw-loss-plot", { x: [iters, iters], y: [lossHistory, lossEMA] }, {}, [0, 1]);
+                Plotly.update("adamw-wnorm-plot", { x: [iters, iters, iters], y: [wNormHistory, wNormEMA, wNormPredHistory] }, {}, [0, 1, 2]);
+                Plotly.update("adamw-updnorm-plot", { x: [iters, iters, iters], y: [updNormHistory, updNormEMA, updNormPredHistory] }, {}, [0, 1, 2]);
+                Plotly.update("adamw-angle-plot", { x: [iters, iters, iters], y: [angleHistory, angleEMA, anglePredHistory] }, {}, [0, 1, 2]);
+
+                // Ensure minimum y-axis range of 0.01 for all plots
+                // Use only EMA and theory traces to determine range (ignore raw data outliers)
+                const plotConfigs = [
+                    { id: "adamw-loss-plot", traceIndices: [1] },        // EMA only
+                    { id: "adamw-wnorm-plot", traceIndices: [1, 2] },    // EMA and theory
+                    { id: "adamw-updnorm-plot", traceIndices: [1, 2] },  // EMA and theory
+                    { id: "adamw-angle-plot", traceIndices: [1, 2] }     // EMA and theory
+                ];
+
+                plotConfigs.forEach(config => {
+                    const plotDiv = document.getElementById(config.id);
+                    if (plotDiv && plotDiv.data) {
+                        let yMin = Infinity, yMax = -Infinity;
+                        config.traceIndices.forEach(traceIdx => {
+                            const trace = plotDiv.data[traceIdx];
+                            if (trace && trace.y && trace.y.length > 0) {
+                                const traceMin = Math.min(...trace.y);
+                                const traceMax = Math.max(...trace.y);
+                                yMin = Math.min(yMin, traceMin);
+                                yMax = Math.max(yMax, traceMax);
+                            }
+                        });
+
+                        if (isFinite(yMin) && isFinite(yMax)) {
+                            const range = yMax - yMin;
+                            if (range < 0.2) {
+                                const center = (yMin + yMax) / 2;
+                                const newMin = center - 0.1;
+                                const newMax = center + 0.1;
+                                Plotly.relayout(config.id, { 'yaxis.range': [newMin, newMax] });
+                            } else {
+                                // Add 5% padding to the range
+                                const padding = range * 0.05;
+                                Plotly.relayout(config.id, { 'yaxis.range': [yMin - padding, yMax + padding] });
+                            }
+                        }
+                    }
+                });
+            }
+
+            function trainStep() {
+                if (!running) return;
+
+                const lr = parseFloat(document.getElementById("adamw-lr").value);
+                const wd = parseFloat(document.getElementById("adamw-wd").value);
+                const beta1 = parseFloat(document.getElementById("adamw-beta1").value);
+                const stepsPerFrame = parseInt(document.getElementById("adamw-speed").value);
+                const optimizer = document.getElementById("optimizer-switch").checked ? 'muon' : 'adamw';
+
+                for (let step = 0; step < stepsPerFrame; step++) {
+                    const { loss, gradW } = forwardAndGrad();
+
+                    let upd;
+                    if (optimizer === 'adamw') {
+                        upd = stepAdamW(gradW, lr, wd, beta1);
+                    } else {
+                        upd = stepMuon(gradW, lr, wd, beta1);
+                    }
+
+                    totalIterations++;
+                    iters.push(totalIterations);
+                    lossHistory.push(loss);
+                    const wNorm = frobNorm(W);
+                    wNormHistory.push(wNorm);
+                    const updNorm = frobNorm(upd);
+                    updNormHistory.push(updNorm);
+                    const cosineAngle = updNorm > 0 ? cosineBetweenMatrices(W, upd) : 0.0;
+                    angleHistory.push(cosineAngle);
+
+                    if (lossEMA.length === 0) {
+                        lossEMA.push(loss);
+                        wNormEMA.push(wNorm);
+                        updNormEMA.push(updNorm);
+                        angleEMA.push(cosineAngle);
+                    } else {
+                        lossEMA.push(emaAlpha * loss + (1 - emaAlpha) * lossEMA[lossEMA.length - 1]);
+                        wNormEMA.push(Math.sqrt(emaAlpha * wNorm * wNorm + (1 - emaAlpha) * wNormEMA[wNormEMA.length - 1] * wNormEMA[wNormEMA.length - 1]));
+                        updNormEMA.push(Math.sqrt(emaAlpha * updNorm * updNorm + (1 - emaAlpha) * updNormEMA[updNormEMA.length - 1] * updNormEMA[updNormEMA.length - 1]));
+                        angleEMA.push(emaAlpha * cosineAngle + (1 - emaAlpha) * angleEMA[angleEMA.length - 1]);
+                    }
+                }
+
+                if (iters.length > maxHistorySize) {
+                    const trimCount = iters.length - maxHistorySize;
+                    iters = iters.slice(trimCount);
+                    lossHistory = lossHistory.slice(trimCount);
+                    wNormHistory = wNormHistory.slice(trimCount);
+                    updNormHistory = updNormHistory.slice(trimCount);
+                    angleHistory = angleHistory.slice(trimCount);
+                    lossEMA = lossEMA.slice(trimCount);
+                    wNormEMA = wNormEMA.slice(trimCount);
+                    updNormEMA = updNormEMA.slice(trimCount);
+                    angleEMA = angleEMA.slice(trimCount);
+                }
+
+                recomputePredictionHistories();
+                document.getElementById("adamw-iter").textContent = totalIterations.toString();
+                updatePlots();
+                loopHandle = window.requestAnimationFrame(trainStep);
+            }
+
+            function updateSliderLabels() {
+                document.getElementById("adamw-lr-val").textContent =
+                    parseFloat(document.getElementById("adamw-lr").value).toFixed(6);
+                document.getElementById("adamw-wd-val").textContent =
+                    parseFloat(document.getElementById("adamw-wd").value).toFixed(5);
+                document.getElementById("adamw-beta1-val").textContent =
+                    parseFloat(document.getElementById("adamw-beta1").value).toFixed(4);
+                document.getElementById("adamw-speed-val").textContent =
+                    document.getElementById("adamw-speed").value;
+            }
+
+            function onHyperparamChange() {
+                updateSliderLabels();
+                cachedHyperparams = null;
+                recomputePredictionHistories();
+                updatePlots();
+            }
+
+            function onOptimizerChange() {
+                const newOptimizer = document.getElementById("optimizer-switch").checked ? 'muon' : 'adamw';
+                if (newOptimizer !== currentOptimizer) {
+                    console.log(`Switching optimizer from ${currentOptimizer} to ${newOptimizer}`);
+                    if (newOptimizer === 'adamw') {
+                        // Switching to AdamW: keep m, re-initialize v
+                        v = zeros(outputDim, inputDim);
+                        t = 0; // Reset t for AdamW bias correction
+                    }
+                    // When switching to Muon from AdamW, m is already there and used.
+                    // v is not used by Muon.
+                    currentOptimizer = newOptimizer;
+                }
+            }
+
+            document.getElementById("optimizer-switch").addEventListener("change", onOptimizerChange);
+            document.getElementById("adamw-lr").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-wd").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-beta1").addEventListener("input", onHyperparamChange);
+            document.getElementById("adamw-speed").addEventListener("input", updateSliderLabels);
+
+            document.getElementById("adamw-start").addEventListener("click", () => {
+                if (!running) {
+                    running = true;
+                    trainStep();
+                }
+            });
+
+            document.getElementById("adamw-pause").addEventListener("click", () => {
+                running = false;
+                if (loopHandle !== null) {
+                    window.cancelAnimationFrame(loopHandle);
+                    loopHandle = null;
+                }
+            });
+
+            document.getElementById("adamw-reset").addEventListener("click", () => {
+                running = false;
+                if (loopHandle !== null) {
+                    window.cancelAnimationFrame(loopHandle);
+                    loopHandle = null;
+                }
+                initWeights();
+                initPlots();
+                document.getElementById("adamw-iter").textContent = "0";
+                updateSliderLabels();
+            });
+
+            initWeights();
+            initPlots();
+            updateSliderLabels();
+        }
+    </script>
+    <script>
+        // Merge consecutive citations so "[1][2][3]" renders as "[1, 2, 3]"
+        document.addEventListener('DOMContentLoaded', () => {
+            const citations = Array.from(document.querySelectorAll('.citation'));
+            const processed = new Set();
+
+            citations.forEach(citation => {
+                if (processed.has(citation)) {
+                    return;
+                }
+                processed.add(citation);
+
+                const group = [citation];
+                let next = citation.nextSibling;
+
+                // Some converters insert text nodes between anchors (e.g., whitespace)
+                const nextCitation = node => node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains('citation');
+
+                while (next) {
+                    if (nextCitation(next)) {
+                        group.push(next);
+                        processed.add(next);
+                        next = next.nextSibling;
+                        continue;
+                    }
+                    if (next.nodeType === Node.TEXT_NODE && next.textContent.trim() === '') {
+                        next = next.nextSibling;
+                        continue;
+                    }
+                    break;
+                }
+
+                if (group.length === 1) {
+                    return;
+                }
+
+                const wrapper = document.createElement('span');
+                wrapper.className = 'citation-group';
+                wrapper.append('[');
+
+                group.forEach((link, index) => {
+                    const mergedLink = link.cloneNode(true);
+                    mergedLink.textContent = mergedLink.textContent.replace(/\[|\]/g, '');
+                    wrapper.appendChild(mergedLink);
+                    if (index < group.length - 1) {
+                        wrapper.append(', ');
+                    }
+                });
+
+                wrapper.append(']');
+                group[0].parentNode.insertBefore(wrapper, group[0]);
+                group.forEach(link => link.remove());
+            });
+        });
+    </script>
+</body>
+
+</html>
