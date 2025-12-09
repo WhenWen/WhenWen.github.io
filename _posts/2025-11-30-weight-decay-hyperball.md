@@ -14,6 +14,7 @@ categories:
 thumbnail: /wd_blog/assets/images/fig0.png
 giscus_comments: false
 toc: false
+read_time: 40
 ---
 
 <script>
