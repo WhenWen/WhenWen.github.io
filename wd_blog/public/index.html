@@ -1509,8 +1509,23 @@ Further, theoretically, <a class="citation" href="#ref-31">[31]</a> shows that M
 
 ## Acknowledgments
 
-The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/), [Zihan Qiu](https://www.linkedin.com/in/zihan-qiu-33a172249/), and [Liliang Ren](https://renll.github.io/) for motivating this blog post into existence. To some extent, this work is a proof to show that it is possible to remove weight decay altogether by designing the optimizer to explicitly control weight norms. The authors would also like to thank [William Held](https://williamheld.com/), [Suhas Kotha](https://kothasuhas.github.io/), [Tatsunori Hashimoto](https://thashim.github.io/), [Jason Lee](https://jasondlee88.github.io/), [Zhiyuan Li](https://zhiyuanli.ttic.edu/), [Lijie Chen](https://chen-lijie.github.io/), [Huaqing Zhang](https://scholar.google.com/citations?user=_E9tcTkAAAAJ), [Jeremy Bernstein](https://jeremybernste.in/) and [Samuel Schoenholz](https://www.linkedin.com/in/samuel-schoenholz-379830a0/) for helpful discussions.
+The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/), [Zihan Qiu](https://www.linkedin.com/in/zihan-qiu-33a172249/), and [Liliang Ren](https://renll.github.io/) for motivating this blog post into existence. To some extent, this work is a proof to show that it is possible to remove weight decay altogether by designing the optimizer to explicitly control weight norms. The authors would also like to thank [William Held](https://williamheld.com/), [David Hall](http://dlwh.org/), [Suhas Kotha](https://kothasuhas.github.io/), [Tatsunori Hashimoto](https://thashim.github.io/), [Jason Lee](https://jasondlee88.github.io/), [Zhiyuan Li](https://zhiyuanli.ttic.edu/), [Lijie Chen](https://chen-lijie.github.io/), [Huaqing Zhang](https://scholar.google.com/citations?user=_E9tcTkAAAAJ), [Jeremy Bernstein](https://jeremybernste.in/) and [Samuel Schoenholz](https://www.linkedin.com/in/samuel-schoenholz-379830a0/) for helpful discussions.
 
+## Citations
+
+If this work is helpful to you, please consider citing:
+
+```bibtex
+@online{wen2025hyperball,
+    title        = {Fantastic Pretraining Optimizers and Where to Find Them II: From Weight Decay to Hyperball Optimization},
+    author       = {Wen, Kaiyue and Dang, Xingyu and Lyu, Kaifeng and Ma, Tengyu and Liang, Percy},
+    year         = {2025},
+    month        = {11},
+    day          = {30},
+    url          = {https://whenwen.github.io/wd_blog/public/index.html},
+    urldate      = {2025-12-09},
+}
+```
 
 ## References
 
@@ -3720,9 +3735,50 @@ The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/),
         }
     </script>
     <script>
-        // Merge consecutive citations so "[1][2][3]" renders as "[1, 2, 3]"
+        // Render citations in author-year format and merge consecutive citations into a single parenthetical group
         document.addEventListener('DOMContentLoaded', () => {
+            const refMap = new Map();
+            const lastName = (name) => {
+                const parts = name.split(/\s+/).filter(Boolean);
+                return parts.length ? parts[parts.length - 1] : name;
+            };
+
+            // Build reference lookup: ref-id -> "Author et al., Year"
+            document.querySelectorAll('.reference-list li[id^="ref-"]').forEach(li => {
+                const id = li.id.replace('ref-', '');
+                const authorText = li.querySelector('strong')?.textContent || '';
+                const authors = authorText.split(',').map(a => a.trim()).filter(Boolean);
+
+                let authorLabel = null;
+                if (authors.length === 1) {
+                    authorLabel = lastName(authors[0]);
+                } else if (authors.length === 2) {
+                    authorLabel = `${lastName(authors[0])} & ${lastName(authors[1])}`;
+                } else if (authors.length > 2) {
+                    authorLabel = `${lastName(authors[0])} et al.`;
+                }
+
+                const yearMatch = li.textContent.match(/\b(19|20)\d{2}\b/);
+                const year = yearMatch ? yearMatch[0] : '';
+
+                if (authorLabel) {
+                    refMap.set(id, year ? `${authorLabel}, ${year}` : authorLabel);
+                }
+            });
+
             const citations = Array.from(document.querySelectorAll('.citation'));
+
+            // Replace numeric labels with author-year labels
+            citations.forEach(citation => {
+                const target = citation.getAttribute('href') || '';
+                const id = target.startsWith('#ref-') ? target.replace('#ref-', '') : null;
+                const label = id ? refMap.get(id) : null;
+                if (label) {
+                    citation.textContent = label;
+                }
+            });
+
+            // Merge consecutive citations into a single "(Author, Year; Author2, Year2)" group
             const processed = new Set();
 
             citations.forEach(citation => {
@@ -3733,44 +3789,43 @@ The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/),
 
                 const group = [citation];
                 let next = citation.nextSibling;
-
-                // Some converters insert text nodes between anchors (e.g., whitespace)
-                const nextCitation = node => node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains('citation');
+                const isCitationNode = node => node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains('citation');
 
                 while (next) {
-                    if (nextCitation(next)) {
-                        group.push(next);
+                    if (isCitationNode(next)) {
                         processed.add(next);
+                        group.push(next);
                         next = next.nextSibling;
                         continue;
                     }
-                    if (next.nodeType === Node.TEXT_NODE && next.textContent.trim() === '') {
+
+                    if (next.nodeType === Node.TEXT_NODE && !next.textContent.trim()) {
                         next = next.nextSibling;
                         continue;
                     }
+
                     break;
                 }
 
                 if (group.length === 1) {
+                    citation.textContent = `(${citation.textContent})`;
                     return;
                 }
 
                 const wrapper = document.createElement('span');
                 wrapper.className = 'citation-group';
-                wrapper.append('[');
+                const parent = citation.parentNode;
+                parent.insertBefore(wrapper, citation);
+                wrapper.append('(');
 
                 group.forEach((link, index) => {
-                    const mergedLink = link.cloneNode(true);
-                    mergedLink.textContent = mergedLink.textContent.replace(/\[|\]/g, '');
-                    wrapper.appendChild(mergedLink);
+                    wrapper.append(link);
                     if (index < group.length - 1) {
-                        wrapper.append(', ');
+                        wrapper.append('; ');
                     }
                 });
 
-                wrapper.append(']');
-                group[0].parentNode.insertBefore(wrapper, group[0]);
-                group.forEach(link => link.remove());
+                wrapper.append(')');
             });
         });
     </script>
