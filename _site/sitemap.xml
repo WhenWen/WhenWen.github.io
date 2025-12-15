@@ -2,7 +2,7 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>http://localhost:4000/books/the_godfather/</loc>
-<lastmod>2025-12-09T17:42:21-08:00</lastmod>
+<lastmod>2025-12-14T22:05:22-08:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/news/2022-06-01-news-25/</loc>
@@ -109,8 +109,12 @@
 <lastmod>2025-09-01T00:00:00-07:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/blog/2025/weight-decay-hyperball/</loc>
-<lastmod>2025-11-30T00:00:00-08:00</lastmod>
+<loc>http://localhost:4000/blog/2025/weight-decay-hyperball-part-1/</loc>
+<lastmod>2025-12-14T00:00:00-08:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/blog/2025/weight-decay-hyperball-part-2/</loc>
+<lastmod>2025-12-14T00:00:00-08:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/</loc>
@@ -285,8 +289,12 @@
 <lastmod>2025-12-02T20:47:29-08:00</lastmod>
 </url>
 <url>
+<loc>http://localhost:4000/wd_blog/public/hyperball-part-1.html</loc>
+<lastmod>2025-12-14T21:59:32-08:00</lastmod>
+</url>
+<url>
 <loc>http://localhost:4000/wd_blog/public/</loc>
-<lastmod>2025-12-09T17:42:17-08:00</lastmod>
+<lastmod>2025-12-11T21:21:15-08:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/wd_blog/public/legacy/index_old.html</loc>
@@ -299,6 +307,10 @@
 <url>
 <loc>http://localhost:4000/wd_blog/public/misc/a.html</loc>
 <lastmod>2025-11-27T21:23:19-08:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/wd_blog/public/weight-decay-part-2.html</loc>
+<lastmod>2025-12-14T21:59:32-08:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/wd_blog/scripts/lr_datasize/public/experiments/plot1b_scaling_law_fit_interactive.html</loc>

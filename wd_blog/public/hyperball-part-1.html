@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weight Decay in Deep Learning</title>
+    <title>Fantastic Pretraining Optimizers and Where to Find Them II (1/2)</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,6 +68,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1.25rem 4rem;
+            padding-left: 1.25rem; /* No commentary sidebar */
         }
 
         .content-layout {
@@ -81,18 +82,404 @@
             min-width: 0;
         }
 
+        .commentary-panel {
+            position: fixed;
+            right: 310px;
+            top: 5rem;
+            width: 260px;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .commentary-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.35rem;
+            cursor: grab;
+            user-select: none;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .commentary-heading:active {
+            cursor: grabbing;
+        }
+
+        .commentary-heading h2 {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .commentary-signature-select {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .commentary-signature-select:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
         #content {
             position: relative;
             overflow: visible;
         }
 
+        .commentary-highlight-fragment {
+            position: absolute;
+            background: rgba(253, 224, 71, 0.55);
+            border-radius: 0.35rem;
+            box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .commentary-highlight-fragment[data-pending="true"] {
+            background: rgba(125, 211, 252, 0.4);
+            box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.5);
+        }
+
+        .commentary-thread {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 200px;
+            max-width: 260px;
+            padding: 0.65rem 0.85rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            box-shadow: 0 22px 40px -26px rgba(15, 23, 42, 0.65);
+            z-index: 2;
+        }
+
+        .commentary-thread-comment {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .commentary-thread-comment:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .commentary-thread-note {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #1f2937;
+            line-height: 1.45;
+        }
+
+        .commentary-thread-signature {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6366f1;
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+
+        .commentary-thread-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 0.75rem;
+            margin-top: 0.3rem;
+        }
+
+        .commentary-thread-actions button {
+            border: none;
+            background: transparent;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0;
+        }
+
+        .commentary-thread-actions button:hover {
+            color: #3b82f6;
+        }
+
+        .commentary-thread-actions button[data-action="delete"]:hover {
+            color: #ef4444;
+        }
+
+        .commentary-reply-form {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .commentary-reply-signature {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+        }
+
+        .commentary-reply-signature:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-reply-input {
+            width: 100%;
+            min-height: 36px;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.8rem;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-reply-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-reply-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .commentary-reply-actions button {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-reply-actions button[data-action="cancel-reply"] {
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .commentary-reply-actions button[data-action="submit-reply"] {
+            border: 1px solid #3b82f6;
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .commentary-reply-actions button[data-action="submit-reply"]:disabled {
+            background: #93c5fd;
+            border-color: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .commentary-thread-replies {
+            margin-top: 0.5rem;
+            padding-left: 0.75rem;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        .commentary-thread-replies .commentary-thread-comment {
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-thread-replies .commentary-thread-note {
+            font-size: 0.85rem;
+        }
+
+        .commentary-thread-replies .commentary-thread-signature {
+            font-size: 0.7rem;
+        }
+
+        .commentary-edit-form {
+            margin-top: 0.4rem;
+        }
+
+        .commentary-edit-signature {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+        }
+
+        .commentary-edit-input {
+            width: 100%;
+            min-height: 36px;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.8rem;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-edit-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-edit-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .commentary-edit-actions button {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-edit-actions button[data-action="cancel-edit"] {
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .commentary-edit-actions button[data-action="save-edit"] {
+            border: 1px solid #10b981;
+            background: #10b981;
+            color: #fff;
+        }
+
+        .commentary-edit-actions button[data-action="save-edit"]:disabled {
+            background: #6ee7b7;
+            border-color: #6ee7b7;
+            cursor: not-allowed;
+        }
+
+        .commentary-input {
+            width: 100%;
+            min-height: 50px;
+            padding: 0.5rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.85rem;
+            background: #fafafa;
+        }
+
+        .commentary-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-submit {
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0.5rem 0.7rem;
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-submit:hover:not(:disabled) {
+            background: #eee;
+        }
+
+        .commentary-submit:disabled {
+            background: #f9f9f9;
+            color: #bbb;
+            border-color: #e5e5e5;
+            cursor: not-allowed;
+        }
+
+        .commentary-status {
+            margin-top: 0.25rem;
+            font-size: 0.65rem;
+            color: #666;
+        }
+
+        .commentary-status:empty {
+            display: none;
+        }
+
+        .commentary-status[data-state="error"] {
+            color: #c00;
+        }
+
+        .commentary-status[data-state="warning"] {
+            color: #a80;
+        }
+
+        .commentary-flash {
+            animation: commentaryFlash 1.4s ease-out;
+        }
+
+        @keyframes commentaryFlash {
+            0% {
+                background-color: rgba(251, 191, 36, 0.45);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
         @media (max-width: 1100px) {
             .container {
-                padding-left: 1.25rem;
+                padding-left: 1.25rem; /* Remove left space on smaller screens */
             }
 
             .content-layout {
                 flex-direction: column;
+            }
+
+            .commentary-panel {
+                left: 0.5rem;
+                bottom: 0.5rem;
+                width: calc(100% - 1rem);
+                max-width: 320px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .commentary-panel {
+                padding: 1rem;
             }
         }
 
@@ -585,7 +972,7 @@
 <body>
     <div class="container">
         <div class="content-layout">
-                        <div class="article-area">
+            <div class="article-area">
                 <div class="author-tab" role="navigation" aria-label="Authors">
                     <span class="author-tab-label">Authors:</span>
                     <div class="author-links">
@@ -603,735 +990,24 @@
 
     <!-- Hidden Markdown Content -->
     <script type="text/template" id="markdown-source">
-# Fantastic Pretraining Optimizers and Where to Find Them II:  From Weight Decay to Hyperball Optimization
 
-Weight decay is a standard component of training, yet its role in modern deep learning is often misunderstood. In this post, we will show how recent deep learning research reveals that for scale-invariant models (like Transformers), weight decay does not control capacity. Instead, it controls the **effective step size** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-2">[2]</a><a class="citation" href="#ref-3">[3]</a><a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-5">[5]</a>.
-<div class="key-point-box">
-
-
-1.  **Debunk** the classical "capacity control" view. 
-
-<img src="../assets/images/fig0.png" alt="Illustrative figure showing weight decay concepts" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
-
-
-2.  **Derive** the modern view: weight decay regulates weight norm, which then controls the effective update size. This can lead to unexpected phenomena. For example, gradient norms may increase as loss decreases <a class="citation" href="#ref-6">[6]</a>!
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_metrics_plot.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot"></iframe>
-</div>
-
-3.  **Demonstrate** a new outer optimizer called **Hyperball** that removes weight decay entirely by controlling weight norms directly. The corresponding version for Adam is called **AdamH** and for Muon is called **MuonH**. This allows for faster convergence and predictable weight norms compared to runs with weight decay and strong hyperparameter transfer across depths and widths using standard parameterizations.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
-</div>
-
-
-
-</div>
-
----
-
-## 1. The Paradox of Weight Decay
-
-Standard weight decay updates parameters $W$ by:
-$$
-W_{t+1} = (1 - \eta_t \lambda) W_t - \eta_t u_t
-$$
-where $\eta_t$ is the learning rate, $\lambda$ is the decay coefficient, and $u_t$ is the update direction given by the base optimizer. This is equivalent to minimizing $L(W) + \frac{\lambda}{2}\|W\|_F^2$<a class="citation" href="#ref-7">[7]</a>.
+# Fantastic Pretraining Optimizers and Where to Find Them II:  From Weight Decay to Hyperball Optimization (Part 1)
 
 <div class="key-point-box">
 
-**Classical View:** This penalty keeps weights small, limiting model capacity and preventing overfitting.
+**Series navigation**
 
-**Modern Reality:** Most weight matrices in modern architectures (Transformers, ResNets with BatchNorm/LayerNorm) are **scale-invariant** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-3">[3]</a>. Multiplying weights by a constant $c$ does not change the output or the loss:
-$$
-L(cW) = L(W), \quad \forall c > 0
-$$
-
-
+- **Part 1 (this page):** Hyperball optimizer + intuition
+- **Part 2 (theory deep dive):** <a href="weight-decay-part-2.html"><strong>Deep Dive into Theory of Weight Decay and how it sets the effective step size</strong></a>
 
 </div>
 
-__SCALE_INVARIANCE_DEMO__
+## Secret Life of Weight Decay
 
-So how scale-invariant are modern architectures, really? Let's take a look at the Transformer architecture.
 
-__TRANSFORMER_DEMO__
+Weight decay is a standard ingredient in almost every modern training recipe, usually tossed in under the assumption that it acts as a proxy for L2 regularization to prevent overfitting. But here is the twist: when you pair it with normalization layers (like LayerNorm), weight decay actually stops affecting model capacity entirely. So, why does it still work?
 
-If the neural network function and hence the loss is unchanged by the scale of $W$, penalizing $\|W\|_F$ cannot constrain capacity. Yet, people continue to use weight decay. Why?
-
-## 2. The Mechanism: How Weight Decay Sets the Effective Step Size
-
-<div style="display: flex; align-items: flex-start; gap: 1.5rem; margin: 1em 0;">
-<div style="flex: 1.2; min-width: 0;">
-
-For scale-invariant losses $L(cW)=L(W)$, optimization depends only on the **direction** of the weights
-$$
-\hat{W} = W / \|W\|_F.
-$$
-This direction-only view follows the intrinsic learning-rate analysis of <a class="citation" href="#ref-4">[4]</a>. 
-
-Define the **effective step size** $\eta_{\text{eff}}$ as the magnitude of the change in the weight direction:
-$$
-\eta_{\text{eff}} := \|\hat{W}_{t+1} - \hat{W}_t\|.
-$$
-
-
-</div>
-<div style="flex: 0.8; min-width: 280px; max-width: 380px;">
-<img src="../assets/images/fig1_output.png" alt="Illustrative figure showing weight decay concepts" style="width: 100%; height: auto;">
-</div>
-</div>
-
-The key mechanism is:
-
-1. The **weight norm** $\|W\|_F$ determines how large a step we take in direction space.
-2. The **weight decay** coefficient $\lambda$ determines the equilibrium value of $\|W\|_F$.
-
-Together these imply that $\lambda$ directly sets the effective step size. This calculation has been explored in detail in <a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>. For readers who can read Chinese, excellent explanations have been provided in JianLin Su's blogs <a class="citation" href="#ref-9">[9]</a> <a class="citation" href="#ref-10">[10]</a> and <a class="citation" href="#ref-11">[11]</a>.
-
-Before we dive into the calculations, let's showcase how current theory aligns with an interactive simulation. The demo below trains a simple normalized linear model using AdamW / Muon with gradient noise. Watch how the **empirical measurements** (solid lines) closely track the **theoretical predictions** (dashed lines). You can adjust the hyperparameters in real-time to see how $\eta$, $\lambda$, and $\beta_1$ affect the equilibrium behavior.
-
-__ADAMW_DEMO__
- 
-<p style="margin: 3rem 0 1rem; color: var(--secondary-text);">
-The expressions below summarize the steady-state behavior of the three optimizers (Adam/AdamW, Muon, Moonlight) in the noise-dominated regime discussed above—this is the final outcome, so feel free to skip the following proof and jump straight to Section 2.6 if you want to skip the math for now.
-</p>
-<div style="overflow-x: auto; margin: 1.5rem 0;">
-<table style="margin: 0 auto; border-collapse: collapse; min-width: 70%;">
-  <thead>
-    <tr style="background-color: var(--primary-color);">
-      <th style="padding: 0.75rem 1.25rem; text-align: left; border: 1px solid var(--border-color);">Quantity</th>
-      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Adam / AdamW</th>
-      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Moonlight</th>
-      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Muon</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr style="background-color: var(--bg-color);">
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\|W_t\|_F$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;" colspan="2">$\eta \sqrt{\frac{1-\beta_1}{1+\beta_1}}\sqrt{d_{\mathrm{in}}d_{\mathrm{out}}}\sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;">$\eta \sqrt{d_{\mathrm{out}}}\sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}$</td>
-    </tr>
-    <tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\|u_t\|_F$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;" colspan="2">$\sqrt{\frac{1-\beta_1}{1+\beta_1}}\sqrt{d_{\mathrm{in}}d_{\mathrm{out}}}$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{d_{\mathrm{out}}}$</td>
-    </tr>
-    <tr style="background-color: var(--bg-color);">
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">$\cos(W_t,u_t)$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color);" colspan="3">
-        <div style="text-align: center;">$-\beta_1 \sqrt{\frac{1-\alpha^2}{(1+\alpha\beta_1)(1-\alpha\beta_1)}}$ </div>
-      </td>
-    </tr>
-    <tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color); font-weight: 500;">Effective step size $\eta_{\mathrm{eff}}$</td>
-      <td style="padding: 0.75rem 1.25rem; border: 1px solid var(--border-color);" colspan="3">
-        <div style="text-align: center;">$\frac{1}{1+\alpha\beta_1}\sqrt{(1-\alpha^2)(1-\beta_1^2)} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1+\beta_1}}$ </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<p style="margin-top: 0.75rem; color: var(--secondary-text); font-size: 0.9rem;">
-Here $\alpha = 1 - \eta\lambda$ and $d_{\mathrm{in}}, d_{\mathrm{out}}$ are the layer dimensions; Muon and Moonlight share the same correlation structure as AdamW, so only the update norm $U$ differs.
-</p>
-
-
-### 2.1 Basic Assumption: Noise-Dominated Training
-
-Throughout this section we work in the **noise-dominated regime**: the stochasticity of the gradients is much larger than the signal. Concretely, for a single scalar gradient entry we assume
-$$
-g_t \in \mathbb{R},\quad
-g_t \sim \mathcal N(0,\sigma^2)\ \text{i.i.d. over } t,
-$$
-and for a whole layer we treat the gradient as
-$$
-g_t \in \mathbb{R}^d,\quad
-g_t \sim \mathcal N(0,\sigma^2 I_d).
-$$
-
-This assumption may look outrageous at first glance, because it ignores any structure in the loss and assumes there is “no signal.” However, **for the specific quantities we care about** (stationary update norms, angles, equilibrium weight norms, effective step size), this is a good approximation when the noise level is much larger than the signal. It is the standard toy model: simple enough to be solvable, but rich enough to capture the scaling behavior with $\eta$ and $\lambda$. It is also interesting to note that a similar assumption has been used in <a class="citation" href="#ref-12">[12]</a> to study how batch size affects the effective step size.
-
-
----
-
-### 2.2 Predicting Optimizer Update Norm 
-
-Let $u_t$ be the **base optimizer update** *before* adding weight decay (the Adam part of AdamW). We show that, under the noise-dominated model, the update norm is approximately **constant over time**, depending only on the optimizer hyperparameters and the layer dimension.
-
-For Muon, this is already guaranteed by design, as all of the singular values of Muon's update before scaling are $1$. Assuming the shape of $W$ is $d_{\mathrm{in}} \times d_{\mathrm{out}}$, we can derive the update norm as follows:
-
-In the speedrun implementation of Muon, the update is scaled by $\max(\sqrt{\frac{d_{\mathrm{out}}}{d_{\mathrm{in}}}}, 1)$ <a class="citation" href="#ref-13">[13]</a>, giving
-$$
-\|u_t\|_F = \sqrt{d_{\mathrm{out}}}.
-$$
-
-For the Moonlight implementation <a class="citation" href="#ref-14">[14]</a>, the update is scaled by $0.2\sqrt{\max(d_{\mathrm{out}}, d_{\mathrm{in}})}$, giving
-$$
-\|u_t\|_F = 0.2\sqrt{d_{\mathrm{out}} d_{\mathrm{in}}}.
-$$
-
-For Adam/AdamW, focusing on a **single scalar coordinate** $\bar u_{t}$, we can write the (bias-corrected) update in the “infinite history” limit as
-$$
-\bar u_{t}
-= \frac{m_t}{\sqrt{v_t}}, m_t = (1 - \beta_1)\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}, v_t = (1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2
-$$
-where $\beta_1$ is the momentum coefficient, $\beta_2$ is the second-moment coefficient, and $\bar g_t$ is a scalar entry of the gradient, assumed i.i.d. $\mathcal N(0,\sigma^2)$ as in §2.1.
-
-Under this assumption, the denominator is approximately constant:
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-For a matrix $W_t$ with $d = d_{\mathrm{in}} d_{\mathrm{out}}$ number of parameters, 
-$$
-\mathbb{E}[\bar u_t^2]
-\approx
-d\frac{1-\beta_1}{1+\beta_1},
-$$
-<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-Assuming the denominator in AdamW converges to the variance of the gradient, we can compute the update norm by considering the variance of the momentum in the nominator in AdamW.
-</p>
-</summary>
-
-We first compute the expected value of the denominator:
-$$
-\begin{align*}
-(1-\beta_2)\mathbb{E}[v_t] &= 
-(1-\beta_2)\mathbb{E}[(1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
-&=
-(1-\beta_2)\mathbb{E}[\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
-&=
-(1-\beta_2)\sigma^2 \sum_{i=0}^{\infty} \beta_2^i =
-\sigma^2.
-\end{align*}
-$$
-
-
-Plugging this approximation into the update gives
-$$
-\bar u_{t}
-\approx
-(1-\beta_1),
-\frac{\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma},
-$$
-
-Then
-$$
-\mathbb{E}\Big[
-\Big(\frac{\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma}\Big)^2
-\Big]
-=
-\frac{1}{\sigma^2}\sum_{i=0}^{\infty} \beta_1^{2i} \mathbb{E}[\bar g_{t-i}^2]
-=
-\sum_{i=0}^{\infty} \beta_1^{2i}
-=
-\frac{1}{1-\beta_1^2}.
-$$
-
-Therefore
-$$
-\mathbb{E}[\bar u_t^2]
-\approx
-(1-\beta_1)^2 \cdot \frac{1}{1-\beta_1^2}
-=
-\frac{1-\beta_1}{1+\beta_1}.
-$$
-
-</details>
-
-
-
-<div class="key-point-box">
-
-**Property 1 (Approximately Constant Update Norm):** In the Gaussian noise model, common base optimizers like AdamW, Adam, Muon have a **time-independent RMS**, so we can treat
-$$
-\|u_t\|_F \approx U
-$$
-as a **constant per layer**. 
-
-<div style="overflow-x: auto; margin: 1.5rem 0;">
-<table style="margin: 0 auto; border-collapse: collapse; min-width: 60%;">
-<thead>
-<tr style="background-color: var(--primary-color);">
-<th style="padding: 0.75rem 1.5rem; text-align: left; border: 1px solid var(--border-color);">Optimizer</th>
-<th style="padding: 0.75rem 1.5rem; text-align: center; border: 1px solid var(--border-color);">Update Norm $\|u_t\|_F$</th>
-</tr>
-</thead>
-<tbody>
-<tr style="background-color: var(--bg-color);">
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Adam / AdamW</td>
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{\frac{1-\beta_1}{1+\beta_1}} \sqrt{d_{\mathrm{in}} \times d_{\mathrm{out}}}$</td>
-</tr>
-<tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Muon</td>
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{d_{\mathrm{out}}}$</td>
-</tr>
-<tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Moonlight</td>
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$0.2\sqrt{d_{\mathrm{out}} d_{\mathrm{in}}}$</td>
-</tr>
-</tbody>
-</table>
-</div>
-
-<!-- <p style="margin-top: 0.5rem; text-align: center; color: var(--secondary-text); font-size: 0.9rem;"> -->
-Here $d_{\mathrm{in}}$ is the input dimension and $d_{\mathrm{out}}$ is the output dimension of the linear layer and $\beta_1$ is the momentum parameter.
-</p>
-
-</div>
-
----
-
-### 2.3 Predicting the Correlation Between Update and Weight
-
-We now turn to the relationship between the update vector $u_t$ and the weight vector $W_t$. A crucial observation is that they exhibit a **stable correlation**.
-
-We quantify this via the projection coefficient $\gamma_t$:
-$$
-\gamma_t
-:=
-\frac{\langle u_t, W_t \rangle}{\|u_t\|_F^2}
-\approx
-\text{const}.
-$$
-
-**Intuition:** Why are they correlated?
-1.  **Weights accumulate history:** The weight vector $W_t$ is an exponentially weighted sum of **past updates** ($u_{t-1}, u_{t-2}, \dots$).
-2.  **Momentum creates memory:** Due to momentum, the current update $u_t$ is not independent of the past; it is strongly correlated with **recent past updates** ($u_{t-1}, u_{t-2}, \dots$).
-3.  **Correlation is inevitable:** Since $W_t$ is built from vectors that $u_t$ is correlated with, the projection of $W_t$ onto $u_t$ is non-zero and stable relative to the update scale.
-
-Mathematically, with decoupled weight decay $W_{t+1} = \alpha W_t - \eta u_t$ (where $\alpha = 1-\eta\lambda$), we can write $W_t$ as a sum:
-$$
-W_t
-=
--\eta\sum_{k=1}^{t} \alpha^{k-1} u_{t-k}.
-$$
-The inner product $\langle u_t, W_t \rangle$ becomes a weighted sum of auto-correlations $\langle u_t, u_{t-k} \rangle$. In a stationary noise regime, these auto-correlations are stable and scale with $U^2$, so $\gamma_t$ converges to a fixed value determined by $(\eta,\lambda,\beta_1)$.
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-    In the same noise-dominated regime, the correlation between $u_t$ and $W_t$ converges to a layer-wise constant determined by $(\eta,\lambda,\beta_1)$. Concretely, 
-    <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-        $$
-        \gamma_t \approx -\frac{\eta\beta_1}{1-\alpha\beta_1}.
-        $$
-        Conceptually, the calculation is the same kind of “Gaussian covariance algebra” as in §2.2: we write down a linear recurrence for $u_t$ and $W_t$, assume Gaussian noise for the gradients, and solve for the stationary covariance.
-    </p>
-</summary>
-
-Start from SGD with momentum (for a single coordinate) and decoupled weight decay:
-$$
-\begin{aligned}
-u_t &= (1-\beta_1)\sum_{i=0}^t \beta_1^{t-i} g_i, \\
-W_{t+1} &= \alpha W_t - \eta u_t,
-\end{aligned}
-$$
-with $g_t \sim \mathcal N(0,\sigma^2 I_d)$ i.i.d. as before.
-
-In high dimension we have
-$$
-\langle g_i, g_j \rangle \approx \sigma^2 d\,\delta_{ij},
-$$
-so for any two times $t,t'$,
-$$
-\begin{aligned}
-\langle u_t, u_{t'} \rangle
-&=
-\Big\langle
-(1-\beta_1)\sum_{i=0}^t \beta_1^{t-i} g_i,\,
-(1-\beta_1)\sum_{j=0}^{t'} \beta_1^{t'-j} g_j
-\Big\rangle \\
-&=
-\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
-\sum_{i=0}^t \sum_{j=0}^{t'} \beta_1^{t+t'-i-j}
-\langle g_i, g_j \rangle \\
-&\approx
-\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
-\sum_{i=0}^{\min(t,t')} \beta_1^{t+t'-2i} \sigma^2 d \\
-&=
-\frac{(1-\beta_1)^2}{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
-\sigma^2 d\,
-\beta_1^{t+t'-2\min(t,t')}
-\frac{1-\beta_1^{2\min(t,t')+2}}{1-\beta_1^2} \\   
-&=
-\frac{(1-\beta_1)(1-\beta_1^{2\min(t,t')+2})\beta_1^{t+t'-2\min(t,t')}}
-{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
-\sigma^2 d.
-\end{aligned}
-$$
-
-This shows that the correlation between $u_t$ and $u_{t'}$ **decays geometrically** with $|t-t'|$, controlled by $\beta_1$. Since
-$$
-W_t = -\eta\sum_{k=0}^{t-1} \alpha^{t-1-k} u_k,
-$$
-we can write
-$$
-\langle W_t, u_t \rangle
-=
--\eta \sum_{k=0}^{t-1} \alpha^{t-1-k} \langle u_k, u_t \rangle.
-$$
-
-Plugging in $\langle u_k, u_t \rangle \approx \|u_t\|_F^2 \beta_1^{t-k}$ (valid for large $t$):
-$$
-\begin{aligned}
-\langle W_t, u_t \rangle
-&\approx
--\eta \sum_{k=0}^{t-1} \alpha^{t-1-k} \left( \|u_t\|_F^2 \beta_1^{t-k} \right) \\
-&=
--\eta \|u_t\|_F^2 \beta_1 \sum_{k=0}^{t-1} (\alpha\beta_1)^{t-1-k}.
-\end{aligned}
-$$
-As $t\to\infty$, the sum becomes a geometric series $\sum_{j=0}^\infty (\alpha\beta_1)^j = \frac{1}{1-\alpha\beta_1}$. Thus:
-$$
-\langle W_t, u_t \rangle
-\approx
--\eta \|u_t\|_F^2 \frac{\beta_1}{1-\alpha\beta_1}.
-$$
-Dividing by $\|u_t\|_F^2$ gives the constant projection coefficient:
-$$
-\gamma 
-= \frac{\langle W_t, u_t \rangle}{\|u_t\|_F^2}
-\approx
--\frac{\eta\beta_1}{1-\alpha\beta_1}.
-$$
-
-</details>
-
-In practice, for the regimes of interest this projection is stable.
-
-<div class="key-point-box">
-
-Because $W_t$ accumulates past updates and momentum ensures $u_t$ correlates with those same past updates, the **projection of $W_t$ onto $u_t$** stabilizes. Specifically, 
-
-$$
-\langle W_t, u_t \rangle \approx -\frac{\eta\beta_1}{1-\alpha\beta_1} \|u_t\|_F^2.
-$$
-
-
-
-This projection term is the same across AdamW and Muon. 
-</div>
-
----
-
-### 2.4 Solving the Equilibrium Weight Norm
-
-We are now ready to close the loop. The dynamics of the weight norm are driven by a tension between two forces: **weight decay**, which shrinks the weights, and **optimizer updates**, which drive the weights away from zero.
-
-Combining our findings from the previous sections, we can reduce the high-dimensional vector dynamics to a simple **scalar recursion**.
-
-Recall our two key properties:
-1.  **Constant Update Size (§2.2):** The update norm is constant, $\|u_t\|_F \approx U$.
-2.  **Stable Projection (§2.3):** The alignment between weights and updates is fixed, $\langle W_t, u_t \rangle \approx \gamma U^2$.
-
-With decoupled weight decay, the weight evolves as $W_{t+1} = \alpha W_t - \eta u_t$. Squaring this equation gives the evolution of the norm $r_t := \|W_t\|_F$:
-
-$$
-\begin{aligned}
-r_{t+1}^2 
-&= \|\alpha W_t - \eta u_t\|_F^2 \\
-&= \alpha^2 \|W_t\|_F^2 + \eta^2 \|u_t\|_F^2 - 2\alpha\eta \langle W_t, u_t \rangle.
-\end{aligned}
-$$
-
-Substituting our approximations for $\|u_t\|_F$ and $\langle W_t, u_t \rangle$, we obtain a closed 1-D system:
-
-$$
-r_{t+1}^2 \approx \alpha^2 r_t^2 + \underbrace{(\eta^2 - 2\alpha\eta \gamma) U^2}_{\text{effective norm increase}}. \quad (\star)
-$$
-
-<div class="key-point-box">
-
-**Interpretation:** The term $(\eta^2 - 2\alpha\eta \gamma) U^2$ represents the *effective* amount of norm increase at each step. It is less than the raw update norm times learning rate(i.e. $\eta^2 U^2$) because the update $u_t$ is **anti-correlated** with $W_t$ (due to momentum), which dampens the expansion.
-</div>
-
-#### The Steady State
-
-At equilibrium, the expected norm stabilizes ($r_{t+1} \approx r_t \approx r_\star$). Solving $(\star)$ for the stationary value $r_\star$:
-
-$$
-r_\star^2 (1 - \alpha^2) \approx (\eta^2 - 2\alpha\eta\gamma) U^2 
-\implies 
-r_\star \approx U \sqrt{\frac{\eta^2 - 2\alpha\eta\gamma}{1-\alpha^2}}.
-$$
-
-Finally, we plug in the specific projection coefficient $\gamma \approx -\frac{\eta\beta_1}{1-\alpha\beta_1}$ derived in §2.3. After simplifying the algebra, we arrive at the **exact equilibrium norm** for a scale-invariant layer trained with AdamW/Muon:
-
-$$
-\boxed{
-\|W_\infty\|_F 
-\approx 
-\eta U \sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}
-}
-$$
-
-This formula is powerful because it depends *only* on the hyperparameters ($\eta, \lambda, \beta_1$) and the layer geometry (through $U$). It requires no empirical fitting.
-
-<div class="key-point-box">
-
-The equilibrium weight norm with respect to the expected update norm $U$ is fully determined by the optimizer settings.
-$$
-\|W_\infty\|_F 
-\approx 
-\eta U \sqrt{\frac{1+\alpha\beta_1}{(1-\alpha^2)(1-\alpha\beta_1)}}
-$$
-
-</div>
-
----
-
-### 2.5 Solving the Effective Step Size
-
-We finally translate the norm dynamics into an **effective step size**, defined as the magnitude of the change in the *direction* of the weights:
-$$
-\eta_{\mathrm{eff},t}
-:=
-\|\hat{W}_{t+1} - \hat{W}_t\|_F.
-$$
-This measures how fast the model traverses the function landscape, independent of the weight scale.
-
-#### Deriving the Step Size
-
-The step size is determined by the projection of the update onto the tangent space of the unit sphere.
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-Given that we know the relative norm ratio between the update and the weight and their correlation, we can calculate the effective step size.
-    <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-    The effective step size is given by:
-        $$
-        \begin{align*}
-        \eta_{\mathrm{eff},t}
-        &= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}
-        \end{align*}
-        $$
-    Note that $\alpha = 1 - \eta\lambda$ and $\beta_1$ is the momentum coefficient. If we assume that $\eta\lambda$ is small, then we can approximately get $\eta_{\mathrm{eff},t} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1 + \beta_1}}$.
-</summary>
-
-<div style="margin-top: 1rem;">
-<p><strong>Step 1: Geometric Approximation</strong></p>
-<p>
-The effective step size is the magnitude of the update projected onto the tangent space of the unit sphere. Let $P_{w^\perp} = I - \hat{w}\hat{w}^\top$ (noted here we view weight as a vector instead of a matrix).
-</p>
-$$
-\eta_{\mathrm{eff},t} \approx \frac{\eta}{\|w_t\|_F} \|P_{w_t^\perp} u_t\|_F.
-$$
-
-<p><strong>Step 2: Tangential Component</strong></p>
-<p>
-Let $k = \|u_t\|_F / \|W_t\|_F$ and using the projection coefficient $\gamma$ from Section 2.3, we can express the tangential norm as:
-</p>
-$$
-\begin{align*}
-\|P_{W_t^\perp} u_t\|_F^2 &= \|u_t - \frac{\langle u_t, W_t \rangle}{\|W_t\|_F^2} W_t\|_F^2\\
-&= \| u_t \|^2 - \frac{(\langle u_t, W_t \rangle)^2}{\|W_t\|_F^2} \\
-&\approx \| u_t \|^2 (1 - \gamma^2 k^2)
-\end{align*}
-$$
-
-Therefore, the effective step size is:
-$$
-\eta_{\mathrm{eff},t} = \eta k \sqrt{1 - \gamma^2 k^2}
-$$
-
-<p><strong>Step 3: Steady-State Substitution</strong></p>
-<p>
-
-From previous section, we have the equilibrium condition:
-$$
-\begin{align*}
-k^2 &= \frac{(1 - \alpha^2)(1 - \alpha\beta_1)}{\eta^2 (1 + \alpha\beta_1)} \\
-\gamma^2 &= \frac{\eta^2\beta_1^2}{(1-\alpha\beta_1)^2}
-\end{align*}
-$$
-
-Therefore we can simplify the expression for the effective step size to 
-
-$$
-\begin{align*}
-\eta_{\mathrm{eff},t}
-& =
-\sqrt{\frac{(1 - \alpha^2)(1 - \alpha \beta_1)}{1 + \alpha \beta_1}}
-\sqrt{
-1 -
-\frac{\beta_1^2 (1 - \alpha^2)}
-{(1 + \alpha \beta_1)(1 - \alpha \beta_1)}
-} \\
-&= \frac{1}{1 + \alpha \beta_1} 
-\sqrt{
-(1 - \alpha^2) \big((1 - \alpha^2 \beta_1^2) - \beta_1^2 (1 - \alpha^2)\big)
-}  \\
-&= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}
-\end{align*}
-$$
-
-This makes it explicit that the tangential move grows with the hidden product $\eta\lambda$ (recall $\alpha = 1 - \eta\lambda$) until the correlation term collapses it.
-
-</p>
-</div>
-</details>
-
-<div class="key-point-box">
-
-In steady state, the effective step size on the unit sphere scales like
-$$
-\eta_{\mathrm{eff},t} \approx \frac{1}{1 + \alpha \beta_1} \sqrt{{(1 - \alpha^2)(1 - \beta_1^2)}} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1 + \beta_1}}.
-$$
-Weight decay $\lambda$ and learning rate $\eta$ together define a **hidden effective step size**: tuning $\eta\lambda$ directly controls how aggressively the model moves in direction space.
-<a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>
-
-
-</div>
-
-
-
-
-
----
-
-### 2.6 One Last Thing: How Gradient Norms Scale
-
-Finally, we explain why **gradient norms tend to grow** toward the end of training when the learning rate decays, even as the loss keeps decreasing. This calculation was shown previously.
-
-From §2.4, in the steady-state regime we have (up to a layer-dependent constant $C(\alpha,\beta)$)
-$$
-\|W_t\|_F
-\approx
-C(\alpha,\beta)\sqrt{\frac{\eta_t}{\lambda}}.
-$$
-
-For a **scale-invariant** layer, the loss satisfies
-$$
-L(cW) = L(W)\quad\forall c>0,
-$$
-which implies the gradient rescales inversely:
-$$
-\nabla_W L(cW) = \frac{1}{c} \nabla_W L(W).
-$$
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-Scale invariance implies inverse gradient scaling
-<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-A larger weight norm means that a fixed norm update makes less change to the direction of the feature.
-</p>
-</summary>
-
-For scale-invariant loss, by definition
-$$
-L(cW + c\epsilon) - L(cW)
-=
-L(W + \epsilon) - L(W)
-$$
-for any perturbation $\epsilon$. Differentiating w.r.t. $\epsilon$ at $\epsilon=0$ gives
-$$
-\langle \nabla_W L(cW), c\epsilon \rangle
-=
-\langle \nabla_W L(W), \epsilon \rangle
-\quad\forall \epsilon,
-$$
-so
-$$
-\nabla_W L(cW) = \frac{1}{c}\,\nabla_W L(W).
-$$
-
-Thus, multiplying weights by $c$ divides the gradient norm by $c$.
-
-</details>
-
-Therefore, in the scale-invariant regime
-$$
-\|G_t\|_F
-:=
-\|\nabla_W L(W_t)\|_F
-\propto
-\frac{1}{\|W_t\|_F}
-\propto
-\sqrt{\frac{\lambda}{\eta_t}}.
-$$
-
-So as the **learning rate decays** during training, the **equilibrium weight norm shrinks**, and the **gradient norm grows**:
-
-* loss can keep going down,
-* but $\|G_t\|_F$ naturally increases as $\eta_t$ decreases.
-
-This looks like “gradient explosion” in the logs, but in this model it is simply the **expected behavior of scale invariance + weight decay + LR decay**. This calculation was previously shown in  <a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-6">[6]</a>.
-
-<div class="key-point-box">
-
-**Key point (2.6):** In scale-invariant layers with weight decay, the steady-state weight norm scales like
-$$
-\|W_t\|_F \propto \sqrt{\eta_t/\lambda},
-$$
-so the gradient norm scales like
-$$
-\|G_t\|_F \propto \sqrt{\lambda/\eta_t}.
-$$
-When the learning rate decays, the **equilibrium radius shrinks and the gradient norm rises**, explaining the empirically observed increase in gradient norms late in training.
-
-</div>
-
-
-
-
-
-## 3. Explaining Empirical Phenomena
-
-
-
-The classic saying goes "all models are wrong, but some are useful". In deep learning theory, whether a theory is useful should be judged by two perspectives:
-
-1. Can it predict empirical phenomena? (This section)
-2. Can it motivate algorithm that works better? (Section 4)
-
-Most of the empirical figures in this section re-run the optimizer sweeps from Wen et al.'s systematic study of pretraining optimizers so that comparisons stay consistent across model sizes and data-to-model ratios.<a class="citation" href="#ref-15">[15]</a>
-
-
-### Phenomenon 1: Weight norm tracks learning rate warmup and decay throughout training.
-
-**Explanation:** As we have derived in Section 2.3, the equilibrium weight norm is determined by learning rate $\eta$ and weight decay $\lambda$, as $\|W_{\infty}\|_F \approx \sqrt{\frac{\eta}{2\lambda}} U$. 
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_qkv_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
-</div>
-
-
-### Phenomenon 2: Gradient norm increases through training.
-
-**Explanation:** As we have derived in Section 2.5, the gradient norm is determined by the weight norm, as $\|G_t\|_F \propto \frac{1}{\|W_t\|_F} \propto \sqrt{\lambda/\eta}$. Naturally, as the weight norm decreases, the gradient norm increases.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_qkv_grad_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
-</div>
-
-### Phenomenon 3: When $\eta \lambda$ is fixed, the model trained with AdamW converges to essentially the same loss. At the same time, the weight norm of each weight matrix is (roughly) proportional to the learning rate. 
-
-**Explanation:** As we have derived in Section 2.5, the effective step size is determined by learning rate $\eta$ and weight decay $\lambda$, as $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$. Further, as derived in Section 2.4, the equilibrium weight norm $\|W_{\infty}\|_F \propto \sqrt{\frac{\eta}{\lambda}} U$ is proportional to the learning rate when $\eta \lambda$ is fixed <a class="citation" href="#ref-13">[13]</a>.
-
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_compare_layer9.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
-</div>
-
-
-
-### Phenomenon 4: Despite sharing the same learning-rate schedule, the run with weight decay starts with a higher loss but ultimately converges to a strictly lower loss than the run without weight decay.
-
-**Explanation:** Although these two runs use the same nominal learning-rate warmup and decay schedule, weight decay changes the weight norms and therefore induces a substantially different effective step size over training. Empirically (and in a our theory in Section 2), we find that training with weight decay yields a larger effective step size throughout training than training without weight decay. In the <em>river valley landscape</em> picture<a class="citation" href="#ref-16">[16]</a>, the loss decomposes into a “river” component, capturing progress along a relatively flat direction where long-term optimization happens, and a “hill” component, capturing excursions in steep directions caused by stochastic gradients. 
-
-<div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; margin: 1rem 0;">
-<div style="flex: 1.4 1 420px; min-width: 360px; max-width: 720px;">
-<p>A larger effective step size amplifies these hill-direction oscillations, which raises the observed loss early in training, but it also accelerates motion along the river. When the learning rate decays, the oscillations in the hill directions shrink and the iterate settles closer to the riverbed, revealing the additional progress that has already been made along the river. In our setting, the run with weight decay therefore starts with a higher loss but ultimately reaches a lower loss, because its larger effective step size allows it to move faster down the river before the decay phase suppresses the oscillations.</p>
-</div>
-<figure style="flex: 0.8 1 280px; min-width: 200px; margin: 0; text-align: center;">
-<img src="../assets/images/function2.png" alt="River valley landscape schematic comparing hill and river directions" style="width: 100%; max-width: 480px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);" loading="lazy">
-<figcaption style="font-size: 0.9rem; color: #6b7280; margin-top: 0.5rem;">
-Visual intuition for the river valley landscape conjecture.
-</figcaption>
-</figure>
-</div>
+It turns out that weight decay has been living a double life. Recent deep learning theory (see a deep dive in <a href="weight-decay-part-2.html">Part 2</a>) shows that weight decay actually determines the **equilibrium weight norm**, and that norm determines how large a step the optimizer takes in *direction space*—i.e., the **effective step size** (with the rule of thumb $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$). In contrast, without weight decay, the weight norm will grow as $\Theta(\sqrt{t})$, so the effective step size decays naturally: $\eta_{\mathrm{eff}} \propto \sqrt{1/t}$. Therefore, weight decay prevents the direction-space step size from decaying too quickly, inducing an effective schedule that often decays **more slowly** than “no weight decay,” so you keep making useful progress later in training <a class="citation" href="#ref-33">[33]</a><a class="citation" href="#ref-34">[34]</a><a class="citation" href="#ref-35">[35]</a>.
 
 <div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
     <iframe src="experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
@@ -1339,44 +1015,47 @@ Visual intuition for the river valley landscape conjecture.
 
 
 
-### Phenomenon 5: Contrary to the original MuP prediction, hyperparameter transfer is not sensitive to weight scale at initialization but it is sensitive to how weight decay is scaled
-
-**Explanation:** Weight decay has emerged as the key driver of hyperparameter transfer in recent work <a class="citation" href="#ref-17">[17]</a><a class="citation" href="#ref-18">[18]</a><a class="citation" href="#ref-19">[19]</a><a class="citation" href="#ref-20">[20]</a>, overshadowing MuP initialization <a class="citation" href="#ref-21">[21]</a>. This isn't surprising: the weight norm rapidly settles into the equilibrium predicted by theory, a value set solely by the learning rate and weight decay and it does **not** depend on the initial scale. Because Tensor Program theory assumes hyperparameter transfer is enabled by the weight norm and the properly rescaled update norm staying stable across network width and depth, weight decay naturally becomes more influential than initialization.
 
 
-<div style="margin: 2rem auto; text-align: center;">
-    <img src="../assets/images/llama_ind_vs_std_vs_nowd_teaser.png" alt="Comparison of learning rate transfer strategies with and without weight decay" style="width: 100%; max-width: 900px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);" loading="lazy">
-    <p style="font-size: 0.95rem; color: #6b7280; margin-top: 0.5rem;">
-        Figure 1 in <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">Kosson et al., 2025</a><a class="citation" href="#ref-17">[17]</a>.
-    </p>
-</div>
 
 
----
+## Hyperball Optimization: Normalizing Both Weight Norm and Update Norm
 
-## 4. Hyperball Optimization: Normalizing Both Weight Norm and Update Norm 
 
-Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus $\eta_{eff}$), why not control it directly?
-
+Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus effective step size $\eta_{\mathrm{eff}}$), why not control it directly?
 
 We propose **Hyperball Optimization**:
 $$
-W_{t+1} = \text{Norm}(W_t - \eta_{eff} \cdot \text{Norm}(u_t) \|W_0\|_F) \|W_0\|_F,
+W_{t+1} = \mathrm{Norm}(W_t - \eta_{\mathrm{eff}} \cdot \mathrm{Norm}(u_t)\,\|W_0\|_F)\,\|W_0\|_F,
 $$
-where $\|W_0\|_F$ is the initial weight norm and $\text{Norm}(x) = x / \|x\|_F$ is the normalization operator that projects $x$ to the unit sphere. Here $u_t$ is the standard Adam/Muon update. We will apply this optimizer for every linear projection matrix in the Transformer model and use Adam for the rest scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
+where $\|W_0\|_F$ is the initial weight norm and $\mathrm{Norm}(x) = x / \|x\|_F$ projects $x$ to the unit sphere. Here $u_t$ is the standard Adam/Muon update. We apply this optimizer to each Transformer projection matrix and use Adam for the remaining scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
 
-This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a>  and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
+This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a> and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
+
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
+</div>
 
 
 This method has the following benefits:
-1.  **Native Hyperparameter Transfer:** Hyperparameters transfer predictably across model width and depth.
-2.  **Empirical Speedup:** We show that this method can lead to faster loss reduction compared to decoupled weight decay across model scale and training duration.
+1. **Native hyperparameter transfer:** Hyperparameters transfer predictably across model width and depth.
+2. **Empirical speedup:** Faster loss reduction compared to decoupled weight decay across model scale and training duration.
 
-### 4.1 Hyperparameter Transfer across Width and Depth
-
-As mentioned in Phenomenon 5 in Section 3, hyperparameter transfer should be a byproduct of constant ratio between weight norm and update norm. We validate this hypothesis by running the following width and depth scaling experiments.
+### Hyperparameter Transfer across Width and Depth
 
 
+According to recent deep learning theory (see details in Phenomenon 5 in <a href="weight-decay-part-2.html">Part 2</a>), hyperparameter transfer should be a byproduct of keeping the ratio between the **weight norm** and the **update norm** essentially constant across model scales. With normalization, loss does not "care" the raw numbers inside the weights; it sees how big each update is **relative** to the current weights, which in turn determines how far the model moves in function space per step. If widening or deepening the network changes this ratio, then the same learning rate suddenly becomes “too hot” or “too cold,” and the optimal learning-rate window drifts with scale.
+
+Hyperball optimization fixes this by explicitly controlling both the weight norm and the update norm. Once we normalize $W$ and $u_t$ and then rescale by a chosen reference norm $\|W_0\|_F$, the ratio
+$$
+\frac{\|u_t\|_F}{\|W_t\|_F}
+$$
+is no longer a subtle consequence of initialization (e.g. MuP initialization) and architecture—it becomes a **designed quantity**. In other words, the “effective step size” on the unit sphere is engineered to be stable across widths and depths, so the same nominal $(\eta_{\text{eff}}, T)$ schedule produces comparable trajectories for a 4-layer toy model and a 512-layer model.
+
+This perspective lines up with the **spectral condition** view of feature learning: what matters is the effective step size along each eigen-direction of the data/feature covariance, not the raw learning rate alone. Yang, Simon, and Bernstein show that feature learning occurs when the product of step size and appropriate spectral quantities lies in a “sweet spot” that is neither too small (no learning) nor too large (instability) <a class="citation" href="#ref-25">[25]</a>. By stabilizing the ratio between weight and update norms, Hyperball makes it much easier to keep the model inside this sweet spot across architectures—so the same hyperparameters induce similar spectral dynamics even as we scale width and depth.
+
+We validate this by running the following width and depth scaling experiments:
 
 
 1. **Depth Scaling:** We fix the number of hidden dimensions to be 128 and vary the number of layers from 4 to 512. We observe that the maximal drift of optimal learning rate window is 1.4x, where as the drift is 3x for Adam and 4x for Muon.
@@ -1409,29 +1088,21 @@ Further, we heavily overtrained a small 130M model with MuonH and Muon and obser
     <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
 </div>
 
-
-
-
-### 4.3 Commonly Asked Questions
-
+### Commonly Asked Questions
 
 <details>
 <summary style="cursor: pointer; font-weight: 600;">
-Q1: Why does Hyperball speed up training?
+Q1: Why does Hyperball speed up training compared to decoupled weight decay?
 <p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-The explicitly chosen effective step-size schedule works better than the implicit one induced by weight decay and learning rate decay.
+Training with decoupled weight decay with a slowly changing learning rate will converge to a fixed weight norm and induce an 'implicit' learning rate schedule. Hyperball makes the effective step-size schedule explicit and this schedule turns out to be better.
 </p>
 </summary>
 
 <p>
-A natural question is why we should expect any speedup here. After all, what we prove in Section 2 is that the raw optimizer with weight decay is already implicitly optimizing on the hyperball, especially when we assume scale invariance.
-</p>
 
-<p>
-The key difference is the effective step-size schedule. In the raw optimizer with weight decay, the effective step size emerges indirectly from the weight decay coefficient and the learning-rate schedule, making it hard to reason about—even under a constant learning rate. Adding learning-rate decay introduces more lag in the weight norm and makes the effective schedule even murkier. With Hyperball, we can directly tune how each new update blends with the existing weight norm, which makes it much easier to design a good schedule. In practice, a simple cosine or linear schedule already performs well for both AdamH and MuonH.
+As we will show in details in <a href="weight-decay-part-2.html">Part 2</a>, training with decoupled weight decay with a slowly changing learning rate will converge to a fixed weight norm that is a function of the optimizer choice and hyperparameters. This induces an 'implicit' learning rate schedule. However, this implicit schedule is hard to reason about as in practice, one need to account for the changing learning rate and this introduces a lagging effect on weight norm.
 
-
-Our finding is also consistent with the finding in <a class="citation" href="#ref-32">[32]</a> that hyperparameter transfer can enable consistent gains of matrix-preconditioned optimizers across scales as with hyperball optimization, the effective step size now naturally extends to the larger scale, as evidenced by the hyperparameter transfer experiment in Section 4.2.
+Hyperball makes the effective step-size schedule explicit instead of implicit and the explicit schedule turns out to be better. Our finding is also consistent with <a class="citation" href="#ref-32">[32]</a>, which argues that hyperparameter transfer can enable consistent gains of matrix-preconditioned optimizers across scale.
 </p>
 
 </details>
@@ -1506,51 +1177,36 @@ In the deep-learning regime of interest, weight matrices empirically hover near 
 Further, theoretically, <a class="citation" href="#ref-31">[31]</a> shows that Muon with decoupled weight decay implicitly optimize weights under spectral norm constraints. As we show in Section 2, our method corresponds to Muon with decoupled weight decay with a special effective step size schedule, and therefore we expect it to have similar behavior.
 
 </details>
+    
 
 ## Acknowledgments
 
 The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/), [Zihan Qiu](https://www.linkedin.com/in/zihan-qiu-33a172249/), and [Liliang Ren](https://renll.github.io/) for motivating this blog post into existence. To some extent, this work is a proof to show that it is possible to remove weight decay altogether by designing the optimizer to explicitly control weight norms. The authors would also like to thank [William Held](https://williamheld.com/), [David Hall](http://dlwh.org/), [Suhas Kotha](https://kothasuhas.github.io/), [Tatsunori Hashimoto](https://thashim.github.io/), [Jason Lee](https://jasondlee88.github.io/), [Zhiyuan Li](https://zhiyuanli.ttic.edu/), [Lijie Chen](https://chen-lijie.github.io/), [Huaqing Zhang](https://scholar.google.com/citations?user=_E9tcTkAAAAJ), [Jiacheng You](https://github.com/YouJiacheng), [Jeremy Bernstein](https://jeremybernste.in/) and [Samuel Schoenholz](https://www.linkedin.com/in/samuel-schoenholz-379830a0/) for helpful discussions.
 
+---
+
 ## Citations
 
-If this work is helpful to you, please consider citing:
+If this work is helpful to you, please consider citing Part I:
 
 ```bibtex
-@online{wen2025hyperball,
+@online{wen2025hyperball_part1,
     title        = {Fantastic Pretraining Optimizers and Where to Find Them II: From Weight Decay to Hyperball Optimization},
     author       = {Wen, Kaiyue and Dang, Xingyu and Lyu, Kaifeng and Ma, Tengyu and Liang, Percy},
     year         = {2025},
-    month        = {11},
-    day          = {30},
-    url          = {https://whenwen.github.io/wd_blog/public/index.html},
-    urldate      = {2025-12-09},
+    month        = {12},
+    day          = {15},
+    url          = {https://whenwen.github.io/wd_blog/public/hyperball-part-1.html},
+    urldate      = {2025-12-15},
 }
 ```
+
+---
 
 ## References
 
 <ol class="reference-list">
-    <li id="ref-1"><strong>Twan van Laarhoven</strong>. "L2 Regularization versus Batch and Weight Normalization." arXiv (2017). <a href="https://arxiv.org/abs/1706.05350" target="_blank" rel="noopener">https://arxiv.org/abs/1706.05350</a></li>
-    <li id="ref-2"><strong>Guodong Zhang, Chaoqi Wang, Bowen Xu, Roger Grosse</strong>. "Three Mechanisms of Weight Decay Regularization." ICLR (2019). <a href="https://openreview.net/forum?id=B1lz-3Rct7" target="_blank" rel="noopener">https://openreview.net/forum?id=B1lz-3Rct7</a></li>
-    <li id="ref-3"><strong>Elad Hoffer, Ron Banner, Itay Golan, Daniel Soudry</strong>. "Norm matters: efficient and accurate normalization schemes in deep networks." (2018). <a href="https://arxiv.org/abs/1803.01814" target="_blank" rel="noopener">https://arxiv.org/abs/1803.01814</a></li>
-    <li id="ref-4"><strong>Zhiyuan Li, Kaifeng Lyu, Sanjeev Arora</strong>. "Reconciling Modern Deep Learning with Traditional Optimization Analyses: The Intrinsic Learning Rate." NeurIPS (2020). <a href="https://arxiv.org/abs/2010.02916" target="_blank" rel="noopener">https://arxiv.org/abs/2010.02916</a></li>
-    <li id="ref-5"><strong>Francesco D'Angelo, Maksym Andriushchenko, Aditya Varre, Nicolas Flammarion</strong>. "Why Do We Need Weight Decay in Modern Deep Learning?" (2023). <a href="https://arxiv.org/abs/2310.04415" target="_blank" rel="noopener">https://arxiv.org/abs/2310.04415</a></li>
-    <li id="ref-6"><strong>Aaron Defazio</strong>. "Why Gradients Rapidly Increase Near the End of Training." (2025). <a href="https://arxiv.org/abs/2506.02285" target="_blank" rel="noopener">https://arxiv.org/abs/2506.02285</a></li>
-    <li id="ref-7"><strong>Ilya Loshchilov, Frank Hutter</strong>. "Decoupled Weight Decay Regularization (AdamW)." (2019). <a href="https://arxiv.org/abs/1711.05101" target="_blank" rel="noopener">https://arxiv.org/abs/1711.05101</a></li>
-    <li id="ref-8"><strong>Atli Kosson, Bettina Messmer, Martin Jaggi</strong>. "Rotational Equilibrium: How Weight Decay Balances Learning Across Neural Networks." (2024). <a href="https://arxiv.org/abs/2305.17212" target="_blank" rel="noopener">https://arxiv.org/abs/2305.17212</a></li> 
-    <li id="ref-9"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part I)." (2025). <a href="https://kexue.fm/archives/11307" target="_blank" rel="noopener">https://kexue.fm/archives/11307</a></li>
-    <li id="ref-10"><strong>Jianlin Su</strong>. "Why Adam's Update RMS Is 0.2?" (2025). <a href="https://kexue.fm/archives/11267" target="_blank" rel="noopener">https://kexue.fm/archives/11267</a></li>
-    <li id="ref-11"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part II)." (2025). <a href="https://kexue.fm/archives/11404" target="_blank" rel="noopener">https://kexue.fm/archives/11404</a></li>
-    <li id="ref-12"><strong>Sadhika Malladi, Kaifeng Lyu, Abhishek Panigrahi, Sanjeev Arora</strong>. "On the SDEs and Scaling Rules for Adaptive Gradient Algorithms." (2024). <a href="https://arxiv.org/abs/2205.10287" target="_blank" rel="noopener">https://arxiv.org/abs/2205.10287</a></li>
-    <li id="ref-13"><strong>Keller Jordan</strong>. "Muon: An optimizer for hidden layers in neural networks." (2023). <a href="https://kellerjordan.github.io/posts/muon/" target="_blank" rel="noopener">https://kellerjordan.github.io/posts/muon/</a></li>
     <li id="ref-14"><strong>Jingyuan Liu, Jianlin Su, Xingcheng Yao, Zhejun Jiang, Guokun Lai, Yulun Du, Yidao Qin, Weixin Xu, Enzhe Lu, Junjie Yan, Yanru Chen, Huabin Zheng, Yibo Liu, Shaowei Liu, Bohong Yin, Weiran He, Han Zhu, Yuzhi Wang, Jianzhou Wang, Mengnan Dong, Zheng Zhang, Yongsheng Kang, Hao Zhang, Xinran Xu, Yutao Zhang, Yuxin Wu, Xinyu Zhou, Zhilin Yang</strong>. "Muon is Scalable for LLM Training." (2025). <a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">https://arxiv.org/abs/2502.16982</a></li>
-    <li id="ref-15"><strong>Kaiyue Wen, David Hall, Tengyu Ma, Percy Liang</strong>. "Fantastic Pretraining Optimizers and Where to Find Them." (2025). <a href="https://arxiv.org/abs/2509.02046" target="_blank" rel="noopener">https://arxiv.org/abs/2509.02046</a></li>
-    <li id="ref-16"><strong>Kaiyue Wen, Zhiyuan Li, Jason Wang, David Hall, Percy Liang, Tengyu Ma</strong>. "Understanding Warmup-Stable-Decay Learning Rates: A River Valley Loss Landscape Perspective." (2024). <a href="https://arxiv.org/abs/2410.05192" target="_blank" rel="noopener">https://arxiv.org/abs/2410.05192</a></li>
-    <li id="ref-17"><strong>Atli Kosson, Jeremy Welborn, Yang Liu, Martin Jaggi, Xi Chen</strong>. "Weight Decay may matter more than μP for Learning Rate Transfer in Practice." (2025). <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">https://arxiv.org/abs/2510.19093</a></li>
-    <li id="ref-18"><strong>Charlie Blake, Constantin Eichenberg, Josef Dean, Lukas Balles, Luke Y. Prince, Björn Deiseroth, Andres Felipe Cruz-Salinas, Carlo Luschi, Samuel Weinbach, Douglas Orr</strong>. "u-μP: The Unit-Scaled Maximal Update Parametrization." (2024). <a href="https://arxiv.org/abs/2407.17465" target="_blank" rel="noopener">https://arxiv.org/abs/2407.17465</a></li>
-    <li id="ref-19"><strong>Ziyuan Fan, Yifeng Liu, Qingyue Zhao, Angela Yuan, Quanquan Gu</strong>. "Robust Layerwise Scaling Rules by Proper Weight Decay Tuning." (2025). <a href="https://arxiv.org/abs/2510.15262" target="_blank" rel="noopener">https://arxiv.org/abs/2510.15262</a></li>
-    <li id="ref-20"><strong>Xi Wang, Laurence Aitchison</strong>. "How to set AdamW's weight decay as you scale model and dataset size." (2024). <a href="https://arxiv.org/abs/2405.13698" target="_blank" rel="noopener">https://arxiv.org/abs/2405.13698</a></li>
-    <li id="ref-21"><strong>Greg Yang, Edward J. Hu, Igor Babuschkin, Szymon Sidor, Xiaodong Liu, David Farhi, Nick Ryder, Jakub Pachocki, Weizhu Chen, Jianfeng Gao</strong>. "Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer." (2021). <a href="https://arxiv.org/abs/2203.03466" target="_blank" rel="noopener">https://arxiv.org/abs/2203.03466</a></li>
     <li id="ref-22"><strong>Tim Salimans, Diederik P. Kingma</strong>. "Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks." (2016). <a href="https://arxiv.org/abs/1602.07868" target="_blank" rel="noopener">https://arxiv.org/abs/1602.07868</a></li>
     <li id="ref-23"><strong>Tero Karras, Miika Aittala, Jaakko Lehtinen, Janne Hellsten, Timo Aila, Samuli Laine</strong>. "Analyzing and Improving the Training Dynamics of Diffusion Models." (2023). <a href="https://arxiv.org/abs/2312.02696" target="_blank" rel="noopener">https://arxiv.org/abs/2312.02696</a></li>
     <li id="ref-24"><strong>Yonggan Fu, Xin Dong, Shizhe Diao, Matthijs Van Keirsbilck, Hanrong Ye, Wonmin Byeon, Yashaswi Karnati, Lucas Liebenwein, Hannah Zhang, Nikolaus Binder, Maksim Khadkevich, Alexander Keller, Jan Kautz, Yingyan Celine Lin, Pavlo Molchanov</strong>. "Nemotron-Flash: Towards Latency-Optimal Hybrid Small Language Models." (2025). <a href="https://arxiv.org/abs/2511.18890" target="_blank" rel="noopener">https://arxiv.org/abs/2511.18890</a></li>
@@ -1561,9 +1217,11 @@ If this work is helpful to you, please consider citing:
     <li id="ref-29"><strong>Franz Louis Cesista</strong>. "Heuristic Solutions for Steepest Descent on the Stiefel Manifold." (2025). <a href="https://leloykun.github.io/ponder/steepest-descent-stiefel/" target="_blank" rel="noopener">https://leloykun.github.io/ponder/steepest-descent-stiefel/</a></li>
     <li id="ref-30"><strong>Jianlin Su</strong>. "Thinking about Spectral Norm Gradient and Spectral Weight Decay." Scientific Spaces (2024). <a href="https://kexue.fm/archives/10648" target="_blank" rel="noopener">https://kexue.fm/archives/10648</a></li>
     <li id="ref-31"><strong>Lizhang Chen, Jonathan Li, Qiang Liu</strong>. "Muon Optimizes Under Spectral Norm Constraints." (2025). <a href="https://arxiv.org/abs/2506.15054" target="_blank" rel="noopener">https://arxiv.org/abs/2506.15054</a></li>
-    <li id="ref-32"><strong>Shikai Qiu, Zixi Chen, Hoang Phan, Qi Lei, Andrew Gordon Wilson    </strong>. "Hyperparameter Transfer Enables Consistent Gains of Matrix-Preconditioned Optimizers Across Scale." (2025). <a href="https://arxiv.org/abs/2512.05620" target="_blank" rel="noopener">https://arxiv.org/abs/2512.05620</a></li>
+    <li id="ref-32"><strong>Shikai Qiu, Zixi Chen, Hoang Phan, Qi Lei, Andrew Gordon Wilson</strong>. "Hyperparameter Transfer Enables Consistent Gains of Matrix-Preconditioned Optimizers Across Scale." (2025). <a href="https://arxiv.org/abs/2512.05620" target="_blank" rel="noopener">https://arxiv.org/abs/2512.05620</a></li>
+    <li id="ref-33"><strong>Zhiyuan Li, Kaifeng Lyu, Sanjeev Arora</strong>. "Reconciling Modern Deep Learning with Traditional Optimization Analyses: The Intrinsic Learning Rate." NeurIPS (2020). <a href="https://arxiv.org/abs/2010.02916" target="_blank" rel="noopener">https://arxiv.org/abs/2010.02916</a></li>
+    <li id="ref-34"><strong>Ilya Loshchilov, Frank Hutter</strong>. "Decoupled Weight Decay Regularization (AdamW)." (2019). <a href="https://arxiv.org/abs/1711.05101" target="_blank" rel="noopener">https://arxiv.org/abs/1711.05101</a></li>
+    <li id="ref-35"><strong>Atli Kosson, Bettina Messmer, Martin Jaggi</strong>. "Rotational Equilibrium: How Weight Decay Balances Learning Across Neural Networks." (2024). <a href="https://arxiv.org/abs/2305.17212" target="_blank" rel="noopener">https://arxiv.org/abs/2305.17212</a></li>
 </ol>
-
 
     </script>
 
@@ -1769,6 +1427,1097 @@ If this work is helpful to you, please consider citing:
                 trackedHeadings.forEach(item => observer.observe(item.heading));
             };
 
+            const setupCommentary = (contentRoot) => {
+                const textarea = document.getElementById('commentary-input');
+                const signatureInput = document.getElementById('commentary-signature-select');
+                const submitBtn = document.getElementById('commentary-submit');
+                const status = document.getElementById('commentary-status');
+                const clearBtn = document.getElementById('commentary-clear');
+                const commentaryPanel = document.querySelector('.commentary-panel');
+
+                if (!textarea || !submitBtn || !signatureInput || !contentRoot) {
+                    return;
+                }
+
+                const storageKey = 'wd_blog_commentary_v1';
+                const API_BASE = 'http://138.197.99.28:7291';
+                const ARTICLE_ID = 'weight-decay-post';
+                const MIN_SELECTION_CHARS = 4;
+                const MAX_SNIPPET_CHARS = 320;
+                const PENDING_ID = '__pending_comment__';
+                const THREAD_GUTTER = 18; // minimum vertical gap between rendered threads
+                const THREAD_COLUMN_GAP = 36;
+
+                let pendingSelection = null;
+                let comments = [];
+                let statusTimer = null;
+                const inlineVisuals = new Map();
+                const sectionSignatures = new Map();
+                let activeSignatureSection = '';
+                let defaultSignature = '';
+                let collisionResolutionFrame = null;
+
+                const debounce = (fn, delay = 120) => {
+                    let timer;
+                    return (...args) => {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => fn(...args), delay);
+                    };
+                };
+
+                const setActiveSignatureSection = (sectionId = '') => {
+                    activeSignatureSection = sectionId || '';
+                    if (!signatureInput) {
+                        return;
+                    }
+                    if (!activeSignatureSection) {
+                        signatureInput.value = defaultSignature;
+                        return;
+                    }
+                    const saved = sectionSignatures.get(activeSignatureSection);
+                    signatureInput.value = typeof saved === 'string' ? saved : defaultSignature;
+                };
+
+                const isNodeHiddenByClosedDetails = (node) => {
+                    if (!node) {
+                        return false;
+                    }
+                    const element = node instanceof Element ? node : node.parentElement;
+                    let current = element;
+                    while (current && current !== contentRoot) {
+                        if (current.tagName === 'DETAILS' && !current.open) {
+                            return true;
+                        }
+                        current = current.parentElement;
+                    }
+                    return false;
+                };
+
+                const showPanel = () => {
+                    // Panel is always visible now, no-op
+                };
+
+                const hidePanel = () => {
+                    // Panel is always visible now, no-op
+                };
+
+                const clearPendingSelection = () => {
+                    if (!pendingSelection) {
+                        return;
+                    }
+                    pendingSelection = null;
+                    setActiveSignatureSection('');
+                    updateSubmitState();
+                    rebuildInlineVisuals();
+                    hidePanel();
+                };
+
+                const showStatus = (message = '', state = 'info') => {
+                    if (!status) {
+                        return;
+                    }
+                    if (statusTimer) {
+                        clearTimeout(statusTimer);
+                        statusTimer = null;
+                    }
+                    status.textContent = message;
+                    status.dataset.state = message ? state : '';
+                    if (message) {
+                        statusTimer = setTimeout(() => {
+                            status.textContent = '';
+                            status.dataset.state = '';
+                            statusTimer = null;
+                        }, 4000);
+                    }
+                };
+
+                const updateClearState = () => {
+                    if (clearBtn) {
+                        clearBtn.disabled = comments.length === 0;
+                    }
+                };
+
+                const saveCommentToServer = async (comment) => {
+                    console.log('[saveCommentToServer] called with:', comment.note);
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                articleId: ARTICLE_ID,
+                                snippet: comment.snippet,
+                                note: comment.note,
+                                sectionId: comment.sectionId,
+                                sectionLabel: comment.sectionLabel,
+                                anchor: comment.anchor,
+                                signature: comment.signature
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        return data.comment;
+                    } catch (err) {
+                        console.error('Failed to save comment to server:', err);
+                        showStatus('Failed to save comment to server.', 'warning');
+                        return null;
+                    }
+                };
+
+                const loadCommentsFromServer = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments?articleId=${encodeURIComponent(ARTICLE_ID)}`);
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        return Array.isArray(data.comments) ? data.comments : [];
+                    } catch (err) {
+                        console.error('Failed to load comments from server:', err);
+                        showStatus('Failed to load comments from server.', 'warning');
+                        return [];
+                    }
+                };
+
+                const deleteCommentFromServer = async (commentId) => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments/${commentId}`, {
+                            method: 'DELETE'
+                        });
+                        if (!response.ok && response.status !== 404) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        return true;
+                    } catch (err) {
+                        console.error('Failed to delete comment from server:', err);
+                        showStatus('Failed to delete comment from server.', 'warning');
+                        return false;
+                    }
+                };
+
+                const updateSubmitState = () => {
+                    submitBtn.disabled = !(pendingSelection && textarea.value.trim().length);
+                };
+
+                const formatTimestamp = (isoString) => {
+                    const date = isoString ? new Date(isoString) : new Date();
+                    return date.toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                const ensureHeadingId = (heading) => {
+                    if (!heading) {
+                        return '';
+                    }
+                    if (heading.id) {
+                        return heading.id;
+                    }
+                    const base = slugifyHeading(heading.textContent.trim());
+                    let candidate = base || `section-${Math.random().toString(36).slice(2, 8)}`;
+                    if (document.getElementById(candidate)) {
+                        candidate = `${candidate}-${Math.random().toString(36).slice(2, 5)}`;
+                    }
+                    heading.id = candidate;
+                    return candidate;
+                };
+
+                const findSectionDetails = (range) => {
+                    const headings = Array.from(contentRoot.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+                    if (!headings.length) {
+                        return null;
+                    }
+                    const rect = range.getBoundingClientRect();
+                    const selectionTop = (rect.top === 0 && rect.bottom === 0)
+                        ? window.scrollY
+                        : rect.top + window.scrollY;
+                    let candidate = headings[0];
+                    let candidateTop = headings[0].getBoundingClientRect().top + window.scrollY;
+                    headings.forEach((heading) => {
+                        const headingTop = heading.getBoundingClientRect().top + window.scrollY;
+                        if (headingTop <= selectionTop + 5 && headingTop >= candidateTop) {
+                            candidate = heading;
+                            candidateTop = headingTop;
+                        }
+                    });
+                    const id = ensureHeadingId(candidate);
+                    return {
+                        id,
+                        sectionLabel: candidate.textContent.trim() || 'Selected section'
+                    };
+                };
+
+                const getNodePath = (node) => {
+                    const path = [];
+                    let current = node;
+                    while (current && current !== contentRoot) {
+                        const parent = current.parentNode;
+                        if (!parent) {
+                            return null;
+                        }
+                        const index = Array.prototype.indexOf.call(parent.childNodes, current);
+                        path.unshift(index);
+                        current = parent;
+                    }
+                    return path;
+                };
+
+                const resolvePath = (path) => {
+                    let current = contentRoot;
+                    for (const index of path) {
+                        if (!current || !current.childNodes || !current.childNodes[index]) {
+                            return null;
+                        }
+                        current = current.childNodes[index];
+                    }
+                    return current;
+                };
+
+                const describeRange = (range) => {
+                    if (!contentRoot.contains(range.commonAncestorContainer)) {
+                        return null;
+                    }
+                    const startPath = getNodePath(range.startContainer);
+                    const endPath = getNodePath(range.endContainer);
+                    if (!startPath || !endPath) {
+                        return null;
+                    }
+                    return {
+                        startPath,
+                        startOffset: range.startOffset,
+                        endPath,
+                        endOffset: range.endOffset
+                    };
+                };
+
+                const buildRangeFromDescriptor = (descriptor) => {
+                    if (!descriptor) {
+                        return null;
+                    }
+                    const startNode = resolvePath(descriptor.startPath);
+                    const endNode = resolvePath(descriptor.endPath);
+                    if (!startNode || !endNode) {
+                        return null;
+                    }
+                    const range = document.createRange();
+                    try {
+                        range.setStart(startNode, descriptor.startOffset);
+                        range.setEnd(endNode, descriptor.endOffset);
+                    } catch (err) {
+                        return null;
+                    }
+                    return range;
+                };
+
+                // Fallback: find text within a section by snippet
+                const findTextInSection = (sectionId, snippet) => {
+                    if (!snippet) return null;
+
+                    // Find the section element
+                    let searchRoot = contentRoot;
+                    if (sectionId) {
+                        const section = document.getElementById(sectionId);
+                        if (section) {
+                            // Search from this section until next sibling heading or end
+                            searchRoot = section.parentElement || section;
+                        }
+                    }
+
+                    // Use TreeWalker to find text nodes
+                    const walker = document.createTreeWalker(
+                        searchRoot,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+
+                    // Collect all text nodes and their positions
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        if (node.textContent.trim()) {
+                            textNodes.push(node);
+                        }
+                    }
+
+                    // Build full text and find snippet
+                    const normalizeText = (t) => t.replace(/\s+/g, ' ').trim();
+                    const normalizedSnippet = normalizeText(snippet);
+
+                    // Try to find exact match first
+                    for (const textNode of textNodes) {
+                        const nodeText = textNode.textContent;
+                        const normalizedNodeText = normalizeText(nodeText);
+                        const idx = normalizedNodeText.indexOf(normalizedSnippet);
+                        if (idx !== -1) {
+                            // Find actual position in original text
+                            let actualStart = 0;
+                            let normalizedPos = 0;
+                            for (let i = 0; i < nodeText.length && normalizedPos < idx; i++) {
+                                if (/\s/.test(nodeText[i])) {
+                                    if (i === 0 || !/\s/.test(nodeText[i-1])) {
+                                        normalizedPos++;
+                                    }
+                                } else {
+                                    normalizedPos++;
+                                }
+                                actualStart = i + 1;
+                            }
+
+                            // Create range
+                            const range = document.createRange();
+                            try {
+                                range.setStart(textNode, actualStart);
+                                range.setEnd(textNode, Math.min(actualStart + snippet.length, nodeText.length));
+                                return range;
+                            } catch (e) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // Try partial match (first few words)
+                    const snippetWords = normalizedSnippet.split(' ').slice(0, 3).join(' ');
+                    if (snippetWords.length > 5) {
+                        for (const textNode of textNodes) {
+                            const nodeText = normalizeText(textNode.textContent);
+                            const idx = nodeText.indexOf(snippetWords);
+                            if (idx !== -1) {
+                                const range = document.createRange();
+                                try {
+                                    range.setStart(textNode, idx);
+                                    range.setEnd(textNode, Math.min(idx + snippet.length, textNode.textContent.length));
+                                    return range;
+                                } catch (e) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    return null;
+                };
+
+                const removeInlineVisual = (id) => {
+                    if (!inlineVisuals.has(id)) {
+                        return;
+                    }
+                    const visual = inlineVisuals.get(id);
+                    if (visual.fragments) {
+                        visual.fragments.forEach(fragment => fragment.remove());
+                    }
+                    if (visual.thread) {
+                        visual.thread.remove();
+                    }
+                    inlineVisuals.delete(id);
+                };
+
+                const buildCommentElement = (comment, isReply = false) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'commentary-thread-comment';
+                    wrapper.dataset.commentId = comment.id;
+
+                    const note = document.createElement('p');
+                    note.className = 'commentary-thread-note';
+                    note.textContent = comment.note;
+                    wrapper.appendChild(note);
+
+                    const signature = document.createElement('div');
+                    signature.className = 'commentary-thread-signature';
+                    signature.textContent = '— ' + ((comment.signature && comment.signature.trim()) || 'Anonymous');
+                    wrapper.appendChild(signature);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'commentary-thread-actions';
+
+                    if (!isReply) {
+                        const replyBtn = document.createElement('button');
+                        replyBtn.type = 'button';
+                        replyBtn.dataset.action = 'reply-comment';
+                        replyBtn.dataset.commentId = comment.id;
+                        replyBtn.textContent = 'Reply';
+                        actions.appendChild(replyBtn);
+                    }
+
+                    const editBtn = document.createElement('button');
+                    editBtn.type = 'button';
+                    editBtn.dataset.action = 'edit-comment';
+                    editBtn.dataset.commentId = comment.id;
+                    editBtn.textContent = 'Edit';
+                    actions.appendChild(editBtn);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.dataset.action = 'delete-comment';
+                    deleteBtn.dataset.commentId = comment.id;
+                    deleteBtn.textContent = 'Delete';
+                    actions.appendChild(deleteBtn);
+
+                    wrapper.appendChild(actions);
+                    return wrapper;
+                };
+
+                const buildEditForm = (comment) => {
+                    const form = document.createElement('div');
+                    form.className = 'commentary-edit-form';
+                    form.dataset.commentId = comment.id;
+
+                    // Signature select
+                    const select = document.createElement('select');
+                    select.className = 'commentary-edit-signature';
+                    select.innerHTML = `
+                        <option value="">-- Select Name --</option>
+                        <option value="T. MA">T. MA</option>
+                        <option value="P. LIANG">P. LIANG</option>
+                        <option value="K. WEN">K. WEN</option>
+                        <option value="X. DANG">X. DANG</option>
+                        <option value="K. LYU">K. LYU</option>
+                    `;
+                    select.value = comment.signature || '';
+                    form.appendChild(select);
+
+                    const input = document.createElement('textarea');
+                    input.className = 'commentary-edit-input';
+                    input.value = comment.note;
+                    input.rows = 2;
+                    form.appendChild(input);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'commentary-edit-actions';
+
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.dataset.action = 'cancel-edit';
+                    cancelBtn.textContent = 'Cancel';
+                    actionsDiv.appendChild(cancelBtn);
+
+                    const saveBtn = document.createElement('button');
+                    saveBtn.type = 'button';
+                    saveBtn.dataset.action = 'save-edit';
+                    saveBtn.dataset.commentId = comment.id;
+                    saveBtn.textContent = 'Save';
+                    saveBtn.disabled = !input.value.trim();
+                    actionsDiv.appendChild(saveBtn);
+
+                    form.appendChild(actionsDiv);
+
+                    input.addEventListener('input', () => {
+                        saveBtn.disabled = !input.value.trim();
+                    });
+
+                    return form;
+                };
+
+                const buildReplyForm = (parentId) => {
+                    const form = document.createElement('div');
+                    form.className = 'commentary-reply-form';
+                    form.dataset.parentId = parentId;
+
+                    // Signature select
+                    const select = document.createElement('select');
+                    select.className = 'commentary-reply-signature';
+                    select.innerHTML = `
+                        <option value="">-- Select Name --</option>
+                        <option value="T. MA">T. MA</option>
+                        <option value="P. LIANG">P. LIANG</option>
+                        <option value="K. WEN">K. WEN</option>
+                        <option value="X. DANG">X. DANG</option>
+                        <option value="K. LYU">K. LYU</option>
+                    `;
+                    // Copy current selection from main panel
+                    select.value = signatureInput.value || '';
+                    form.appendChild(select);
+
+                    const input = document.createElement('textarea');
+                    input.className = 'commentary-reply-input';
+                    input.placeholder = 'Write a reply...';
+                    input.rows = 2;
+                    form.appendChild(input);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'commentary-reply-actions';
+
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.dataset.action = 'cancel-reply';
+                    cancelBtn.textContent = 'Cancel';
+                    actionsDiv.appendChild(cancelBtn);
+
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'button';
+                    submitBtn.dataset.action = 'submit-reply';
+                    submitBtn.dataset.parentId = parentId;
+                    submitBtn.textContent = 'Reply';
+                    submitBtn.disabled = true;
+                    actionsDiv.appendChild(submitBtn);
+
+                    form.appendChild(actionsDiv);
+
+                    // Enable/disable submit based on input
+                    input.addEventListener('input', () => {
+                        submitBtn.disabled = !input.value.trim();
+                    });
+
+                    return form;
+                };
+
+                const buildThreadElement = (comment, anchorRect, contentRect) => {
+                    const thread = document.createElement('div');
+                    thread.className = 'commentary-thread';
+                    thread.dataset.commentId = comment.id;
+
+                    const offsetTop = anchorRect.top - contentRect.top;
+                    thread.style.top = `${offsetTop}px`;
+
+                    // Add main comment
+                    const mainComment = buildCommentElement(comment, false);
+                    thread.appendChild(mainComment);
+
+                    // Add replies if any
+                    const replies = comments.filter(c => c.parentId === comment.id);
+                    if (replies.length > 0) {
+                        const repliesContainer = document.createElement('div');
+                        repliesContainer.className = 'commentary-thread-replies';
+                        replies.forEach(reply => {
+                            const replyEl = buildCommentElement(reply, true);
+                            repliesContainer.appendChild(replyEl);
+                        });
+                        thread.appendChild(repliesContainer);
+                    }
+
+                    contentRoot.appendChild(thread);
+
+                    requestAnimationFrame(() => {
+                        const threadRect = thread.getBoundingClientRect();
+                        const targetLeft = -(threadRect.width + THREAD_COLUMN_GAP);
+                        thread.style.left = `${targetLeft}px`;
+                        const connectorOffset = Math.min(
+                            Math.max(anchorRect.height * 0.4, 12),
+                            threadRect.height - 12
+                        );
+                        thread.style.setProperty('--connector-offset', `${connectorOffset}px`);
+                    });
+
+                    return thread;
+                };
+
+                const scheduleThreadCollisionResolution = () => {
+                    if (collisionResolutionFrame) {
+                        cancelAnimationFrame(collisionResolutionFrame);
+                    }
+                    collisionResolutionFrame = requestAnimationFrame(() => {
+                        collisionResolutionFrame = null;
+                        const threads = Array.from(contentRoot.querySelectorAll('.commentary-thread'));
+                        if (!threads.length) {
+                            return;
+                        }
+                        threads.sort((a, b) => {
+                            const topA = parseFloat(a.style.top) || 0;
+                            const topB = parseFloat(b.style.top) || 0;
+                            return topA - topB;
+                        });
+                        let currentBottom = -Infinity;
+                        threads.forEach(thread => {
+                            const height = thread.offsetHeight;
+                            if (!height) {
+                                return;
+                            }
+                            let targetTop = parseFloat(thread.style.top) || 0;
+                            if (targetTop < currentBottom + THREAD_GUTTER) {
+                                targetTop = currentBottom + THREAD_GUTTER;
+                                thread.style.top = `${targetTop}px`;
+                            }
+                            currentBottom = targetTop + height;
+                        });
+                    });
+                };
+
+                const renderInlineHighlight = (id, descriptor, options = {}) => {
+                    // Try exact path-based range first
+                    let range = buildRangeFromDescriptor(descriptor);
+
+                    // Fallback: use sectionId + snippet to find text
+                    if (!range && options.comment) {
+                        range = findTextInSection(options.comment.sectionId, options.comment.snippet);
+                    }
+
+                    if (!range) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    if (isNodeHiddenByClosedDetails(range.startContainer) || isNodeHiddenByClosedDetails(range.endContainer)) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+                    if (!rects.length) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    const contentRect = contentRoot.getBoundingClientRect();
+                    removeInlineVisual(id);
+
+                    const fragments = rects.map(rect => {
+                        const fragment = document.createElement('div');
+                        fragment.className = 'commentary-highlight-fragment';
+                        if (options.pending) {
+                            fragment.dataset.pending = 'true';
+                        }
+                        fragment.style.top = `${rect.top - contentRect.top}px`;
+                        fragment.style.left = `${rect.left - contentRect.left}px`;
+                        fragment.style.width = `${rect.width}px`;
+                        fragment.style.height = `${rect.height}px`;
+                        contentRoot.appendChild(fragment);
+                        return fragment;
+                    });
+
+                    let thread = null;
+                    if (options.comment) {
+                        const anchorRect = rects[0];
+                        thread = buildThreadElement(options.comment, anchorRect, contentRect);
+                    }
+
+                    inlineVisuals.set(id, { fragments, thread });
+                };
+
+                const clearInlineVisuals = () => {
+                    Array.from(inlineVisuals.keys()).forEach(removeInlineVisual);
+                    if (collisionResolutionFrame) {
+                        cancelAnimationFrame(collisionResolutionFrame);
+                        collisionResolutionFrame = null;
+                    }
+                };
+
+                const rebuildInlineVisuals = () => {
+                    clearInlineVisuals();
+                    // Only render top-level comments (not replies)
+                    comments.filter(comment => !comment.parentId).forEach(comment => {
+                        if (comment.anchor) {
+                            renderInlineHighlight(comment.id, comment.anchor, { comment });
+                        }
+                    });
+                    if (pendingSelection?.rangeDescriptor) {
+                        renderInlineHighlight(PENDING_ID, pendingSelection.rangeDescriptor, { pending: true });
+                    }
+                    scheduleThreadCollisionResolution();
+                };
+
+                const scheduleInlineRebuild = debounce(rebuildInlineVisuals, 140);
+                window.addEventListener('resize', scheduleInlineRebuild);
+                if ('ResizeObserver' in window) {
+                    const resizeObserver = new ResizeObserver(() => scheduleInlineRebuild());
+                    resizeObserver.observe(contentRoot);
+                }
+
+                // Load comments from server on init
+                (async () => {
+                    showStatus('Loading comments...', 'info');
+                    comments = await loadCommentsFromServer();
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    updateSubmitState();
+                    if (comments.length > 0) {
+                        showPanel();
+                        showStatus(`Loaded ${comments.length} comment(s).`, 'info');
+                    } else {
+                        showStatus('');
+                    }
+                })();
+
+                const isInsideCommentaryUI = (node) => {
+                    if (!node || !(node instanceof Node)) {
+                        return false;
+                    }
+                    if (commentaryPanel?.contains(node)) {
+                        return true;
+                    }
+                    if (node instanceof Element && node.closest('.commentary-thread')) {
+                        return true;
+                    }
+                    return false;
+                };
+
+                const handleSelectionChange = () => {
+                    const selection = window.getSelection();
+                    // If no valid selection, just return - keep the pending selection
+                    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+                        return;
+                    }
+                    const range = selection.getRangeAt(0);
+                    // If selection is outside content area, ignore it - keep the pending selection
+                    if (!contentRoot.contains(range.commonAncestorContainer)) {
+                        return;
+                    }
+                    const normalizedText = selection.toString().replace(/\s+/g, ' ').trim();
+                    // If selection is too short, ignore it - keep the pending selection
+                    if (normalizedText.length < MIN_SELECTION_CHARS) {
+                        return;
+                    }
+                    const descriptor = describeRange(range);
+                    if (!descriptor) {
+                        showStatus('Unable to capture this selection.', 'warning');
+                        return;
+                    }
+                    // New valid selection - this replaces any existing pending selection
+                    const snippet = normalizedText.length > MAX_SNIPPET_CHARS
+                        ? `${normalizedText.slice(0, MAX_SNIPPET_CHARS)}…`
+                        : normalizedText;
+                    const section = findSectionDetails(range);
+                    pendingSelection = {
+                        snippet,
+                        sectionId: section?.id || '',
+                        sectionLabel: section?.sectionLabel || 'Selected text',
+                        rangeDescriptor: descriptor
+                    };
+                    setActiveSignatureSection(pendingSelection.sectionId);
+                    updateSubmitState();
+                    rebuildInlineVisuals();
+                    showPanel();
+                };
+
+                document.addEventListener('selectionchange', handleSelectionChange);
+
+                textarea.addEventListener('input', updateSubmitState);
+
+                signatureInput.addEventListener('input', () => {
+                    defaultSignature = signatureInput.value.trim();
+                    if (!activeSignatureSection) {
+                        return;
+                    }
+                    const trimmed = signatureInput.value.trim();
+                    if (trimmed) {
+                        sectionSignatures.set(activeSignatureSection, trimmed);
+                    } else {
+                        sectionSignatures.delete(activeSignatureSection);
+                    }
+                });
+
+                const deleteCommentById = async (commentId) => {
+                    const commentToDelete = comments.find(c => c.id === commentId);
+                    if (!commentToDelete) {
+                        return;
+                    }
+
+                    // Find all replies to this comment (if it's a top-level comment)
+                    const replies = comments.filter(c => c.parentId === commentId);
+                    const idsToDelete = [commentId, ...replies.map(r => r.id)];
+
+                    // Delete from server (delete replies first, then parent)
+                    for (const id of [...replies.map(r => r.id), commentId]) {
+                        const success = await deleteCommentFromServer(id);
+                        if (!success) {
+                            console.error('Failed to delete comment:', id);
+                        }
+                    }
+
+                    // Remove from local state
+                    comments = comments.filter(c => !idsToDelete.includes(c.id));
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    showStatus('Comment removed.');
+                    hidePanel();
+                };
+
+                let isSubmitting = false;
+                submitBtn.addEventListener('click', async () => {
+                    console.log('[submitBtn click] isSubmitting:', isSubmitting);
+                    if (isSubmitting) {
+                        console.log('[submitBtn click] blocked - already submitting');
+                        return;
+                    }
+                    const note = textarea.value.trim();
+                    if (!pendingSelection || !pendingSelection.rangeDescriptor || !note) {
+                        return;
+                    }
+                    isSubmitting = true;
+                    submitBtn.disabled = true;
+                    console.log('[submitBtn click] proceeding with submission');
+                    showStatus('Saving comment...', 'info');
+                    const resolveSignature = () => {
+                        if (activeSignatureSection) {
+                            const stored = sectionSignatures.get(activeSignatureSection);
+                            if (stored && stored.trim()) {
+                                return stored.trim();
+                            }
+                        }
+                        if (signatureInput.value.trim()) {
+                            return signatureInput.value.trim();
+                        }
+                        return defaultSignature.trim();
+                    };
+                    const newComment = {
+                        snippet: pendingSelection.snippet,
+                        note,
+                        sectionId: pendingSelection.sectionId,
+                        sectionLabel: pendingSelection.sectionLabel,
+                        anchor: pendingSelection.rangeDescriptor,
+                        signature: resolveSignature()
+                    };
+                    const savedComment = await saveCommentToServer(newComment);
+                    if (!savedComment) {
+                        submitBtn.disabled = false;
+                        isSubmitting = false;
+                        return;
+                    }
+                    comments = [savedComment, ...comments];
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    textarea.value = '';
+                    pendingSelection = null;
+                    updateSubmitState();
+                    showStatus('Comment added.');
+                    isSubmitting = false;
+                    const selection = window.getSelection();
+                    if (selection) {
+                        selection.removeAllRanges();
+                    }
+                });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', async () => {
+                        if (!comments.length) {
+                            return;
+                        }
+                        if (!window.confirm('Remove all saved comments?')) {
+                            return;
+                        }
+                        clearBtn.disabled = true;
+                        showStatus('Removing all comments...', 'info');
+                        const deletePromises = comments.map(c => deleteCommentFromServer(c.id));
+                        await Promise.all(deletePromises);
+                        comments = [];
+                        updateClearState();
+                        rebuildInlineVisuals();
+                        showStatus('All comments removed.');
+                        hidePanel();
+                    });
+                }
+
+                const submitReply = async (parentId, noteText, form) => {
+                    const submitBtn = form.querySelector('button[data-action="submit-reply"]');
+                    const input = form.querySelector('.commentary-reply-input');
+                    const replySignature = form.querySelector('.commentary-reply-signature');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Sending...';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                articleId: ARTICLE_ID,
+                                note: noteText,
+                                parentId: parentId,
+                                signature: replySignature?.value || null
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        comments.push(data.comment);
+                        rebuildInlineVisuals();
+                        form.remove();
+                    } catch (err) {
+                        console.error('Failed to submit reply:', err);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Reply';
+                        input.focus();
+                    }
+                };
+
+                const saveEdit = async (commentId, form) => {
+                    const saveBtn = form.querySelector('button[data-action="save-edit"]');
+                    const input = form.querySelector('.commentary-edit-input');
+                    const editSignature = form.querySelector('.commentary-edit-signature');
+                    const noteText = input.value.trim();
+
+                    if (!noteText) return;
+
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Saving...';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments/${commentId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                note: noteText,
+                                signature: editSignature?.value || null
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        // Update local comment
+                        const index = comments.findIndex(c => c.id === commentId);
+                        if (index !== -1) {
+                            comments[index] = data.comment;
+                        }
+                        rebuildInlineVisuals();
+                    } catch (err) {
+                        console.error('Failed to save edit:', err);
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = 'Save';
+                        input.focus();
+                    }
+                };
+
+                contentRoot.addEventListener('click', (event) => {
+                    const button = event.target.closest('button');
+                    if (!button || !button.closest('.commentary-thread')) {
+                        return;
+                    }
+
+                    const thread = button.closest('.commentary-thread');
+
+                    if (button.dataset.action === 'delete-comment') {
+                        deleteCommentById(button.dataset.commentId);
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'reply-comment') {
+                        // Remove any existing reply form in this thread
+                        const existingForm = thread.querySelector('.commentary-reply-form');
+                        if (existingForm) {
+                            existingForm.remove();
+                            return;
+                        }
+                        // Add reply form
+                        const form = buildReplyForm(button.dataset.commentId);
+                        thread.appendChild(form);
+                        form.querySelector('.commentary-reply-input').focus();
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'cancel-reply') {
+                        const form = button.closest('.commentary-reply-form');
+                        if (form) {
+                            form.remove();
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'submit-reply') {
+                        const form = button.closest('.commentary-reply-form');
+                        const input = form.querySelector('.commentary-reply-input');
+                        const noteText = input.value.trim();
+                        if (noteText) {
+                            submitReply(button.dataset.parentId, noteText, form);
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'edit-comment') {
+                        const commentWrapper = button.closest('.commentary-thread-comment');
+                        // Remove any existing edit form
+                        const existingForm = commentWrapper.querySelector('.commentary-edit-form');
+                        if (existingForm) {
+                            existingForm.remove();
+                            return;
+                        }
+                        // Find the comment data
+                        const comment = comments.find(c => c.id === button.dataset.commentId);
+                        if (!comment) return;
+                        // Hide the note and signature while editing
+                        const noteEl = commentWrapper.querySelector('.commentary-thread-note');
+                        const sigEl = commentWrapper.querySelector('.commentary-thread-signature');
+                        if (noteEl) noteEl.style.display = 'none';
+                        if (sigEl) sigEl.style.display = 'none';
+                        // Add edit form after the actions div
+                        const form = buildEditForm(comment);
+                        commentWrapper.insertBefore(form, commentWrapper.querySelector('.commentary-thread-actions'));
+                        form.querySelector('.commentary-edit-input').focus();
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'cancel-edit') {
+                        const commentWrapper = button.closest('.commentary-thread-comment');
+                        const form = button.closest('.commentary-edit-form');
+                        if (form) {
+                            form.remove();
+                            // Show the note and signature again
+                            const noteEl = commentWrapper.querySelector('.commentary-thread-note');
+                            const sigEl = commentWrapper.querySelector('.commentary-thread-signature');
+                            if (noteEl) noteEl.style.display = '';
+                            if (sigEl) sigEl.style.display = '';
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'save-edit') {
+                        const form = button.closest('.commentary-edit-form');
+                        saveEdit(button.dataset.commentId, form);
+                        event.stopPropagation();
+                        return;
+                    }
+                });
+
+                contentRoot.addEventListener('toggle', debounce(() => {
+                    rebuildInlineVisuals();
+                }, 80));
+
+                // Double-click on blank area to clear pending selection
+                document.addEventListener('dblclick', (event) => {
+                    // Ignore if clicking inside content or commentary UI
+                    if (contentRoot.contains(event.target)) {
+                        return;
+                    }
+                    if (isInsideCommentaryUI(event.target)) {
+                        return;
+                    }
+                    clearPendingSelection();
+                });
+
+                // Draggable panel
+                const heading = document.querySelector('.commentary-heading');
+                if (heading && commentaryPanel) {
+                    let isDragging = false;
+                    let startX, startY, startLeft, startTop;
+
+                    heading.addEventListener('pointerdown', (e) => {
+                        if (e.target.closest('button')) return;
+                        isDragging = true;
+                        heading.setPointerCapture(e.pointerId);
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        const rect = commentaryPanel.getBoundingClientRect();
+                        startLeft = rect.left;
+                        startTop = rect.top;
+                        commentaryPanel.style.transform = 'none';
+                        commentaryPanel.style.left = startLeft + 'px';
+                        commentaryPanel.style.top = startTop + 'px';
+                    });
+
+                    heading.addEventListener('pointermove', (e) => {
+                        if (!isDragging) return;
+                        const dx = e.clientX - startX;
+                        const dy = e.clientY - startY;
+                        commentaryPanel.style.left = (startLeft + dx) + 'px';
+                        commentaryPanel.style.top = (startTop + dy) + 'px';
+                    });
+
+                    heading.addEventListener('pointerup', () => {
+                        isDragging = false;
+                    });
+
+                    heading.addEventListener('pointercancel', () => {
+                        isDragging = false;
+                    });
+                }
+            };
 
             let parts = markdownSource.split(scaleInvToken);
             let finalHtml = '';
@@ -1889,6 +2638,7 @@ If this work is helpful to you, please consider citing:
             }
 
             contentDiv.innerHTML = finalHtml;
+            // Commentary panel removed
 
             const authorTab = document.querySelector('.author-tab');
             const primaryHeading = contentDiv.querySelector('h1');
@@ -2895,7 +3645,7 @@ If this work is helpful to you, please consider citing:
                     key: 'approx',
                     symbol: '≈',
                     label: 'Approximated scale invariance',
-                    description: 'Holds when SwiGLU behaves like a positive-homogeneous ReLU.<br>E.g. Jointly scaling gate_proj, down_proj and W_o by the same factor to keep the output approximately invariant thanks to the final activation.'
+                    description: 'Holds when SwiGLU behaves like a positive-homogeneous ReLU.<br>E.g. Jointly scaling gate_proj, W_o and Embedding by the same factor to keep the output approximately invariant thanks to the final activation.'
                 },
                 {
                     key: 'individual',
@@ -3738,10 +4488,13 @@ If this work is helpful to you, please consider citing:
         // Render citations in author-year format and merge consecutive citations into a single parenthetical group
         document.addEventListener('DOMContentLoaded', () => {
             const refMap = new Map();
+            const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const lastName = (name) => {
                 const parts = name.split(/\s+/).filter(Boolean);
                 return parts.length ? parts[parts.length - 1] : name;
             };
+            const refMeta = new Map(); // refId -> { kind, baseAuthor, year }
+            const disambigGroups = new Map(); // `${kind}@@${baseAuthor}@@${year}` -> [refId...]
 
             // Build reference lookup: ref-id -> "Author et al., Year"
             document.querySelectorAll('.reference-list li[id^="ref-"]').forEach(li => {
@@ -3750,12 +4503,19 @@ If this work is helpful to you, please consider citing:
                 const authors = authorText.split(',').map(a => a.trim()).filter(Boolean);
 
                 let authorLabel = null;
+                let kind = null;
+                let baseAuthor = null;
                 if (authors.length === 1) {
-                    authorLabel = lastName(authors[0]);
+                    baseAuthor = lastName(authors[0]);
+                    authorLabel = baseAuthor;
+                    kind = 'single';
                 } else if (authors.length === 2) {
                     authorLabel = `${lastName(authors[0])} & ${lastName(authors[1])}`;
                 } else if (authors.length > 2) {
-                    authorLabel = `${lastName(authors[0])} et al.`;
+                    const first = lastName(authors[0]);
+                    authorLabel = `${first} et al.`;
+                    baseAuthor = first;
+                    kind = 'etal';
                 }
 
                 const yearMatch = li.textContent.match(/\b(19|20)\d{2}\b/);
@@ -3763,8 +4523,35 @@ If this work is helpful to you, please consider citing:
 
                 if (authorLabel) {
                     refMap.set(id, year ? `${authorLabel}, ${year}` : authorLabel);
+                    if (kind && baseAuthor) {
+                        refMeta.set(id, { kind, baseAuthor, year });
+                        const groupKey = `${kind}@@${baseAuthor}@@${year}`;
+                        if (!disambigGroups.has(groupKey)) disambigGroups.set(groupKey, []);
+                        disambigGroups.get(groupKey).push(id);
+                    }
                 }
             });
+
+            // Disambiguate collisions that would otherwise render identically:
+            // - single author: "Su, 2025" -> "Su[1], 2025", "Su[2], 2025", ...
+            // - et al.: "Wen et al., 2025" -> "Wen[1] et al., 2025", ...
+            for (const [, ids] of disambigGroups.entries()) {
+                if (ids.length <= 1) continue;
+                ids.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+                ids.forEach((id, idx) => {
+                    const meta = refMeta.get(id);
+                    const existing = refMap.get(id);
+                    if (!meta || !existing) return;
+                    const n = idx + 1;
+                    if (meta.kind === 'etal') {
+                        const prefixRe = new RegExp(`^${escapeRegExp(meta.baseAuthor)} et al\\.`); // before ", YEAR"
+                        refMap.set(id, existing.replace(prefixRe, `${meta.baseAuthor}[${n}] et al.`));
+                    } else if (meta.kind === 'single') {
+                        const prefixRe = new RegExp(`^${escapeRegExp(meta.baseAuthor)}\\b`); // before ", YEAR"
+                        refMap.set(id, existing.replace(prefixRe, `${meta.baseAuthor}[${n}]`));
+                    }
+                });
+            }
 
             const citations = Array.from(document.querySelectorAll('.citation'));
 
@@ -3829,6 +4616,7 @@ If this work is helpful to you, please consider citing:
             });
         });
     </script>
+
 </body>
 
 </html>

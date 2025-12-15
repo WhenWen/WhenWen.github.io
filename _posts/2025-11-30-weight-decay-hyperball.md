@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "From Weight Decay to Hyperball Optimization"
-description: "How weight decay shapes the effective learning rate and how Hyperball optimizer replaces it."
+title: "From Weight Decay to Hyperball Optimization (Series)"
+description: "Two-part interactive series: Hyperball optimizer + a theory deep dive on weight decay and effective step size."
 date: 2025-11-30
-redirect: /wd_blog/public/index.html
+published: false
 tags:
   - weight decay
   - hyperball
@@ -17,69 +17,12 @@ toc: false
 read_time: 40
 ---
 
-<script>
-  if (typeof window !== 'undefined') {
-    window.location.replace('{{ "/wd_blog/public/index.html" | relative_url }}');
-  }
-</script>
+This is a two-part interactive series:
 
-Weight decay is often described as capacity control, but in modern scale-invariant architectures it instead sets the *effective* step size. Xingyu, Kaifeng, Tengyu, Percy, and I put together a full-length interactive article that walks through the math, demos, and Hyperball — an optimizer that removes weight decay entirely by constraining norms directly.
+- **Part 1 (Hyperball optimizer + intuition)**: [`/wd_blog/public/hyperball-part-1.html`]( {{ '/wd_blog/public/hyperball-part-1.html' | relative_url }} )
+- **Part 2 (theory deep dive on weight decay & effective step size)**: [`/wd_blog/public/weight-decay-part-2.html`]( {{ '/wd_blog/public/weight-decay-part-2.html' | relative_url }} )
 
-All of the interactive plots, sliders, and citations live in the standalone build below. You can read it inline or pop it out into a new tab if you want a full-screen view.
+Weight decay is often described as capacity control, but in modern scale-invariant architectures it instead sets the *effective* step size. Xingyu, Kaifeng, Tengyu, Percy, and I put together two standalone interactive articles with the math, demos, and Hyperball—an optimizer that removes weight decay entirely by constraining norms directly.
 
-<div class="wd-blog-frame">
-  <div class="wd-blog-frame__toolbar">
-    <a class="btn" href="{{ '/wd_blog/public/index.html' | relative_url }}" target="_blank" rel="noopener">
-      Open full page
-    </a>
-  </div>
-  <iframe
-    id="wd-blog-iframe"
-    src="{{ '/wd_blog/public/index.html' | relative_url }}"
-    title="From Weight Decay to Hyperball Optimization"
-    loading="lazy"
-    referrerpolicy="strict-origin-when-cross-origin"
-    style="width: 100%; border: 1px solid var(--global-muted-color, #e5e7eb); border-radius: 8px; min-height: 1200px;"
-  ></iframe>
-</div>
-
-<script>
-  (function () {
-    const iframe = document.getElementById('wd-blog-iframe');
-    if (!iframe) return;
-    const resize = () => {
-      try {
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        if (!doc || !doc.body) return;
-        const height = doc.body.scrollHeight;
-        if (height > 0) {
-          iframe.style.height = `${height + 100}px`;
-        }
-      } catch (err) {
-        console.warn('wd_blog iframe resize failed', err);
-      }
-    };
-    iframe.addEventListener('load', resize);
-    window.addEventListener('resize', () => {
-      window.requestAnimationFrame(resize);
-    });
-  })();
-</script>
-
-<style>
-  .wd-blog-frame {
-    margin-top: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
-  .wd-blog-frame__toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.5rem;
-  }
-  .wd-blog-frame__toolbar .btn {
-    border-radius: 999px;
-    font-weight: 600;
-    padding: 0.4rem 1.2rem;
-  }
-</style>
+If you want the full interactive experience, open the pages directly (links above).
 

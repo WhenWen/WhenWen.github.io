@@ -30,15 +30,26 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-from-weight-decay-to-hyperball-optimization",
+        },{id: "post-from-weight-decay-to-hyperball-optimization-part-2-weight-decay-theory-deep-dive",
         
-          title: "From Weight Decay to Hyperball Optimization",
+          title: "From Weight Decay to Hyperball Optimization (Part 2): Weight decay theory deep dive...",
         
-        description: "How weight decay shapes the effective learning rate and how Hyperball optimizer replaces it.",
+        description: "Part 2 of a two-part interactive series: why weight decay sets effective step size in scale-invariant nets.",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/wd_blog/public/index.html";
+            window.location.href = "/wd_blog/public/weight-decay-part-2.html";
+          
+        },
+      },{id: "post-from-weight-decay-to-hyperball-optimization-part-1-hyperball-optimizer-intuition",
+        
+          title: "From Weight Decay to Hyperball Optimization (Part 1): Hyperball optimizer + intuition",
+        
+        description: "Part 1 of a two-part interactive series: Hyperball optimization and empirical intuition.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/wd_blog/public/hyperball-part-1.html";
           
         },
       },{id: "books-the-godfather",

@@ -65,7 +65,13 @@ pagination:
 <div class="row row-cols-{% if featured_posts.size <= 2 or is_even == 0 %}2{% else %}3{% endif %}">
 {% for post in featured_posts %}
 <div class="col mb-4">
+{% if post.redirect == blank %}
 <a href="{{ post.url | relative_url }}">
+{% elsif post.redirect contains '://' %}
+<a href="{{ post.redirect }}" target="_blank">
+{% else %}
+<a href="{{ post.redirect | relative_url }}">
+{% endif %}
 <div class="card hoverable">
 <div class="row g-0">
 <div class="col-md-12">

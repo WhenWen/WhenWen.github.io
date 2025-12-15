@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weight Decay in Deep Learning</title>
+    <title>Fantastic Pretraining Optimizers and Where to Find Them II (2/2)</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,6 +68,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1.25rem 4rem;
+            padding-left: 1.25rem; /* No commentary sidebar */
         }
 
         .content-layout {
@@ -81,18 +82,404 @@
             min-width: 0;
         }
 
+        .commentary-panel {
+            position: fixed;
+            right: 310px;
+            top: 5rem;
+            width: 260px;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .commentary-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.35rem;
+            cursor: grab;
+            user-select: none;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .commentary-heading:active {
+            cursor: grabbing;
+        }
+
+        .commentary-heading h2 {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .commentary-signature-select {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .commentary-signature-select:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
         #content {
             position: relative;
             overflow: visible;
         }
 
+        .commentary-highlight-fragment {
+            position: absolute;
+            background: rgba(253, 224, 71, 0.55);
+            border-radius: 0.35rem;
+            box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .commentary-highlight-fragment[data-pending="true"] {
+            background: rgba(125, 211, 252, 0.4);
+            box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.5);
+        }
+
+        .commentary-thread {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 200px;
+            max-width: 260px;
+            padding: 0.65rem 0.85rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            box-shadow: 0 22px 40px -26px rgba(15, 23, 42, 0.65);
+            z-index: 2;
+        }
+
+        .commentary-thread-comment {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .commentary-thread-comment:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .commentary-thread-note {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #1f2937;
+            line-height: 1.45;
+        }
+
+        .commentary-thread-signature {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6366f1;
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+
+        .commentary-thread-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 0.75rem;
+            margin-top: 0.3rem;
+        }
+
+        .commentary-thread-actions button {
+            border: none;
+            background: transparent;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0;
+        }
+
+        .commentary-thread-actions button:hover {
+            color: #3b82f6;
+        }
+
+        .commentary-thread-actions button[data-action="delete"]:hover {
+            color: #ef4444;
+        }
+
+        .commentary-reply-form {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .commentary-reply-signature {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+        }
+
+        .commentary-reply-signature:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-reply-input {
+            width: 100%;
+            min-height: 36px;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.8rem;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-reply-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-reply-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .commentary-reply-actions button {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-reply-actions button[data-action="cancel-reply"] {
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .commentary-reply-actions button[data-action="submit-reply"] {
+            border: 1px solid #3b82f6;
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .commentary-reply-actions button[data-action="submit-reply"]:disabled {
+            background: #93c5fd;
+            border-color: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .commentary-thread-replies {
+            margin-top: 0.5rem;
+            padding-left: 0.75rem;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        .commentary-thread-replies .commentary-thread-comment {
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-thread-replies .commentary-thread-note {
+            font-size: 0.85rem;
+        }
+
+        .commentary-thread-replies .commentary-thread-signature {
+            font-size: 0.7rem;
+        }
+
+        .commentary-edit-form {
+            margin-top: 0.4rem;
+        }
+
+        .commentary-edit-signature {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+        }
+
+        .commentary-edit-input {
+            width: 100%;
+            min-height: 36px;
+            padding: 0.4rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.8rem;
+            background: #fafafa;
+            margin-bottom: 0.4rem;
+        }
+
+        .commentary-edit-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-edit-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .commentary-edit-actions button {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-edit-actions button[data-action="cancel-edit"] {
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .commentary-edit-actions button[data-action="save-edit"] {
+            border: 1px solid #10b981;
+            background: #10b981;
+            color: #fff;
+        }
+
+        .commentary-edit-actions button[data-action="save-edit"]:disabled {
+            background: #6ee7b7;
+            border-color: #6ee7b7;
+            cursor: not-allowed;
+        }
+
+        .commentary-input {
+            width: 100%;
+            min-height: 50px;
+            padding: 0.5rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.85rem;
+            background: #fafafa;
+        }
+
+        .commentary-input:focus {
+            outline: none;
+            border-color: #999;
+            background: #fff;
+        }
+
+        .commentary-submit {
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0.5rem 0.7rem;
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .commentary-submit:hover:not(:disabled) {
+            background: #eee;
+        }
+
+        .commentary-submit:disabled {
+            background: #f9f9f9;
+            color: #bbb;
+            border-color: #e5e5e5;
+            cursor: not-allowed;
+        }
+
+        .commentary-status {
+            margin-top: 0.25rem;
+            font-size: 0.65rem;
+            color: #666;
+        }
+
+        .commentary-status:empty {
+            display: none;
+        }
+
+        .commentary-status[data-state="error"] {
+            color: #c00;
+        }
+
+        .commentary-status[data-state="warning"] {
+            color: #a80;
+        }
+
+        .commentary-flash {
+            animation: commentaryFlash 1.4s ease-out;
+        }
+
+        @keyframes commentaryFlash {
+            0% {
+                background-color: rgba(251, 191, 36, 0.45);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
         @media (max-width: 1100px) {
             .container {
-                padding-left: 1.25rem;
+                padding-left: 1.25rem; /* Remove left space on smaller screens */
             }
 
             .content-layout {
                 flex-direction: column;
+            }
+
+            .commentary-panel {
+                left: 0.5rem;
+                bottom: 0.5rem;
+                width: calc(100% - 1rem);
+                max-width: 320px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .commentary-panel {
+                padding: 1rem;
             }
         }
 
@@ -585,7 +972,7 @@
 <body>
     <div class="container">
         <div class="content-layout">
-                        <div class="article-area">
+            <div class="article-area">
                 <div class="author-tab" role="navigation" aria-label="Authors">
                     <span class="author-tab-label">Authors:</span>
                     <div class="author-links">
@@ -603,11 +990,21 @@
 
     <!-- Hidden Markdown Content -->
     <script type="text/template" id="markdown-source">
-# Fantastic Pretraining Optimizers and Where to Find Them II:  From Weight Decay to Hyperball Optimization
+# Fantastic Pretraining Optimizers and Where to Find Them II:  From Weight Decay to Hyperball Optimization (Part 2)
 
-Weight decay is a standard component of training, yet its role in modern deep learning is often misunderstood. In this post, we will show how recent deep learning research reveals that for scale-invariant models (like Transformers), weight decay does not control capacity. Instead, it controls the **effective step size** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-2">[2]</a><a class="citation" href="#ref-3">[3]</a><a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-5">[5]</a>.
+
 <div class="key-point-box">
 
+**Series navigation**
+
+- **Part 1 (optimizer):** <a href="hyperball-part-1.html"><strong>Hyperball optimizer</strong></a>
+- **Part 2 (this page):** Weight decay theory deep dive
+
+</div>
+
+Weight decay is a standard component of training, yet its role in modern deep learning is often misunderstood. In this post, we will show how recent deep learning research reveals that for scale-invariant models (like Transformers), weight decay does not control capacity. Instead, it controls the **effective step size** <a class="citation" href="#ref-1">[1]</a><a class="citation" href="#ref-2">[2]</a><a class="citation" href="#ref-3">[3]</a><a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-5">[5]</a>. This theory is what motivates the design of the **Hyperball** optimizer in <a href="hyperball-part-1.html">Part 1</a> of this series.
+
+<div class="key-point-box">
 
 1.  **Debunk** the classical "capacity control" view. 
 
@@ -620,13 +1017,6 @@ Weight decay is a standard component of training, yet its role in modern deep le
     <iframe src="experiments/wandb_metrics_plot.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot"></iframe>
 </div>
 
-3.  **Demonstrate** a new outer optimizer called **Hyperball** that removes weight decay entirely by controlling weight norms directly. The corresponding version for Adam is called **AdamH** and for Muon is called **MuonH**. This allows for faster convergence and predictable weight norms compared to runs with weight decay and strong hyperparameter transfer across depths and widths using standard parameterizations.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
-</div>
-
-
 
 </div>
 
@@ -638,7 +1028,7 @@ Standard weight decay updates parameters $W$ by:
 $$
 W_{t+1} = (1 - \eta_t \lambda) W_t - \eta_t u_t
 $$
-where $\eta_t$ is the learning rate, $\lambda$ is the decay coefficient, and $u_t$ is the update direction given by the base optimizer. This is equivalent to minimizing $L(W) + \frac{\lambda}{2}\|W\|_F^2$<a class="citation" href="#ref-7">[7]</a>.
+where $\eta_t$ is the learning rate, $\lambda$ is the decay coefficient, and $u_t$ is the update direction given by the base optimizer. This is equivalent to minimizing $L(W) + \frac{\lambda}{2}\|W\|_F^2$ for SGD.
 
 <div class="key-point-box">
 
@@ -696,14 +1086,14 @@ Before we dive into the calculations, let's showcase how current theory aligns w
 __ADAMW_DEMO__
  
 <p style="margin: 3rem 0 1rem; color: var(--secondary-text);">
-The expressions below summarize the steady-state behavior of the three optimizers (Adam/AdamW, Muon, Moonlight) in the noise-dominated regime discussed above—this is the final outcome, so feel free to skip the following proof and jump straight to Section 2.6 if you want to skip the math for now.
+The expressions below summarize the steady-state behavior of the three optimizers (AdamW, Muon, Moonlight) in the noise-dominated regime discussed above—this is the final outcome, so feel free to skip the following proof and jump straight to Section 2.6 if you are not in the mood for detailed calculations!
 </p>
 <div style="overflow-x: auto; margin: 1.5rem 0;">
 <table style="margin: 0 auto; border-collapse: collapse; min-width: 70%;">
   <thead>
     <tr style="background-color: var(--primary-color);">
       <th style="padding: 0.75rem 1.25rem; text-align: left; border: 1px solid var(--border-color);">Quantity</th>
-      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Adam / AdamW</th>
+      <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">AdamW</th>
       <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Moonlight</th>
       <th style="padding: 0.75rem 1.25rem; text-align: center; border: 1px solid var(--border-color);">Muon</th>
     </tr>
@@ -759,7 +1149,7 @@ This assumption may look outrageous at first glance, because it ignores any stru
 
 ### 2.2 Predicting Optimizer Update Norm 
 
-Let $u_t$ be the **base optimizer update** *before* adding weight decay (the Adam part of AdamW). We show that, under the noise-dominated model, the update norm is approximately **constant over time**, depending only on the optimizer hyperparameters and the layer dimension.
+Let $u_t$ be the **base optimizer update** *before* adding weight decay (e.g. the Adam part of AdamW). We show that, under the noise-dominated model, the update norm is approximately **constant over time**, depending only on the optimizer hyperparameters and the layer dimension.
 
 For Muon, this is already guaranteed by design, as all of the singular values of Muon's update before scaling are $1$. Assuming the shape of $W$ is $d_{\mathrm{in}} \times d_{\mathrm{out}}$, we can derive the update norm as follows:
 
@@ -773,7 +1163,7 @@ $$
 \|u_t\|_F = 0.2\sqrt{d_{\mathrm{out}} d_{\mathrm{in}}}.
 $$
 
-For Adam/AdamW, focusing on a **single scalar coordinate** $\bar u_{t}$, we can write the (bias-corrected) update in the “infinite history” limit as
+For AdamW, focusing on a **single scalar coordinate** $\bar u_{t}$, we can write the (bias-corrected) update in the “infinite history” limit as
 $$
 \bar u_{t}
 = \frac{m_t}{\sqrt{v_t}}, m_t = (1 - \beta_1)\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}, v_t = (1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2
@@ -813,7 +1203,7 @@ Plugging this approximation into the update gives
 $$
 \bar u_{t}
 \approx
-(1-\beta_1),
+(1-\beta_1)
 \frac{\sum_{i=0}^{\infty} \beta_1^i \bar g_{t-i}}{\sigma},
 $$
 
@@ -845,7 +1235,7 @@ $$
 
 <div class="key-point-box">
 
-**Property 1 (Approximately Constant Update Norm):** In the Gaussian noise model, common base optimizers like AdamW, Adam, Muon have a **time-independent RMS**, so we can treat
+**Property 1 (Approximately Constant Update Norm):** In the Gaussian noise model, common base optimizers like Adam and Muon have a **time-independent RMS**, so we can treat
 $$
 \|u_t\|_F \approx U
 $$
@@ -861,7 +1251,7 @@ as a **constant per layer**.
 </thead>
 <tbody>
 <tr style="background-color: var(--bg-color);">
-<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">Adam / AdamW</td>
+<td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); font-weight: 500;">AdamW</td>
 <td style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color); text-align: center;">$\sqrt{\frac{1-\beta_1}{1+\beta_1}} \sqrt{d_{\mathrm{in}} \times d_{\mathrm{out}}}$</td>
 </tr>
 <tr style="background-color: rgba(var(--primary-color-rgb), 0.05);">
@@ -1044,7 +1434,7 @@ $$
 
 <div class="key-point-box">
 
-**Interpretation:** The term $(\eta^2 - 2\alpha\eta \gamma) U^2$ represents the *effective* amount of norm increase at each step. It is less than the raw update norm times learning rate(i.e. $\eta^2 U^2$) because the update $u_t$ is **anti-correlated** with $W_t$ (due to momentum), which dampens the expansion.
+**Interpretation:** The term $(\eta^2 - 2\alpha\eta \gamma) U^2$ represents the *effective* amount of norm increase at each step. It is less than the raw update norm times learning rate (i.e. $\eta^2 U^2$) because the update $u_t$ is **anti-correlated** with $W_t$ (due to momentum), which dampens the expansion.
 </div>
 
 #### The Steady State
@@ -1163,13 +1553,11 @@ $$
 \sqrt{
 (1 - \alpha^2) \big((1 - \alpha^2 \beta_1^2) - \beta_1^2 (1 - \alpha^2)\big)
 }  \\
-&= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}
+&= \frac{1}{1 + \alpha \beta_1} \sqrt{(1 - \alpha^2)(1 - \beta_1^2)}.
 \end{align*}
 $$
 
-This makes it explicit that the tangential move grows with the hidden product $\eta\lambda$ (recall $\alpha = 1 - \eta\lambda$) until the correlation term collapses it.
-
-</p>
+This concludes our calculation and show that the effective step size is determined by the product of the learning rate and the weight decay.
 </div>
 </details>
 
@@ -1179,8 +1567,7 @@ In steady state, the effective step size on the unit sphere scales like
 $$
 \eta_{\mathrm{eff},t} \approx \frac{1}{1 + \alpha \beta_1} \sqrt{{(1 - \alpha^2)(1 - \beta_1^2)}} \approx \sqrt{2\eta\lambda \frac{1 - \beta_1}{1 + \beta_1}}.
 $$
-Weight decay $\lambda$ and learning rate $\eta$ together define a **hidden effective step size**: tuning $\eta\lambda$ directly controls how aggressively the model moves in direction space.
-<a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>
+Weight decay $\lambda$ and learning rate $\eta$ together define a **hidden effective step size**: tuning $\eta\lambda$ directly controls how aggressively the model moves in direction space<a class="citation" href="#ref-4">[4]</a><a class="citation" href="#ref-8">[8]</a>.
 
 
 </div>
@@ -1284,14 +1671,14 @@ When the learning rate decays, the **equilibrium radius shrinks and the gradient
 The classic saying goes "all models are wrong, but some are useful". In deep learning theory, whether a theory is useful should be judged by two perspectives:
 
 1. Can it predict empirical phenomena? (This section)
-2. Can it motivate algorithm that works better? (Section 4)
+2. Can it motivate algorithm that works better? (<a href="hyperball-part-1.html">Part 1</a>)
 
-Most of the empirical figures in this section re-run the optimizer sweeps from Wen et al.'s systematic study of pretraining optimizers so that comparisons stay consistent across model sizes and data-to-model ratios.<a class="citation" href="#ref-15">[15]</a>
+Most of the empirical figures in this section are from the optimizer sweeps from our previous study of pretraining optimizers <a class="citation" href="#ref-15">[15]</a>.
 
 
 ### Phenomenon 1: Weight norm tracks learning rate warmup and decay throughout training.
 
-**Explanation:** As we have derived in Section 2.3, the equilibrium weight norm is determined by learning rate $\eta$ and weight decay $\lambda$, as $\|W_{\infty}\|_F \approx \sqrt{\frac{\eta}{2\lambda}} U$. 
+**Explanation:** As we have derived in Section 2.3, the equilibrium weight norm is determined by learning rate $\eta$ and weight decay $\lambda$, as $\|W_{\infty}\|_F \propto \sqrt{\frac{\eta}{2\lambda}} U$. 
 
 <div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
     <iframe src="experiments/wandb_qkv_norms.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
@@ -1319,7 +1706,7 @@ Most of the empirical figures in this section re-run the optimizer sweeps from W
 
 ### Phenomenon 4: Despite sharing the same learning-rate schedule, the run with weight decay starts with a higher loss but ultimately converges to a strictly lower loss than the run without weight decay.
 
-**Explanation:** Although these two runs use the same nominal learning-rate warmup and decay schedule, weight decay changes the weight norms and therefore induces a substantially different effective step size over training. Empirically (and in a our theory in Section 2), we find that training with weight decay yields a larger effective step size throughout training than training without weight decay. In the <em>river valley landscape</em> picture<a class="citation" href="#ref-16">[16]</a>, the loss decomposes into a “river” component, capturing progress along a relatively flat direction where long-term optimization happens, and a “hill” component, capturing excursions in steep directions caused by stochastic gradients. 
+**Explanation:** Although these two runs use the same nominal learning-rate warmup and decay schedule, weight decay changes the weight norms and therefore induces a substantially different effective step size over training. Empirically (and in the theory in Section 2), we find that training with weight decay yields a larger effective step size throughout training than training without weight decay. In the <em>river valley landscape</em> picture <a class="citation" href="#ref-16">[16]</a>, the loss decomposes into a “river” component, capturing progress along a relatively flat direction where long-term optimization happens, and a “hill” component, capturing excursions in steep directions caused by stochastic gradients. 
 
 <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; margin: 1rem 0;">
 <div style="flex: 1.4 1 420px; min-width: 360px; max-width: 720px;">
@@ -1347,185 +1734,38 @@ Visual intuition for the river valley landscape conjecture.
 <div style="margin: 2rem auto; text-align: center;">
     <img src="../assets/images/llama_ind_vs_std_vs_nowd_teaser.png" alt="Comparison of learning rate transfer strategies with and without weight decay" style="width: 100%; max-width: 900px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);" loading="lazy">
     <p style="font-size: 0.95rem; color: #6b7280; margin-top: 0.5rem;">
-        Figure 1 in <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">Kosson et al., 2025</a><a class="citation" href="#ref-17">[17]</a>.
+        Figure 1 in <a class="citation" href="#ref-17">[17]</a>.
     </p>
 </div>
 
 
----
-
-## 4. Hyperball Optimization: Normalizing Both Weight Norm and Update Norm 
-
-Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus $\eta_{eff}$), why not control it directly?
-
-
-We propose **Hyperball Optimization**:
-$$
-W_{t+1} = \text{Norm}(W_t - \eta_{eff} \cdot \text{Norm}(u_t) \|W_0\|_F) \|W_0\|_F,
-$$
-where $\|W_0\|_F$ is the initial weight norm and $\text{Norm}(x) = x / \|x\|_F$ is the normalization operator that projects $x$ to the unit sphere. Here $u_t$ is the standard Adam/Muon update. We will apply this optimizer for every linear projection matrix in the Transformer model and use Adam for the rest scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
-
-This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a>  and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
-
-
-This method has the following benefits:
-1.  **Native Hyperparameter Transfer:** Hyperparameters transfer predictably across model width and depth.
-2.  **Empirical Speedup:** We show that this method can lead to faster loss reduction compared to decoupled weight decay across model scale and training duration.
-
-### 4.1 Hyperparameter Transfer across Width and Depth
-
-As mentioned in Phenomenon 5 in Section 3, hyperparameter transfer should be a byproduct of constant ratio between weight norm and update norm. We validate this hypothesis by running the following width and depth scaling experiments.
-
-
-
-
-1. **Depth Scaling:** We fix the number of hidden dimensions to be 128 and vary the number of layers from 4 to 512. We observe that the maximal drift of optimal learning rate window is 1.4x, where as the drift is 3x for Adam and 4x for Muon.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/depth_scaling_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Depth Scaling Plot"></iframe>
-</div>
-
-
-
-2. **Width Scaling:** We fix the number of layers to be 4 and vary the number of hidden dimensions from 128 to 2048. We observe that the maximal drift of optimal learning rate window is 1.4x for AdamH and MuonH, whereas the drift is 2x for Adam and 4x for Muon.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/width_scaling_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Width Scaling Plot"></iframe>
-</div>
-
-### 4.2 Empirical Speedup 
-
-We further validate Hyperball in the same setup as <a href="https://marin.community/speedrun/" target="_blank" rel="noopener">Marin's speedrun</a> and observe that Hyperball leads to empirical speedup over AdamW and MuonW using a Gemma-like architecture.
-
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/c4_en_loss_interactive.html" style="width: 100%; height: 640px; border: none; display: block;" title="Interactive C4/en Loss Plot"></iframe>
-</div>
-
-
-Further, we heavily overtrained a small 130M model with MuonH and Muon and observe a consistent speedup across different data sizes.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
-</div>
-
-
-
-
-### 4.3 Commonly Asked Questions
-
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-Q1: Why does Hyperball speed up training?
-<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-The explicitly chosen effective step-size schedule works better than the implicit one induced by weight decay and learning rate decay.
-</p>
-</summary>
-
-<p>
-A natural question is why we should expect any speedup here. After all, what we prove in Section 2 is that the raw optimizer with weight decay is already implicitly optimizing on the hyperball, especially when we assume scale invariance.
-</p>
-
-<p>
-The key difference is the effective step-size schedule. In the raw optimizer with weight decay, the effective step size emerges indirectly from the weight decay coefficient and the learning-rate schedule, making it hard to reason about—even under a constant learning rate. Adding learning-rate decay introduces more lag in the weight norm and makes the effective schedule even murkier. With Hyperball, we can directly tune how each new update blends with the existing weight norm, which makes it much easier to design a good schedule. In practice, a simple cosine or linear schedule already performs well for both AdamH and MuonH.
-
-
-Our finding is also consistent with the finding in <a class="citation" href="#ref-32">[32]</a> that hyperparameter transfer can enable consistent gains of matrix-preconditioned optimizers across scales as with hyperball optimization, the effective step size now naturally extends to the larger scale, as evidenced by the hyperparameter transfer experiment in Section 4.2.
-</p>
-
-</details>
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-Q2: Will weight normalization hurt representation power?
-<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-No, in most cases. RMSNorm’s trainable affine term keeps the model expressive even with fixed weight norms.
-</p>
-</summary>
-
-<p>
-The commonly used RMSNorm affine transformation provides an explicit way to control the norm. Concretely, pre-norm neural networks consist of linear projections that look like
-$$
-f(h; W, \gamma) = W (\gamma \odot \mathrm{RMSNorm}(h))
-$$
-where $W$ is the weight matrix, $\gamma$ is the scaling vector, and $\mathrm{RMSNorm}(h)$ is the RMSNorm normalization. Because $\gamma$ is trainable, fixing the norm of $W$ doesn't hurt representation power as we have
-$$
-f(h; cW, \gamma/c) = f(h; W, \gamma).
-$$
-</p>
-
-</details>
-
-<details>
-<summary style="cursor: pointer; font-weight: 600;">
-Q3: Why don't we control the spectral norm instead of the Frobenius norm?
-<p style="margin-top: 0.5rem; color: var(--secondary-text); font-weight: normal;">
-In practice, the two norms track each other because transformer weight matrices stay close to full rank, so constraining $\|W\|_F$ already constrains $\|W\|_{\mathrm{op}}$.
-</p>
-</summary>
-
-<p>
-If you focus on steepest-descent methods such as Muon and related spectral condition theory <a class="citation" href="#ref-25">[25]</a>, it feels more natural to constrain the spectral norm. That intuition is correct for update matrices. Here, however, we are constraining the <em>weight</em> matrices themselves, and doing so through the Frobenius norm is almost equivalent when those matrices remain well-conditioned.
-</p>
-
-<p>
-Assume a singular value decomposition $W = U \Sigma V^\top$ with $\Sigma = \mathrm{diag}(\sigma_1, \ldots, \sigma_d)$. Then
-</p>
-$$
-\|W\|_F^2 = \sum_{i=1}^d \sigma_i^2, \qquad \|W\|_{\mathrm{op}}^2 = \sigma_1^2.
-$$
-
-<p>
-The ratio
-</p>
-$$
-r = \frac{\|W\|_F^2}{d \|W\|_{\mathrm{op}}^2} = \frac{\sum_{i=1}^d \sigma_i^2}{d \sigma_1^2} \in \left[\frac{1}{d}, 1\right]
-$$
-<p>
-measures how concentrated the singular values are. Low-rank matrices push $r$ toward $1/d$, while full-rank matrices keep it near $1$.
-</p>
-
-<p>
-In the deep-learning regime of interest, weight matrices empirically hover near full rank, so $r$ stays far from $0$ <a class="citation" href="#ref-14">[14]</a>. That makes Frobenius-norm control an excellent proxy for spectral-norm control without needing additional machinery <a class="citation" href="#ref-26">[26]</a><a class="citation" href="#ref-27">[27]</a><a class="citation" href="#ref-28">[28]</a><a class="citation" href="#ref-29">[29]</a><a class="citation" href="#ref-30">[30]</a>.
-</p>
-
-<div style="text-align: center; margin: 2rem 0;">
-    <img src="../assets/images/svd_dist_attn_final_v2.png"
-        alt="Empirical SVD of weight matrix"
-        loading="lazy"
-        style="max-width: 100%; height: auto;">
-    <p style="font-size: 0.9rem; color: #6b7280; margin-top: 0.5rem;">
-        Empirical SVD of weight matrix. Figure from
-        <a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">
-            Muon is Scalable for LLM Training
-        </a><a class="citation" href="#ref-14">[14]</a>.
-    </p>
-</div>
-
-Further, theoretically, <a class="citation" href="#ref-31">[31]</a> shows that Muon with decoupled weight decay implicitly optimize weights under spectral norm constraints. As we show in Section 2, our method corresponds to Muon with decoupled weight decay with a special effective step size schedule, and therefore we expect it to have similar behavior.
-
-</details>
 
 ## Acknowledgments
 
 The authors would like to thank [Songlin Yang](https://sustcsonglin.github.io/), [Zihan Qiu](https://www.linkedin.com/in/zihan-qiu-33a172249/), and [Liliang Ren](https://renll.github.io/) for motivating this blog post into existence. To some extent, this work is a proof to show that it is possible to remove weight decay altogether by designing the optimizer to explicitly control weight norms. The authors would also like to thank [William Held](https://williamheld.com/), [David Hall](http://dlwh.org/), [Suhas Kotha](https://kothasuhas.github.io/), [Tatsunori Hashimoto](https://thashim.github.io/), [Jason Lee](https://jasondlee88.github.io/), [Zhiyuan Li](https://zhiyuanli.ttic.edu/), [Lijie Chen](https://chen-lijie.github.io/), [Huaqing Zhang](https://scholar.google.com/citations?user=_E9tcTkAAAAJ), [Jiacheng You](https://github.com/YouJiacheng), [Jeremy Bernstein](https://jeremybernste.in/) and [Samuel Schoenholz](https://www.linkedin.com/in/samuel-schoenholz-379830a0/) for helpful discussions.
 
+
 ## Citations
 
 If this work is helpful to you, please consider citing:
 
+## Citations
+
+If this work is helpful to you, please consider citing Part I:
+
 ```bibtex
-@online{wen2025hyperball,
+@online{wen2025hyperball_part1,
     title        = {Fantastic Pretraining Optimizers and Where to Find Them II: From Weight Decay to Hyperball Optimization},
     author       = {Wen, Kaiyue and Dang, Xingyu and Lyu, Kaifeng and Ma, Tengyu and Liang, Percy},
     year         = {2025},
     month        = {11},
     day          = {30},
-    url          = {https://whenwen.github.io/wd_blog/public/index.html},
-    urldate      = {2025-12-09},
+    url          = {https://whenwen.github.io/wd_blog/public/hyperball-part-1.html},
+    urldate      = {2025-12-15},
 }
 ```
+
+
 
 ## References
 
@@ -1541,14 +1781,14 @@ If this work is helpful to you, please consider citing:
     <li id="ref-9"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part I)." (2025). <a href="https://kexue.fm/archives/11307" target="_blank" rel="noopener">https://kexue.fm/archives/11307</a></li>
     <li id="ref-10"><strong>Jianlin Su</strong>. "Why Adam's Update RMS Is 0.2?" (2025). <a href="https://kexue.fm/archives/11267" target="_blank" rel="noopener">https://kexue.fm/archives/11267</a></li>
     <li id="ref-11"><strong>Jianlin Su</strong>. "AdamW Weight RMS Asymptotics (Part II)." (2025). <a href="https://kexue.fm/archives/11404" target="_blank" rel="noopener">https://kexue.fm/archives/11404</a></li>
-    <li id="ref-12"><strong>Sadhika Malladi, Kaifeng Lyu, Abhishek Panigrahi, Sanjeev Arora</strong>. "On the SDEs and Scaling Rules for Adaptive Gradient Algorithms." (2024). <a href="https://arxiv.org/abs/2205.10287" target="_blank" rel="noopener">https://arxiv.org/abs/2205.10287</a></li>
+    <li id="ref-12"><strong>Sadhika Malladi, Kaifeng Lyu, Abhishek Panigrahi, Sanjeev Arora</strong>. "On the SDEs and Scaling Rules for Adaptive Gradient Algorithms." (2022). <a href="https://arxiv.org/abs/2205.10287" target="_blank" rel="noopener">https://arxiv.org/abs/2205.10287</a></li>
     <li id="ref-13"><strong>Keller Jordan</strong>. "Muon: An optimizer for hidden layers in neural networks." (2023). <a href="https://kellerjordan.github.io/posts/muon/" target="_blank" rel="noopener">https://kellerjordan.github.io/posts/muon/</a></li>
     <li id="ref-14"><strong>Jingyuan Liu, Jianlin Su, Xingcheng Yao, Zhejun Jiang, Guokun Lai, Yulun Du, Yidao Qin, Weixin Xu, Enzhe Lu, Junjie Yan, Yanru Chen, Huabin Zheng, Yibo Liu, Shaowei Liu, Bohong Yin, Weiran He, Han Zhu, Yuzhi Wang, Jianzhou Wang, Mengnan Dong, Zheng Zhang, Yongsheng Kang, Hao Zhang, Xinran Xu, Yutao Zhang, Yuxin Wu, Xinyu Zhou, Zhilin Yang</strong>. "Muon is Scalable for LLM Training." (2025). <a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">https://arxiv.org/abs/2502.16982</a></li>
     <li id="ref-15"><strong>Kaiyue Wen, David Hall, Tengyu Ma, Percy Liang</strong>. "Fantastic Pretraining Optimizers and Where to Find Them." (2025). <a href="https://arxiv.org/abs/2509.02046" target="_blank" rel="noopener">https://arxiv.org/abs/2509.02046</a></li>
     <li id="ref-16"><strong>Kaiyue Wen, Zhiyuan Li, Jason Wang, David Hall, Percy Liang, Tengyu Ma</strong>. "Understanding Warmup-Stable-Decay Learning Rates: A River Valley Loss Landscape Perspective." (2024). <a href="https://arxiv.org/abs/2410.05192" target="_blank" rel="noopener">https://arxiv.org/abs/2410.05192</a></li>
     <li id="ref-17"><strong>Atli Kosson, Jeremy Welborn, Yang Liu, Martin Jaggi, Xi Chen</strong>. "Weight Decay may matter more than μP for Learning Rate Transfer in Practice." (2025). <a href="https://arxiv.org/abs/2510.19093" target="_blank" rel="noopener">https://arxiv.org/abs/2510.19093</a></li>
     <li id="ref-18"><strong>Charlie Blake, Constantin Eichenberg, Josef Dean, Lukas Balles, Luke Y. Prince, Björn Deiseroth, Andres Felipe Cruz-Salinas, Carlo Luschi, Samuel Weinbach, Douglas Orr</strong>. "u-μP: The Unit-Scaled Maximal Update Parametrization." (2024). <a href="https://arxiv.org/abs/2407.17465" target="_blank" rel="noopener">https://arxiv.org/abs/2407.17465</a></li>
-    <li id="ref-19"><strong>Ziyuan Fan, Yifeng Liu, Qingyue Zhao, Angela Yuan, Quanquan Gu</strong>. "Robust Layerwise Scaling Rules by Proper Weight Decay Tuning." (2025). <a href="https://arxiv.org/abs/2510.15262" target="_blank" rel="noopener">https://arxiv.org/abs/2510.15262</a></li>
+    <li id="ref-19"><strong>Zhiyuan Fan, Yifeng Liu, Qingyue Zhao, Angela Yuan, Quanquan Gu</strong>. "Robust Layerwise Scaling Rules by Proper Weight Decay Tuning." (2025). <a href="https://arxiv.org/abs/2510.15262" target="_blank" rel="noopener">https://arxiv.org/abs/2510.15262</a></li>
     <li id="ref-20"><strong>Xi Wang, Laurence Aitchison</strong>. "How to set AdamW's weight decay as you scale model and dataset size." (2024). <a href="https://arxiv.org/abs/2405.13698" target="_blank" rel="noopener">https://arxiv.org/abs/2405.13698</a></li>
     <li id="ref-21"><strong>Greg Yang, Edward J. Hu, Igor Babuschkin, Szymon Sidor, Xiaodong Liu, David Farhi, Nick Ryder, Jakub Pachocki, Weizhu Chen, Jianfeng Gao</strong>. "Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer." (2021). <a href="https://arxiv.org/abs/2203.03466" target="_blank" rel="noopener">https://arxiv.org/abs/2203.03466</a></li>
     <li id="ref-22"><strong>Tim Salimans, Diederik P. Kingma</strong>. "Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks." (2016). <a href="https://arxiv.org/abs/1602.07868" target="_blank" rel="noopener">https://arxiv.org/abs/1602.07868</a></li>
@@ -1563,7 +1803,6 @@ If this work is helpful to you, please consider citing:
     <li id="ref-31"><strong>Lizhang Chen, Jonathan Li, Qiang Liu</strong>. "Muon Optimizes Under Spectral Norm Constraints." (2025). <a href="https://arxiv.org/abs/2506.15054" target="_blank" rel="noopener">https://arxiv.org/abs/2506.15054</a></li>
     <li id="ref-32"><strong>Shikai Qiu, Zixi Chen, Hoang Phan, Qi Lei, Andrew Gordon Wilson    </strong>. "Hyperparameter Transfer Enables Consistent Gains of Matrix-Preconditioned Optimizers Across Scale." (2025). <a href="https://arxiv.org/abs/2512.05620" target="_blank" rel="noopener">https://arxiv.org/abs/2512.05620</a></li>
 </ol>
-
 
     </script>
 
@@ -1769,6 +2008,1097 @@ If this work is helpful to you, please consider citing:
                 trackedHeadings.forEach(item => observer.observe(item.heading));
             };
 
+            const setupCommentary = (contentRoot) => {
+                const textarea = document.getElementById('commentary-input');
+                const signatureInput = document.getElementById('commentary-signature-select');
+                const submitBtn = document.getElementById('commentary-submit');
+                const status = document.getElementById('commentary-status');
+                const clearBtn = document.getElementById('commentary-clear');
+                const commentaryPanel = document.querySelector('.commentary-panel');
+
+                if (!textarea || !submitBtn || !signatureInput || !contentRoot) {
+                    return;
+                }
+
+                const storageKey = 'wd_blog_commentary_v1';
+                const API_BASE = 'http://138.197.99.28:7291';
+                const ARTICLE_ID = 'weight-decay-post';
+                const MIN_SELECTION_CHARS = 4;
+                const MAX_SNIPPET_CHARS = 320;
+                const PENDING_ID = '__pending_comment__';
+                const THREAD_GUTTER = 18; // minimum vertical gap between rendered threads
+                const THREAD_COLUMN_GAP = 36;
+
+                let pendingSelection = null;
+                let comments = [];
+                let statusTimer = null;
+                const inlineVisuals = new Map();
+                const sectionSignatures = new Map();
+                let activeSignatureSection = '';
+                let defaultSignature = '';
+                let collisionResolutionFrame = null;
+
+                const debounce = (fn, delay = 120) => {
+                    let timer;
+                    return (...args) => {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => fn(...args), delay);
+                    };
+                };
+
+                const setActiveSignatureSection = (sectionId = '') => {
+                    activeSignatureSection = sectionId || '';
+                    if (!signatureInput) {
+                        return;
+                    }
+                    if (!activeSignatureSection) {
+                        signatureInput.value = defaultSignature;
+                        return;
+                    }
+                    const saved = sectionSignatures.get(activeSignatureSection);
+                    signatureInput.value = typeof saved === 'string' ? saved : defaultSignature;
+                };
+
+                const isNodeHiddenByClosedDetails = (node) => {
+                    if (!node) {
+                        return false;
+                    }
+                    const element = node instanceof Element ? node : node.parentElement;
+                    let current = element;
+                    while (current && current !== contentRoot) {
+                        if (current.tagName === 'DETAILS' && !current.open) {
+                            return true;
+                        }
+                        current = current.parentElement;
+                    }
+                    return false;
+                };
+
+                const showPanel = () => {
+                    // Panel is always visible now, no-op
+                };
+
+                const hidePanel = () => {
+                    // Panel is always visible now, no-op
+                };
+
+                const clearPendingSelection = () => {
+                    if (!pendingSelection) {
+                        return;
+                    }
+                    pendingSelection = null;
+                    setActiveSignatureSection('');
+                    updateSubmitState();
+                    rebuildInlineVisuals();
+                    hidePanel();
+                };
+
+                const showStatus = (message = '', state = 'info') => {
+                    if (!status) {
+                        return;
+                    }
+                    if (statusTimer) {
+                        clearTimeout(statusTimer);
+                        statusTimer = null;
+                    }
+                    status.textContent = message;
+                    status.dataset.state = message ? state : '';
+                    if (message) {
+                        statusTimer = setTimeout(() => {
+                            status.textContent = '';
+                            status.dataset.state = '';
+                            statusTimer = null;
+                        }, 4000);
+                    }
+                };
+
+                const updateClearState = () => {
+                    if (clearBtn) {
+                        clearBtn.disabled = comments.length === 0;
+                    }
+                };
+
+                const saveCommentToServer = async (comment) => {
+                    console.log('[saveCommentToServer] called with:', comment.note);
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                articleId: ARTICLE_ID,
+                                snippet: comment.snippet,
+                                note: comment.note,
+                                sectionId: comment.sectionId,
+                                sectionLabel: comment.sectionLabel,
+                                anchor: comment.anchor,
+                                signature: comment.signature
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        return data.comment;
+                    } catch (err) {
+                        console.error('Failed to save comment to server:', err);
+                        showStatus('Failed to save comment to server.', 'warning');
+                        return null;
+                    }
+                };
+
+                const loadCommentsFromServer = async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments?articleId=${encodeURIComponent(ARTICLE_ID)}`);
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        return Array.isArray(data.comments) ? data.comments : [];
+                    } catch (err) {
+                        console.error('Failed to load comments from server:', err);
+                        showStatus('Failed to load comments from server.', 'warning');
+                        return [];
+                    }
+                };
+
+                const deleteCommentFromServer = async (commentId) => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments/${commentId}`, {
+                            method: 'DELETE'
+                        });
+                        if (!response.ok && response.status !== 404) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        return true;
+                    } catch (err) {
+                        console.error('Failed to delete comment from server:', err);
+                        showStatus('Failed to delete comment from server.', 'warning');
+                        return false;
+                    }
+                };
+
+                const updateSubmitState = () => {
+                    submitBtn.disabled = !(pendingSelection && textarea.value.trim().length);
+                };
+
+                const formatTimestamp = (isoString) => {
+                    const date = isoString ? new Date(isoString) : new Date();
+                    return date.toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                const ensureHeadingId = (heading) => {
+                    if (!heading) {
+                        return '';
+                    }
+                    if (heading.id) {
+                        return heading.id;
+                    }
+                    const base = slugifyHeading(heading.textContent.trim());
+                    let candidate = base || `section-${Math.random().toString(36).slice(2, 8)}`;
+                    if (document.getElementById(candidate)) {
+                        candidate = `${candidate}-${Math.random().toString(36).slice(2, 5)}`;
+                    }
+                    heading.id = candidate;
+                    return candidate;
+                };
+
+                const findSectionDetails = (range) => {
+                    const headings = Array.from(contentRoot.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+                    if (!headings.length) {
+                        return null;
+                    }
+                    const rect = range.getBoundingClientRect();
+                    const selectionTop = (rect.top === 0 && rect.bottom === 0)
+                        ? window.scrollY
+                        : rect.top + window.scrollY;
+                    let candidate = headings[0];
+                    let candidateTop = headings[0].getBoundingClientRect().top + window.scrollY;
+                    headings.forEach((heading) => {
+                        const headingTop = heading.getBoundingClientRect().top + window.scrollY;
+                        if (headingTop <= selectionTop + 5 && headingTop >= candidateTop) {
+                            candidate = heading;
+                            candidateTop = headingTop;
+                        }
+                    });
+                    const id = ensureHeadingId(candidate);
+                    return {
+                        id,
+                        sectionLabel: candidate.textContent.trim() || 'Selected section'
+                    };
+                };
+
+                const getNodePath = (node) => {
+                    const path = [];
+                    let current = node;
+                    while (current && current !== contentRoot) {
+                        const parent = current.parentNode;
+                        if (!parent) {
+                            return null;
+                        }
+                        const index = Array.prototype.indexOf.call(parent.childNodes, current);
+                        path.unshift(index);
+                        current = parent;
+                    }
+                    return path;
+                };
+
+                const resolvePath = (path) => {
+                    let current = contentRoot;
+                    for (const index of path) {
+                        if (!current || !current.childNodes || !current.childNodes[index]) {
+                            return null;
+                        }
+                        current = current.childNodes[index];
+                    }
+                    return current;
+                };
+
+                const describeRange = (range) => {
+                    if (!contentRoot.contains(range.commonAncestorContainer)) {
+                        return null;
+                    }
+                    const startPath = getNodePath(range.startContainer);
+                    const endPath = getNodePath(range.endContainer);
+                    if (!startPath || !endPath) {
+                        return null;
+                    }
+                    return {
+                        startPath,
+                        startOffset: range.startOffset,
+                        endPath,
+                        endOffset: range.endOffset
+                    };
+                };
+
+                const buildRangeFromDescriptor = (descriptor) => {
+                    if (!descriptor) {
+                        return null;
+                    }
+                    const startNode = resolvePath(descriptor.startPath);
+                    const endNode = resolvePath(descriptor.endPath);
+                    if (!startNode || !endNode) {
+                        return null;
+                    }
+                    const range = document.createRange();
+                    try {
+                        range.setStart(startNode, descriptor.startOffset);
+                        range.setEnd(endNode, descriptor.endOffset);
+                    } catch (err) {
+                        return null;
+                    }
+                    return range;
+                };
+
+                // Fallback: find text within a section by snippet
+                const findTextInSection = (sectionId, snippet) => {
+                    if (!snippet) return null;
+
+                    // Find the section element
+                    let searchRoot = contentRoot;
+                    if (sectionId) {
+                        const section = document.getElementById(sectionId);
+                        if (section) {
+                            // Search from this section until next sibling heading or end
+                            searchRoot = section.parentElement || section;
+                        }
+                    }
+
+                    // Use TreeWalker to find text nodes
+                    const walker = document.createTreeWalker(
+                        searchRoot,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+
+                    // Collect all text nodes and their positions
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        if (node.textContent.trim()) {
+                            textNodes.push(node);
+                        }
+                    }
+
+                    // Build full text and find snippet
+                    const normalizeText = (t) => t.replace(/\s+/g, ' ').trim();
+                    const normalizedSnippet = normalizeText(snippet);
+
+                    // Try to find exact match first
+                    for (const textNode of textNodes) {
+                        const nodeText = textNode.textContent;
+                        const normalizedNodeText = normalizeText(nodeText);
+                        const idx = normalizedNodeText.indexOf(normalizedSnippet);
+                        if (idx !== -1) {
+                            // Find actual position in original text
+                            let actualStart = 0;
+                            let normalizedPos = 0;
+                            for (let i = 0; i < nodeText.length && normalizedPos < idx; i++) {
+                                if (/\s/.test(nodeText[i])) {
+                                    if (i === 0 || !/\s/.test(nodeText[i-1])) {
+                                        normalizedPos++;
+                                    }
+                                } else {
+                                    normalizedPos++;
+                                }
+                                actualStart = i + 1;
+                            }
+
+                            // Create range
+                            const range = document.createRange();
+                            try {
+                                range.setStart(textNode, actualStart);
+                                range.setEnd(textNode, Math.min(actualStart + snippet.length, nodeText.length));
+                                return range;
+                            } catch (e) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // Try partial match (first few words)
+                    const snippetWords = normalizedSnippet.split(' ').slice(0, 3).join(' ');
+                    if (snippetWords.length > 5) {
+                        for (const textNode of textNodes) {
+                            const nodeText = normalizeText(textNode.textContent);
+                            const idx = nodeText.indexOf(snippetWords);
+                            if (idx !== -1) {
+                                const range = document.createRange();
+                                try {
+                                    range.setStart(textNode, idx);
+                                    range.setEnd(textNode, Math.min(idx + snippet.length, textNode.textContent.length));
+                                    return range;
+                                } catch (e) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    return null;
+                };
+
+                const removeInlineVisual = (id) => {
+                    if (!inlineVisuals.has(id)) {
+                        return;
+                    }
+                    const visual = inlineVisuals.get(id);
+                    if (visual.fragments) {
+                        visual.fragments.forEach(fragment => fragment.remove());
+                    }
+                    if (visual.thread) {
+                        visual.thread.remove();
+                    }
+                    inlineVisuals.delete(id);
+                };
+
+                const buildCommentElement = (comment, isReply = false) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'commentary-thread-comment';
+                    wrapper.dataset.commentId = comment.id;
+
+                    const note = document.createElement('p');
+                    note.className = 'commentary-thread-note';
+                    note.textContent = comment.note;
+                    wrapper.appendChild(note);
+
+                    const signature = document.createElement('div');
+                    signature.className = 'commentary-thread-signature';
+                    signature.textContent = '— ' + ((comment.signature && comment.signature.trim()) || 'Anonymous');
+                    wrapper.appendChild(signature);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'commentary-thread-actions';
+
+                    if (!isReply) {
+                        const replyBtn = document.createElement('button');
+                        replyBtn.type = 'button';
+                        replyBtn.dataset.action = 'reply-comment';
+                        replyBtn.dataset.commentId = comment.id;
+                        replyBtn.textContent = 'Reply';
+                        actions.appendChild(replyBtn);
+                    }
+
+                    const editBtn = document.createElement('button');
+                    editBtn.type = 'button';
+                    editBtn.dataset.action = 'edit-comment';
+                    editBtn.dataset.commentId = comment.id;
+                    editBtn.textContent = 'Edit';
+                    actions.appendChild(editBtn);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.dataset.action = 'delete-comment';
+                    deleteBtn.dataset.commentId = comment.id;
+                    deleteBtn.textContent = 'Delete';
+                    actions.appendChild(deleteBtn);
+
+                    wrapper.appendChild(actions);
+                    return wrapper;
+                };
+
+                const buildEditForm = (comment) => {
+                    const form = document.createElement('div');
+                    form.className = 'commentary-edit-form';
+                    form.dataset.commentId = comment.id;
+
+                    // Signature select
+                    const select = document.createElement('select');
+                    select.className = 'commentary-edit-signature';
+                    select.innerHTML = `
+                        <option value="">-- Select Name --</option>
+                        <option value="T. MA">T. MA</option>
+                        <option value="P. LIANG">P. LIANG</option>
+                        <option value="K. WEN">K. WEN</option>
+                        <option value="X. DANG">X. DANG</option>
+                        <option value="K. LYU">K. LYU</option>
+                    `;
+                    select.value = comment.signature || '';
+                    form.appendChild(select);
+
+                    const input = document.createElement('textarea');
+                    input.className = 'commentary-edit-input';
+                    input.value = comment.note;
+                    input.rows = 2;
+                    form.appendChild(input);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'commentary-edit-actions';
+
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.dataset.action = 'cancel-edit';
+                    cancelBtn.textContent = 'Cancel';
+                    actionsDiv.appendChild(cancelBtn);
+
+                    const saveBtn = document.createElement('button');
+                    saveBtn.type = 'button';
+                    saveBtn.dataset.action = 'save-edit';
+                    saveBtn.dataset.commentId = comment.id;
+                    saveBtn.textContent = 'Save';
+                    saveBtn.disabled = !input.value.trim();
+                    actionsDiv.appendChild(saveBtn);
+
+                    form.appendChild(actionsDiv);
+
+                    input.addEventListener('input', () => {
+                        saveBtn.disabled = !input.value.trim();
+                    });
+
+                    return form;
+                };
+
+                const buildReplyForm = (parentId) => {
+                    const form = document.createElement('div');
+                    form.className = 'commentary-reply-form';
+                    form.dataset.parentId = parentId;
+
+                    // Signature select
+                    const select = document.createElement('select');
+                    select.className = 'commentary-reply-signature';
+                    select.innerHTML = `
+                        <option value="">-- Select Name --</option>
+                        <option value="T. MA">T. MA</option>
+                        <option value="P. LIANG">P. LIANG</option>
+                        <option value="K. WEN">K. WEN</option>
+                        <option value="X. DANG">X. DANG</option>
+                        <option value="K. LYU">K. LYU</option>
+                    `;
+                    // Copy current selection from main panel
+                    select.value = signatureInput.value || '';
+                    form.appendChild(select);
+
+                    const input = document.createElement('textarea');
+                    input.className = 'commentary-reply-input';
+                    input.placeholder = 'Write a reply...';
+                    input.rows = 2;
+                    form.appendChild(input);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'commentary-reply-actions';
+
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.dataset.action = 'cancel-reply';
+                    cancelBtn.textContent = 'Cancel';
+                    actionsDiv.appendChild(cancelBtn);
+
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'button';
+                    submitBtn.dataset.action = 'submit-reply';
+                    submitBtn.dataset.parentId = parentId;
+                    submitBtn.textContent = 'Reply';
+                    submitBtn.disabled = true;
+                    actionsDiv.appendChild(submitBtn);
+
+                    form.appendChild(actionsDiv);
+
+                    // Enable/disable submit based on input
+                    input.addEventListener('input', () => {
+                        submitBtn.disabled = !input.value.trim();
+                    });
+
+                    return form;
+                };
+
+                const buildThreadElement = (comment, anchorRect, contentRect) => {
+                    const thread = document.createElement('div');
+                    thread.className = 'commentary-thread';
+                    thread.dataset.commentId = comment.id;
+
+                    const offsetTop = anchorRect.top - contentRect.top;
+                    thread.style.top = `${offsetTop}px`;
+
+                    // Add main comment
+                    const mainComment = buildCommentElement(comment, false);
+                    thread.appendChild(mainComment);
+
+                    // Add replies if any
+                    const replies = comments.filter(c => c.parentId === comment.id);
+                    if (replies.length > 0) {
+                        const repliesContainer = document.createElement('div');
+                        repliesContainer.className = 'commentary-thread-replies';
+                        replies.forEach(reply => {
+                            const replyEl = buildCommentElement(reply, true);
+                            repliesContainer.appendChild(replyEl);
+                        });
+                        thread.appendChild(repliesContainer);
+                    }
+
+                    contentRoot.appendChild(thread);
+
+                    requestAnimationFrame(() => {
+                        const threadRect = thread.getBoundingClientRect();
+                        const targetLeft = -(threadRect.width + THREAD_COLUMN_GAP);
+                        thread.style.left = `${targetLeft}px`;
+                        const connectorOffset = Math.min(
+                            Math.max(anchorRect.height * 0.4, 12),
+                            threadRect.height - 12
+                        );
+                        thread.style.setProperty('--connector-offset', `${connectorOffset}px`);
+                    });
+
+                    return thread;
+                };
+
+                const scheduleThreadCollisionResolution = () => {
+                    if (collisionResolutionFrame) {
+                        cancelAnimationFrame(collisionResolutionFrame);
+                    }
+                    collisionResolutionFrame = requestAnimationFrame(() => {
+                        collisionResolutionFrame = null;
+                        const threads = Array.from(contentRoot.querySelectorAll('.commentary-thread'));
+                        if (!threads.length) {
+                            return;
+                        }
+                        threads.sort((a, b) => {
+                            const topA = parseFloat(a.style.top) || 0;
+                            const topB = parseFloat(b.style.top) || 0;
+                            return topA - topB;
+                        });
+                        let currentBottom = -Infinity;
+                        threads.forEach(thread => {
+                            const height = thread.offsetHeight;
+                            if (!height) {
+                                return;
+                            }
+                            let targetTop = parseFloat(thread.style.top) || 0;
+                            if (targetTop < currentBottom + THREAD_GUTTER) {
+                                targetTop = currentBottom + THREAD_GUTTER;
+                                thread.style.top = `${targetTop}px`;
+                            }
+                            currentBottom = targetTop + height;
+                        });
+                    });
+                };
+
+                const renderInlineHighlight = (id, descriptor, options = {}) => {
+                    // Try exact path-based range first
+                    let range = buildRangeFromDescriptor(descriptor);
+
+                    // Fallback: use sectionId + snippet to find text
+                    if (!range && options.comment) {
+                        range = findTextInSection(options.comment.sectionId, options.comment.snippet);
+                    }
+
+                    if (!range) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    if (isNodeHiddenByClosedDetails(range.startContainer) || isNodeHiddenByClosedDetails(range.endContainer)) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    const rects = Array.from(range.getClientRects()).filter(rect => rect.width > 0 && rect.height > 0);
+                    if (!rects.length) {
+                        removeInlineVisual(id);
+                        return;
+                    }
+                    const contentRect = contentRoot.getBoundingClientRect();
+                    removeInlineVisual(id);
+
+                    const fragments = rects.map(rect => {
+                        const fragment = document.createElement('div');
+                        fragment.className = 'commentary-highlight-fragment';
+                        if (options.pending) {
+                            fragment.dataset.pending = 'true';
+                        }
+                        fragment.style.top = `${rect.top - contentRect.top}px`;
+                        fragment.style.left = `${rect.left - contentRect.left}px`;
+                        fragment.style.width = `${rect.width}px`;
+                        fragment.style.height = `${rect.height}px`;
+                        contentRoot.appendChild(fragment);
+                        return fragment;
+                    });
+
+                    let thread = null;
+                    if (options.comment) {
+                        const anchorRect = rects[0];
+                        thread = buildThreadElement(options.comment, anchorRect, contentRect);
+                    }
+
+                    inlineVisuals.set(id, { fragments, thread });
+                };
+
+                const clearInlineVisuals = () => {
+                    Array.from(inlineVisuals.keys()).forEach(removeInlineVisual);
+                    if (collisionResolutionFrame) {
+                        cancelAnimationFrame(collisionResolutionFrame);
+                        collisionResolutionFrame = null;
+                    }
+                };
+
+                const rebuildInlineVisuals = () => {
+                    clearInlineVisuals();
+                    // Only render top-level comments (not replies)
+                    comments.filter(comment => !comment.parentId).forEach(comment => {
+                        if (comment.anchor) {
+                            renderInlineHighlight(comment.id, comment.anchor, { comment });
+                        }
+                    });
+                    if (pendingSelection?.rangeDescriptor) {
+                        renderInlineHighlight(PENDING_ID, pendingSelection.rangeDescriptor, { pending: true });
+                    }
+                    scheduleThreadCollisionResolution();
+                };
+
+                const scheduleInlineRebuild = debounce(rebuildInlineVisuals, 140);
+                window.addEventListener('resize', scheduleInlineRebuild);
+                if ('ResizeObserver' in window) {
+                    const resizeObserver = new ResizeObserver(() => scheduleInlineRebuild());
+                    resizeObserver.observe(contentRoot);
+                }
+
+                // Load comments from server on init
+                (async () => {
+                    showStatus('Loading comments...', 'info');
+                    comments = await loadCommentsFromServer();
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    updateSubmitState();
+                    if (comments.length > 0) {
+                        showPanel();
+                        showStatus(`Loaded ${comments.length} comment(s).`, 'info');
+                    } else {
+                        showStatus('');
+                    }
+                })();
+
+                const isInsideCommentaryUI = (node) => {
+                    if (!node || !(node instanceof Node)) {
+                        return false;
+                    }
+                    if (commentaryPanel?.contains(node)) {
+                        return true;
+                    }
+                    if (node instanceof Element && node.closest('.commentary-thread')) {
+                        return true;
+                    }
+                    return false;
+                };
+
+                const handleSelectionChange = () => {
+                    const selection = window.getSelection();
+                    // If no valid selection, just return - keep the pending selection
+                    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+                        return;
+                    }
+                    const range = selection.getRangeAt(0);
+                    // If selection is outside content area, ignore it - keep the pending selection
+                    if (!contentRoot.contains(range.commonAncestorContainer)) {
+                        return;
+                    }
+                    const normalizedText = selection.toString().replace(/\s+/g, ' ').trim();
+                    // If selection is too short, ignore it - keep the pending selection
+                    if (normalizedText.length < MIN_SELECTION_CHARS) {
+                        return;
+                    }
+                    const descriptor = describeRange(range);
+                    if (!descriptor) {
+                        showStatus('Unable to capture this selection.', 'warning');
+                        return;
+                    }
+                    // New valid selection - this replaces any existing pending selection
+                    const snippet = normalizedText.length > MAX_SNIPPET_CHARS
+                        ? `${normalizedText.slice(0, MAX_SNIPPET_CHARS)}…`
+                        : normalizedText;
+                    const section = findSectionDetails(range);
+                    pendingSelection = {
+                        snippet,
+                        sectionId: section?.id || '',
+                        sectionLabel: section?.sectionLabel || 'Selected text',
+                        rangeDescriptor: descriptor
+                    };
+                    setActiveSignatureSection(pendingSelection.sectionId);
+                    updateSubmitState();
+                    rebuildInlineVisuals();
+                    showPanel();
+                };
+
+                document.addEventListener('selectionchange', handleSelectionChange);
+
+                textarea.addEventListener('input', updateSubmitState);
+
+                signatureInput.addEventListener('input', () => {
+                    defaultSignature = signatureInput.value.trim();
+                    if (!activeSignatureSection) {
+                        return;
+                    }
+                    const trimmed = signatureInput.value.trim();
+                    if (trimmed) {
+                        sectionSignatures.set(activeSignatureSection, trimmed);
+                    } else {
+                        sectionSignatures.delete(activeSignatureSection);
+                    }
+                });
+
+                const deleteCommentById = async (commentId) => {
+                    const commentToDelete = comments.find(c => c.id === commentId);
+                    if (!commentToDelete) {
+                        return;
+                    }
+
+                    // Find all replies to this comment (if it's a top-level comment)
+                    const replies = comments.filter(c => c.parentId === commentId);
+                    const idsToDelete = [commentId, ...replies.map(r => r.id)];
+
+                    // Delete from server (delete replies first, then parent)
+                    for (const id of [...replies.map(r => r.id), commentId]) {
+                        const success = await deleteCommentFromServer(id);
+                        if (!success) {
+                            console.error('Failed to delete comment:', id);
+                        }
+                    }
+
+                    // Remove from local state
+                    comments = comments.filter(c => !idsToDelete.includes(c.id));
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    showStatus('Comment removed.');
+                    hidePanel();
+                };
+
+                let isSubmitting = false;
+                submitBtn.addEventListener('click', async () => {
+                    console.log('[submitBtn click] isSubmitting:', isSubmitting);
+                    if (isSubmitting) {
+                        console.log('[submitBtn click] blocked - already submitting');
+                        return;
+                    }
+                    const note = textarea.value.trim();
+                    if (!pendingSelection || !pendingSelection.rangeDescriptor || !note) {
+                        return;
+                    }
+                    isSubmitting = true;
+                    submitBtn.disabled = true;
+                    console.log('[submitBtn click] proceeding with submission');
+                    showStatus('Saving comment...', 'info');
+                    const resolveSignature = () => {
+                        if (activeSignatureSection) {
+                            const stored = sectionSignatures.get(activeSignatureSection);
+                            if (stored && stored.trim()) {
+                                return stored.trim();
+                            }
+                        }
+                        if (signatureInput.value.trim()) {
+                            return signatureInput.value.trim();
+                        }
+                        return defaultSignature.trim();
+                    };
+                    const newComment = {
+                        snippet: pendingSelection.snippet,
+                        note,
+                        sectionId: pendingSelection.sectionId,
+                        sectionLabel: pendingSelection.sectionLabel,
+                        anchor: pendingSelection.rangeDescriptor,
+                        signature: resolveSignature()
+                    };
+                    const savedComment = await saveCommentToServer(newComment);
+                    if (!savedComment) {
+                        submitBtn.disabled = false;
+                        isSubmitting = false;
+                        return;
+                    }
+                    comments = [savedComment, ...comments];
+                    updateClearState();
+                    rebuildInlineVisuals();
+                    textarea.value = '';
+                    pendingSelection = null;
+                    updateSubmitState();
+                    showStatus('Comment added.');
+                    isSubmitting = false;
+                    const selection = window.getSelection();
+                    if (selection) {
+                        selection.removeAllRanges();
+                    }
+                });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', async () => {
+                        if (!comments.length) {
+                            return;
+                        }
+                        if (!window.confirm('Remove all saved comments?')) {
+                            return;
+                        }
+                        clearBtn.disabled = true;
+                        showStatus('Removing all comments...', 'info');
+                        const deletePromises = comments.map(c => deleteCommentFromServer(c.id));
+                        await Promise.all(deletePromises);
+                        comments = [];
+                        updateClearState();
+                        rebuildInlineVisuals();
+                        showStatus('All comments removed.');
+                        hidePanel();
+                    });
+                }
+
+                const submitReply = async (parentId, noteText, form) => {
+                    const submitBtn = form.querySelector('button[data-action="submit-reply"]');
+                    const input = form.querySelector('.commentary-reply-input');
+                    const replySignature = form.querySelector('.commentary-reply-signature');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Sending...';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                articleId: ARTICLE_ID,
+                                note: noteText,
+                                parentId: parentId,
+                                signature: replySignature?.value || null
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        comments.push(data.comment);
+                        rebuildInlineVisuals();
+                        form.remove();
+                    } catch (err) {
+                        console.error('Failed to submit reply:', err);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Reply';
+                        input.focus();
+                    }
+                };
+
+                const saveEdit = async (commentId, form) => {
+                    const saveBtn = form.querySelector('button[data-action="save-edit"]');
+                    const input = form.querySelector('.commentary-edit-input');
+                    const editSignature = form.querySelector('.commentary-edit-signature');
+                    const noteText = input.value.trim();
+
+                    if (!noteText) return;
+
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Saving...';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/api/comments/${commentId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                note: noteText,
+                                signature: editSignature?.value || null
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Server responded with ${response.status}`);
+                        }
+                        const data = await response.json();
+                        // Update local comment
+                        const index = comments.findIndex(c => c.id === commentId);
+                        if (index !== -1) {
+                            comments[index] = data.comment;
+                        }
+                        rebuildInlineVisuals();
+                    } catch (err) {
+                        console.error('Failed to save edit:', err);
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = 'Save';
+                        input.focus();
+                    }
+                };
+
+                contentRoot.addEventListener('click', (event) => {
+                    const button = event.target.closest('button');
+                    if (!button || !button.closest('.commentary-thread')) {
+                        return;
+                    }
+
+                    const thread = button.closest('.commentary-thread');
+
+                    if (button.dataset.action === 'delete-comment') {
+                        deleteCommentById(button.dataset.commentId);
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'reply-comment') {
+                        // Remove any existing reply form in this thread
+                        const existingForm = thread.querySelector('.commentary-reply-form');
+                        if (existingForm) {
+                            existingForm.remove();
+                            return;
+                        }
+                        // Add reply form
+                        const form = buildReplyForm(button.dataset.commentId);
+                        thread.appendChild(form);
+                        form.querySelector('.commentary-reply-input').focus();
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'cancel-reply') {
+                        const form = button.closest('.commentary-reply-form');
+                        if (form) {
+                            form.remove();
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'submit-reply') {
+                        const form = button.closest('.commentary-reply-form');
+                        const input = form.querySelector('.commentary-reply-input');
+                        const noteText = input.value.trim();
+                        if (noteText) {
+                            submitReply(button.dataset.parentId, noteText, form);
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'edit-comment') {
+                        const commentWrapper = button.closest('.commentary-thread-comment');
+                        // Remove any existing edit form
+                        const existingForm = commentWrapper.querySelector('.commentary-edit-form');
+                        if (existingForm) {
+                            existingForm.remove();
+                            return;
+                        }
+                        // Find the comment data
+                        const comment = comments.find(c => c.id === button.dataset.commentId);
+                        if (!comment) return;
+                        // Hide the note and signature while editing
+                        const noteEl = commentWrapper.querySelector('.commentary-thread-note');
+                        const sigEl = commentWrapper.querySelector('.commentary-thread-signature');
+                        if (noteEl) noteEl.style.display = 'none';
+                        if (sigEl) sigEl.style.display = 'none';
+                        // Add edit form after the actions div
+                        const form = buildEditForm(comment);
+                        commentWrapper.insertBefore(form, commentWrapper.querySelector('.commentary-thread-actions'));
+                        form.querySelector('.commentary-edit-input').focus();
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'cancel-edit') {
+                        const commentWrapper = button.closest('.commentary-thread-comment');
+                        const form = button.closest('.commentary-edit-form');
+                        if (form) {
+                            form.remove();
+                            // Show the note and signature again
+                            const noteEl = commentWrapper.querySelector('.commentary-thread-note');
+                            const sigEl = commentWrapper.querySelector('.commentary-thread-signature');
+                            if (noteEl) noteEl.style.display = '';
+                            if (sigEl) sigEl.style.display = '';
+                        }
+                        event.stopPropagation();
+                        return;
+                    }
+
+                    if (button.dataset.action === 'save-edit') {
+                        const form = button.closest('.commentary-edit-form');
+                        saveEdit(button.dataset.commentId, form);
+                        event.stopPropagation();
+                        return;
+                    }
+                });
+
+                contentRoot.addEventListener('toggle', debounce(() => {
+                    rebuildInlineVisuals();
+                }, 80));
+
+                // Double-click on blank area to clear pending selection
+                document.addEventListener('dblclick', (event) => {
+                    // Ignore if clicking inside content or commentary UI
+                    if (contentRoot.contains(event.target)) {
+                        return;
+                    }
+                    if (isInsideCommentaryUI(event.target)) {
+                        return;
+                    }
+                    clearPendingSelection();
+                });
+
+                // Draggable panel
+                const heading = document.querySelector('.commentary-heading');
+                if (heading && commentaryPanel) {
+                    let isDragging = false;
+                    let startX, startY, startLeft, startTop;
+
+                    heading.addEventListener('pointerdown', (e) => {
+                        if (e.target.closest('button')) return;
+                        isDragging = true;
+                        heading.setPointerCapture(e.pointerId);
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        const rect = commentaryPanel.getBoundingClientRect();
+                        startLeft = rect.left;
+                        startTop = rect.top;
+                        commentaryPanel.style.transform = 'none';
+                        commentaryPanel.style.left = startLeft + 'px';
+                        commentaryPanel.style.top = startTop + 'px';
+                    });
+
+                    heading.addEventListener('pointermove', (e) => {
+                        if (!isDragging) return;
+                        const dx = e.clientX - startX;
+                        const dy = e.clientY - startY;
+                        commentaryPanel.style.left = (startLeft + dx) + 'px';
+                        commentaryPanel.style.top = (startTop + dy) + 'px';
+                    });
+
+                    heading.addEventListener('pointerup', () => {
+                        isDragging = false;
+                    });
+
+                    heading.addEventListener('pointercancel', () => {
+                        isDragging = false;
+                    });
+                }
+            };
 
             let parts = markdownSource.split(scaleInvToken);
             let finalHtml = '';
@@ -1889,6 +3219,7 @@ If this work is helpful to you, please consider citing:
             }
 
             contentDiv.innerHTML = finalHtml;
+            // Commentary panel removed
 
             const authorTab = document.querySelector('.author-tab');
             const primaryHeading = contentDiv.querySelector('h1');
@@ -2895,7 +4226,7 @@ If this work is helpful to you, please consider citing:
                     key: 'approx',
                     symbol: '≈',
                     label: 'Approximated scale invariance',
-                    description: 'Holds when SwiGLU behaves like a positive-homogeneous ReLU.<br>E.g. Jointly scaling gate_proj, down_proj and W_o by the same factor to keep the output approximately invariant thanks to the final activation.'
+                    description: 'Holds when SwiGLU behaves like a positive-homogeneous ReLU.<br>E.g. Jointly scaling gate_proj, W_o and Embedding by the same factor to keep the output approximately invariant thanks to the final activation.'
                 },
                 {
                     key: 'individual',
@@ -3738,10 +5069,13 @@ If this work is helpful to you, please consider citing:
         // Render citations in author-year format and merge consecutive citations into a single parenthetical group
         document.addEventListener('DOMContentLoaded', () => {
             const refMap = new Map();
+            const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const lastName = (name) => {
                 const parts = name.split(/\s+/).filter(Boolean);
                 return parts.length ? parts[parts.length - 1] : name;
             };
+            const refMeta = new Map(); // refId -> { kind, baseAuthor, year }
+            const disambigGroups = new Map(); // `${kind}@@${baseAuthor}@@${year}` -> [refId...]
 
             // Build reference lookup: ref-id -> "Author et al., Year"
             document.querySelectorAll('.reference-list li[id^="ref-"]').forEach(li => {
@@ -3750,12 +5084,19 @@ If this work is helpful to you, please consider citing:
                 const authors = authorText.split(',').map(a => a.trim()).filter(Boolean);
 
                 let authorLabel = null;
+                let kind = null;
+                let baseAuthor = null;
                 if (authors.length === 1) {
-                    authorLabel = lastName(authors[0]);
+                    baseAuthor = lastName(authors[0]);
+                    authorLabel = baseAuthor;
+                    kind = 'single';
                 } else if (authors.length === 2) {
                     authorLabel = `${lastName(authors[0])} & ${lastName(authors[1])}`;
                 } else if (authors.length > 2) {
-                    authorLabel = `${lastName(authors[0])} et al.`;
+                    const first = lastName(authors[0]);
+                    authorLabel = `${first} et al.`;
+                    baseAuthor = first;
+                    kind = 'etal';
                 }
 
                 const yearMatch = li.textContent.match(/\b(19|20)\d{2}\b/);
@@ -3763,8 +5104,35 @@ If this work is helpful to you, please consider citing:
 
                 if (authorLabel) {
                     refMap.set(id, year ? `${authorLabel}, ${year}` : authorLabel);
+                    if (kind && baseAuthor) {
+                        refMeta.set(id, { kind, baseAuthor, year });
+                        const groupKey = `${kind}@@${baseAuthor}@@${year}`;
+                        if (!disambigGroups.has(groupKey)) disambigGroups.set(groupKey, []);
+                        disambigGroups.get(groupKey).push(id);
+                    }
                 }
             });
+
+            // Disambiguate collisions that would otherwise render identically:
+            // - single author: "Su, 2025" -> "Su[1], 2025", "Su[2], 2025", ...
+            // - et al.: "Wen et al., 2025" -> "Wen[1] et al., 2025", ...
+            for (const [, ids] of disambigGroups.entries()) {
+                if (ids.length <= 1) continue;
+                ids.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+                ids.forEach((id, idx) => {
+                    const meta = refMeta.get(id);
+                    const existing = refMap.get(id);
+                    if (!meta || !existing) return;
+                    const n = idx + 1;
+                    if (meta.kind === 'etal') {
+                        const prefixRe = new RegExp(`^${escapeRegExp(meta.baseAuthor)} et al\\.`); // before ", YEAR"
+                        refMap.set(id, existing.replace(prefixRe, `${meta.baseAuthor}[${n}] et al.`));
+                    } else if (meta.kind === 'single') {
+                        const prefixRe = new RegExp(`^${escapeRegExp(meta.baseAuthor)}\\b`); // before ", YEAR"
+                        refMap.set(id, existing.replace(prefixRe, `${meta.baseAuthor}[${n}]`));
+                    }
+                });
+            }
 
             const citations = Array.from(document.querySelectorAll('.citation'));
 
@@ -3829,6 +5197,7 @@ If this work is helpful to you, please consider citing:
             });
         });
     </script>
+
 </body>
 
 </html>
