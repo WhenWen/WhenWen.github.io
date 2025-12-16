@@ -1011,7 +1011,7 @@
 
 
 
-Recent deep learning theory shows that weight decay is just a proxy for controlling $\|W\|_F$. The weight norm further determines the effective step size: how large the update is \textit{relative} to the weight (see Section 2 and deep dive in <a href="weight-decay-part-2.html">Part 2</a>).
+Recent deep learning theory shows that weight decay is just a proxy for controlling $\|W\|_F$. The weight norm further determines the effective step size: how large the update is *relative* to the weight (see Section 2 and deep dive in <a href="weight-decay-part-2.html">Part 2</a>).
 
 In light of this theory, we propose **Hyperball Optimization**:
 $$
@@ -1079,7 +1079,7 @@ Further, we heavily overtrained a small 130M model with MuonH and Muon and obser
 
 ## Why Hyperball? A Secret Life of Weight Decay
 
-Before Hyperball, the common wisdom is to use weight decay to control the weight norm. Weight decay is often tossed in under the assumption that it acts as a proxy for L2 regularization to prevent overfitting. But here is the twist: when you pair it with normalization layers (like LayerNorm), weight decay actually stops affecting model capacity entirely. So, why does it still work?
+Before Hyperball, the common wisdom is to use weight decay to control the weight norm. Weight decay is often tossed in under the assumption that it acts as a proxy for L2 regularization to prevent overfitting. But here is the twist: when you pair it with normalization layers (like LayerNorm), weight norm actually stops affecting model capacity entirely. So, why does weight decay still work?
 
 It turns out that weight decay has been living a double life. Recent deep learning theory (see a deep dive in <a href="weight-decay-part-2.html">Part 2</a>) shows that weight decay actually determines the **equilibrium weight norm**, and that norm determines how large a step the optimizer takes in *direction space*—i.e., the **effective step size** (with the rule of thumb $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$). In contrast, without weight decay, the weight norm will grow as $\Theta(\sqrt{t})$, so the effective step size decays naturally: $\eta_{\mathrm{eff}} \propto \sqrt{1/t}$. Therefore, weight decay prevents the direction-space step size from decaying too quickly, inducing an effective schedule that often decays **more slowly** than “no weight decay,” so you keep making useful progress later in training <a class="citation" href="#ref-33">[33]</a><a class="citation" href="#ref-34">[34]</a><a class="citation" href="#ref-35">[35]</a>.
 
