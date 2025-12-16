@@ -1002,18 +1002,6 @@
 
 </div>
 
-## Secret Life of Weight Decay
-
-
-Weight decay is a standard ingredient in almost every modern training recipe, usually tossed in under the assumption that it acts as a proxy for L2 regularization to prevent overfitting. But here is the twist: when you pair it with normalization layers (like LayerNorm), weight decay actually stops affecting model capacity entirely. So, why does it still work?
-
-It turns out that weight decay has been living a double life. Recent deep learning theory (see a deep dive in <a href="weight-decay-part-2.html">Part 2</a>) shows that weight decay actually determines the **equilibrium weight norm**, and that norm determines how large a step the optimizer takes in *direction space*—i.e., the **effective step size** (with the rule of thumb $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$). In contrast, without weight decay, the weight norm will grow as $\Theta(\sqrt{t})$, so the effective step size decays naturally: $\eta_{\mathrm{eff}} \propto \sqrt{1/t}$. Therefore, weight decay prevents the direction-space step size from decaying too quickly, inducing an effective schedule that often decays **more slowly** than “no weight decay,” so you keep making useful progress later in training <a class="citation" href="#ref-33">[33]</a><a class="citation" href="#ref-34">[34]</a><a class="citation" href="#ref-35">[35]</a>.
-
-<div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
-</div>
-
-
 
 
 
@@ -1022,9 +1010,10 @@ It turns out that weight decay has been living a double life. Recent deep learni
 ## Hyperball Optimization: Normalizing Both Weight Norm and Update Norm
 
 
-Since weight decay is just a proxy for controlling $\|W\|_F$ (and thus effective step size $\eta_{\mathrm{eff}}$), why not control it directly?
 
-We propose **Hyperball Optimization**:
+Recent deep learning theory shows that weight decay is just a proxy for controlling $\|W\|_F$. The weight norm further determines the effective step size: how large the update is \textit{relative} to the weight (see Section 2 and deep dive in <a href="weight-decay-part-2.html">Part 2</a>).
+
+In light of this theory, we propose **Hyperball Optimization**:
 $$
 W_{t+1} = \mathrm{Norm}(W_t - \eta_{\mathrm{eff}} \cdot \mathrm{Norm}(u_t)\,\|W_0\|_F)\,\|W_0\|_F,
 $$
@@ -1088,7 +1077,19 @@ Further, we heavily overtrained a small 130M model with MuonH and Muon and obser
     <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
 </div>
 
-### Commonly Asked Questions
+## Why Hyperball? A Secret Life of Weight Decay
+
+Before Hyperball, the common wisdom is to use weight decay to control the weight norm. Weight decay is often tossed in under the assumption that it acts as a proxy for L2 regularization to prevent overfitting. But here is the twist: when you pair it with normalization layers (like LayerNorm), weight decay actually stops affecting model capacity entirely. So, why does it still work?
+
+It turns out that weight decay has been living a double life. Recent deep learning theory (see a deep dive in <a href="weight-decay-part-2.html">Part 2</a>) shows that weight decay actually determines the **equilibrium weight norm**, and that norm determines how large a step the optimizer takes in *direction space*—i.e., the **effective step size** (with the rule of thumb $\eta_{\mathrm{eff}} \propto \sqrt{\eta\lambda}$). In contrast, without weight decay, the weight norm will grow as $\Theta(\sqrt{t})$, so the effective step size decays naturally: $\eta_{\mathrm{eff}} \propto \sqrt{1/t}$. Therefore, weight decay prevents the direction-space step size from decaying too quickly, inducing an effective schedule that often decays **more slowly** than “no weight decay,” so you keep making useful progress later in training <a class="citation" href="#ref-33">[33]</a><a class="citation" href="#ref-34">[34]</a><a class="citation" href="#ref-35">[35]</a>.
+
+<div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
+</div>
+
+
+
+## Commonly Asked Questions
 
 <details>
 <summary style="cursor: pointer; font-weight: 600;">
