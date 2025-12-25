@@ -1,0 +1,5 @@
+PWD c:/Users/86136/Downloads/02_Personal/WhenWen.github.io/wd_blog/docs/latex/fig1
+INPUT d:/texlive/2022/texmf.cnf
+INPUT d:/texlive/2022/texmf-dist/web2c/texmf.cnf
+INPUT d:/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt
+OUTPUT texput.log
