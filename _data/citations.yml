@@ -1,8 +1,8 @@
 metadata:
-  last_updated: '2025-12-15'
+  last_updated: '2025-12-29'
 papers:
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 103
+    citations: 104
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
@@ -30,15 +30,15 @@ papers:
     title: Residual permutation test for regression coefficient testing
     year: '2025'
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 183
+    citations: 184
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
-    citations: 34
+    citations: 35
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 16
+    citations: 19
     title: 'Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
@@ -46,11 +46,11 @@ papers:
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2024'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 122
+    citations: 123
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 12
+    citations: 11
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
@@ -66,10 +66,10 @@ papers:
     title: 'PaTH Attention: Position Encoding via Accumulating Householder Transformations'
     year: '2025'
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 53
+    citations: 55
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 25
+    citations: 27
     title: Overtrained language models are harder to fine-tune
     year: '2025'
