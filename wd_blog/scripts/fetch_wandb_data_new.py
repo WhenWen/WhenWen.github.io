@@ -21,7 +21,6 @@ run_paths = {
 # Metrics to retrieve
 metrics = [
     "params/norm/transformer.layers.9.self_attn.v_proj.weight",
-    "grad/norm/transformer.layers.9.self_attn.v_proj.weight",
     "eval/paloma/c4_en/loss"
 ]
 
@@ -70,16 +69,15 @@ for idx, metric in enumerate(metrics):
 
 print("\nCreating plots...")
 
-# Create subplots - horizontal layout (1 row, 3 columns)
+# Create subplots - horizontal layout (1 row, 2 columns)
 fig = make_subplots(
-    rows=1, cols=3,
+    rows=1, cols=2,
     subplot_titles=(
         "Weight Norm",
-        "Gradient Norm",
         "Evaluation Loss"
     ),
-    horizontal_spacing=0.08,
-    specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]]
+    horizontal_spacing=0.1,
+    specs=[[{"secondary_y": False}, {"secondary_y": False}]]
 )
 
 colors = {
@@ -121,26 +119,17 @@ fig.update_yaxes(
     tickfont=dict(size=13)
 )
 
-# Gradient norm - FIXED range [0, 0.05] with larger tick font
-fig.update_yaxes(
-    title_text="Norm", 
-    row=1, col=2, 
-    gridcolor='rgba(229, 231, 235, 0.5)',
-    tickfont=dict(size=13),
-    range=[0, 0.05]
-)
-
 # Loss - fixed range for better visualization
 fig.update_yaxes(
     title_text="Loss", 
-    row=1, col=3, 
+    row=1, col=2, 
     gridcolor='rgba(229, 231, 235, 0.5)',
     tickfont=dict(size=13),
     range=[3, 4]
 )
 
 # Update x-axes - larger tick font
-for col in range(1, 4):
+for col in range(1, 3):
     fig.update_xaxes(
         row=1, col=col, 
         gridcolor='rgba(229, 231, 235, 0.5)',
@@ -239,7 +228,6 @@ with open(output_file, 'w') as f:
 print(f"\n✓ Styling applied to {output_file}")
 print(f"✓ Title added: '1.2B Model' with token count")
 print(f"✓ Legend updated: 'MuonH' and 'Muon'")
-print(f"✓ Gradient norm y-axis range set to [0, 0.05]")
 print(f"✓ Loss y-axis range set to [3, 4]")
 print(f"✓ Y-axis and X-axis tick labels enlarged (size 13)")
 print(f"✓ Legend text enlarged (size 15)")
