@@ -1189,7 +1189,7 @@ We first compute the expected value of the denominator:
 $$
 \begin{align*}
 (1-\beta_2)\mathbb{E}[v_t] &= 
-(1-\beta_2)\mathbb{E}[(1 - \beta_2)\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
+(1-\beta_2)\mathbb{E}[\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
 &=
 (1-\beta_2)\mathbb{E}[\sum_{i=0}^{\infty} \beta_2^i \bar g_{t-i}^2] \\
 &=
@@ -1347,7 +1347,7 @@ $$
 \frac{1-\beta_1^{2\min(t,t')+2}}{1-\beta_1^2} \\   
 &=
 \frac{(1-\beta_1)(1-\beta_1^{2\min(t,t')+2})\beta_1^{t+t'-2\min(t,t')}}
-{(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
+{(1 + \beta_1)(1-\beta_1^{t+1})(1-\beta_1^{t'+1})}
 \sigma^2 d.
 \end{aligned}
 $$
