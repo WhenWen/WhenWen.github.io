@@ -30,26 +30,26 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-from-weight-decay-to-hyperball-optimization-part-2-weight-decay-theory-deep-dive",
+        },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-ii-part-2",
         
-          title: "From Weight Decay to Hyperball Optimization (Part 2): Weight decay theory deep dive...",
+          title: "Fantastic Pretraining Optimizers and Where to Find Them II (Part 2)",
         
-        description: "Part 2 of a two-part interactive series: why weight decay sets effective step size in scale-invariant nets.",
+        description: "A deep dive into hyperball geometry and pretraining optimization strategies.",
         section: "Posts",
         handler: () => {
           
             window.location.href = "/wd_blog/public/weight-decay-part-2.html";
           
         },
-      },{id: "post-from-weight-decay-to-hyperball-optimization-part-1-hyperball-optimizer-intuition",
+      },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-ii-part-1",
         
-          title: "From Weight Decay to Hyperball Optimization (Part 1): Hyperball optimizer + intuition",
+          title: "Fantastic Pretraining Optimizers and Where to Find Them II (Part 1)",
         
-        description: "Part 1 of a two-part interactive series: Hyperball optimization and empirical intuition.",
+        description: "Understanding weight decay and its role in modern deep learning optimization.",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/wd_blog/public/hyperball-part-1.html";
+            window.location.href = "/wd_blog/public/index.html";
           
         },
       },{id: "books-the-godfather",
