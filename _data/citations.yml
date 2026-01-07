@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2025-12-29'
+  last_updated: '2026-01-07'
 papers:
   oTmQCFUAAAAJ:0EnyYjriUFMC:
     citations: 104
@@ -10,7 +10,7 @@ papers:
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 18
+    citations: 19
     title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2024'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -38,7 +38,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 19
+    citations: 27
     title: 'Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
@@ -54,11 +54,11 @@ papers:
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 26
+    citations: 27
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 14
+    citations: 15
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
