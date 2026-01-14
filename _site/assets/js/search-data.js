@@ -45,11 +45,11 @@ ninja.data = [{
         
           title: "Fantastic Pretraining Optimizers and Where to Find Them II (Part 1)",
         
-        description: "Understanding weight decay and its role in modern deep learning optimization.",
+        description: "A deep dive into hyperball geometry and pretraining optimization strategies.",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/wd_blog/public/index.html";
+            window.location.href = "/wd_blog/public/hyperball-part-1.html";
           
         },
       },{id: "books-the-godfather",

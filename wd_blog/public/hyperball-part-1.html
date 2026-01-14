@@ -68,7 +68,8 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 1.25rem 4rem;
-            padding-left: 1.25rem; /* No commentary sidebar */
+            padding-left: 1.25rem;
+            /* No commentary sidebar */
         }
 
         .content-layout {
@@ -462,7 +463,8 @@
 
         @media (max-width: 1100px) {
             .container {
-                padding-left: 1.25rem; /* Remove left space on smaller screens */
+                padding-left: 1.25rem;
+                /* Remove left space on smaller screens */
             }
 
             .content-layout {
@@ -977,10 +979,13 @@
                     <span class="author-tab-label">Authors:</span>
                     <div class="author-links">
                         <a href="https://whenwen.github.io/" target="_blank" rel="noopener noreferrer">Kaiyue Wen</a>
-                        <a href="https://dangxingyu.github.io/" target="_blank" rel="noopener noreferrer">Xingyu Dang</a>
+                        <a href="https://dangxingyu.github.io/" target="_blank" rel="noopener noreferrer">Xingyu
+                            Dang</a>
                         <a href="https://kaifeng.ac/" target="_blank" rel="noopener noreferrer">Kaifeng Lyu</a>
-                        <a href="https://ai.stanford.edu/~tengyuma/" target="_blank" rel="noopener noreferrer">Tengyu Ma</a>
-                        <a href="https://cs.stanford.edu/~pliang/" target="_blank" rel="noopener noreferrer">Percy Liang</a>
+                        <a href="https://ai.stanford.edu/~tengyuma/" target="_blank" rel="noopener noreferrer">Tengyu
+                            Ma</a>
+                        <a href="https://cs.stanford.edu/~pliang/" target="_blank" rel="noopener noreferrer">Percy
+                            Liang</a>
                     </div>
                 </div>
                 <div id="content" aria-live="polite"></div>
@@ -1023,13 +1028,20 @@ This idea is closely related to Weight Normalization <a class="citation" href="#
 
 
 <div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
+    <img src="../assets/images/speedup.png" style="width: 100%; height: auto; display: block;" alt="Speedup demo">
 </div>
 
 
 This method has the following benefits:
 1. **Native hyperparameter transfer:** Hyperparameters transfer predictably across model width and depth.
 2. **Empirical speedup:** Faster loss reduction compared to decoupled weight decay across model scale and training duration.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
+</div>
+
+
+
 
 ### Hyperparameter Transfer across Width and Depth
 
@@ -1064,11 +1076,6 @@ We validate this by running the following width and depth scaling experiments:
 ### Empirical Speedup 
 
 We further validate Hyperball in the same setup as <a href="https://marin.community/speedrun/" target="_blank" rel="noopener">Marin's speedrun</a> and observe that Hyperball leads to empirical speedup over AdamW and MuonW using a Gemma-like architecture.
-
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/c4_en_loss_interactive.html" style="width: 100%; height: 640px; border: none; display: block;" title="Interactive C4/en Loss Plot"></iframe>
-</div>
 
 
 Further, we heavily overtrained a small 130M model with MuonH and Muon and observe a consistent speedup across different data sizes.
@@ -1761,7 +1768,7 @@ If this work is helpful to you, please consider citing:
                             let normalizedPos = 0;
                             for (let i = 0; i < nodeText.length && normalizedPos < idx; i++) {
                                 if (/\s/.test(nodeText[i])) {
-                                    if (i === 0 || !/\s/.test(nodeText[i-1])) {
+                                    if (i === 0 || !/\s/.test(nodeText[i - 1])) {
                                         normalizedPos++;
                                     }
                                 } else {
@@ -3662,7 +3669,7 @@ If this work is helpful to you, please consider citing:
             }, {});
 
             const weightScaleMap = {
-                'word-embed': { default: 'group', "gemma3": "individual"},
+                'word-embed': { default: 'group', "gemma3": "individual" },
                 'lm-head': { default: 'none' },
                 wq: { default: 'none', qwen3: 'individual', gemma3: 'individual' },
                 wk: { default: 'none', qwen3: 'individual', gemma3: 'individual' },
