@@ -1024,23 +1024,39 @@ W_{t+1} = \mathrm{Normalize}_R(W_t - \eta \cdot \mathrm{Normalize}_R(u_t)).
 $$
 where $R$ is the initial weight norm and $\mathrm{Normalize}_R(x) = R x / \|x\|_F$ projects $x$ to the unit sphere, and $u_t$ is the standard Adam/Muon update. We apply this optimizer to each Transformer projection matrix and use Adam for the remaining scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
 
-This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a> and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
 
+This method has the following benefits:
+1. **Empirical speedup:** Faster loss reduction compared to decoupled weight decay across model scale and training duration.
+2. **Native hyperparameter transfer:** Hyperparameters transfer predictably across model width and depth.
 
 <div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
     <img src="../assets/images/speedup.png" style="width: 100%; height: auto; display: block;" alt="Speedup demo">
 </div>
 
 
-This method has the following benefits:
-1. **Native hyperparameter transfer:** Hyperparameters transfer predictably across model width and depth.
-2. **Empirical speedup:** Faster loss reduction compared to decoupled weight decay across model scale and training duration.
+
+### Empirical Speedup 
+
+We further validate Hyperball in the same setup as <a href="https://marin.community/speedrun/" target="_blank" rel="noopener">Marin's speedrun</a> and observe that Hyperball leads to empirical speedup over AdamW and MuonW using a Gemma-like architecture.
+
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/c4_en_loss_interactive.html" style="width: 100%; height: 640px; border: none; display: block;" title="Interactive C4/en Loss Plot"></iframe>
+</div>
+
+
+An example run of MuonH on 1.2B-parameters model is shown below, where the weight norm stays constant as we expect, and we see improved performance compared to MuonW.
 
 <div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
     <iframe src="experiments/wandb_metrics_plot_new.html" style="width: 100%; height: 580px; border: none; display: block;" title="Interactive W&B Metrics Plot - Hyperball Runs"></iframe>
 </div>
 
 
+Further, we heavily overtrained a small 130M model with MuonH and Muon and observe a consistent speedup across different data sizes.
+
+<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
+    <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
+</div>
 
 
 ### Hyperparameter Transfer across Width and Depth
@@ -1073,16 +1089,6 @@ We validate this by running the following width and depth scaling experiments:
     <iframe src="experiments/width_scaling_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Width Scaling Plot"></iframe>
 </div>
 
-### Empirical Speedup 
-
-We further validate Hyperball in the same setup as <a href="https://marin.community/speedrun/" target="_blank" rel="noopener">Marin's speedrun</a> and observe that Hyperball leads to empirical speedup over AdamW and MuonW using a Gemma-like architecture.
-
-
-Further, we heavily overtrained a small 130M model with MuonH and Muon and observe a consistent speedup across different data sizes.
-
-<div style="margin: 2rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
-    <iframe src="experiments/plot1b_scaling_law_fit_interactive.html" style="width: 100%; height: 620px; border: none; display: block;" title="Interactive Data Scaling Plot"></iframe>
-</div>
 
 ## Why Hyperball? A Secret Life of Weight Decay
 
@@ -1093,6 +1099,10 @@ It turns out that weight decay has been living a double life. Recent deep learni
 <div style="margin: 2rem auto; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
     <iframe src="experiments/wandb_metrics_plot_analyze.html" style="width: 100%; height: 850px; border: none; display: block;" title="Interactive W&B QKV Norms Plot"></iframe>
 </div>
+
+## Related Work
+
+This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a> and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
 
 
 
