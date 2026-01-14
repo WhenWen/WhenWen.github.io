@@ -1020,9 +1020,9 @@ Recent deep learning theory shows that weight decay is just a proxy for controll
 
 In light of this theory, we propose **Hyperball Optimization**:
 $$
-W_{t+1} = \mathrm{Norm}(W_t - \eta_{\mathrm{eff}} \cdot \mathrm{Norm}(u_t)\,\|W_0\|_F)\,\|W_0\|_F,
+W_{t+1} = \mathrm{Normalize}_R(W_t - \eta \cdot \mathrm{Normalize}_R(u_t)).
 $$
-where $\|W_0\|_F$ is the initial weight norm and $\mathrm{Norm}(x) = x / \|x\|_F$ projects $x$ to the unit sphere. Here $u_t$ is the standard Adam/Muon update. We apply this optimizer to each Transformer projection matrix and use Adam for the remaining scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
+where $R$ is the initial weight norm and $\mathrm{Normalize}_R(x) = R x / \|x\|_F$ projects $x$ to the unit sphere, and $u_t$ is the standard Adam/Muon update. We apply this optimizer to each Transformer projection matrix and use Adam for the remaining scalar parameters and embeddings. We call the corresponding optimizer **Adam-Hyperball (AdamH)** or **Muon-Hyperball (MuonH)** depending on the base optimizer.
 
 This idea is closely related to Weight Normalization <a class="citation" href="#ref-22">[22]</a>, though we no longer maintain a separate norm parameter. Variants that omit update-norm normalization have been explored in diffusion models <a class="citation" href="#ref-23">[23]</a> and, concurrently with our work, in language model training <a class="citation" href="#ref-24">[24]</a>. We do not expect update-norm normalization to deliver a large empirical speedup, but it is crucial for native hyperparameter transfer because it preserves the ratio between the weight and update norms.
 
