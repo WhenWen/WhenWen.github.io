@@ -48,7 +48,7 @@
     % Normalized Gradient Update (Green) - unit direction scaled by η||W_0||_F
     \draw[->, ultra thick, green!60!black] (Wt) -- (Wt_inter) 
         node[midway, right, xshift=4pt, yshift=0pt, align=left, text=green!60!black] 
-        {$-\eta \cdot \widehat{\mathbf{u}}_t \cdot \|\mathbf{W}_0\|_F$};
+        {$-\eta \cdot \widehat{\mathbf{u}}_t \cdot R$};
 
     % Intermediate point (dashed, off-sphere)
     \draw[->, thick, dashed, gray] (O) -- (Wt_inter) 
@@ -77,7 +77,7 @@
     
     % Fixed Norm Label
     \node[anchor=north west, blue!40!black] at (-\R-0.3, -\R+0.5) {Fixed Weight Norm};
-    \node[anchor=north west, blue!40!black] at (-\R+0.2, -\R+0.9) {$\|\mathbf{W}\| = \|\mathbf{W}_0\|_F$};
+    \node[anchor=north west, blue!40!black] at (-\R+0.2, -\R+0.9) {$\|\mathbf{W}\|_F = R$};
 
     % Origin
     \node[below left] at (O) {$0$};

@@ -195,7 +195,7 @@ def create_plot(records: Sequence[RunRecord], output_file: Path) -> None:
         "MuonH": "#1d4ed8",
         "Muon": "#60a5fa",
         "AdamH": "#f87171",
-        "AdamC": "#fda4af",
+        "AdamW": "#fda4af",
     }
 
     for optimizer, optimizer_records in by_optimizer.items():
@@ -230,7 +230,7 @@ def create_plot(records: Sequence[RunRecord], output_file: Path) -> None:
 
     fig.update_layout(
         title=dict(
-            text="Final C4/en Loss by Optimizer & Model Size",
+            text="Final Eval Loss by Optimizer & Model Size",
             x=0.5,
             font=dict(size=20, family="Inter, sans-serif"),
         ),

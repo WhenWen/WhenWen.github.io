@@ -73,7 +73,7 @@ print("\nCreating plots...")
 fig = make_subplots(
     rows=1, cols=2,
     subplot_titles=(
-        "Weight Norm",
+        "Weight Norm (Layer 9 V Proj)",
         "Evaluation Loss"
     ),
     horizontal_spacing=0.1,
@@ -178,7 +178,7 @@ fig.add_annotation(
 )
 
 # Save as HTML
-output_file = "wandb_metrics_plot_new.html"
+output_file = "wd_blog/public/experiments/wandb_metrics_plot_new.html"
 fig.write_html(
     output_file,
     config={
