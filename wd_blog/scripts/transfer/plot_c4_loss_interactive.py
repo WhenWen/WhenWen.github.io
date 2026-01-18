@@ -50,7 +50,7 @@ RUN_GROUPS: Dict[str, Sequence[str]] = {
         "https://wandb.ai/marin-community/marin/runs/qwen3_520m_muon_4096-361875",
         "https://wandb.ai/marin-community/marin/runs/qwen3_1_2b_muon_4096-d117d2",
     ],
-    "AdamC": [
+    "AdamW": [
         "https://wandb.ai/marin-community/marin/runs/llama_130m_adamc_cos_4096-55946b",
         "https://wandb.ai/marin-community/marin/runs/llama_300m_adamc_cos_4096-a94d5d",
         "https://wandb.ai/marin-community/marin/runs/llama_520m_adamc_cos_4096-a3c775",
