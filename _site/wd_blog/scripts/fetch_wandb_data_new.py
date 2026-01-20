@@ -90,6 +90,16 @@ display_names = {
     "remove_attn_bias": "Muon"
 }
 
+# W&B URLs for click-to-redirect (format: entity/project/runs/run_id)
+def make_wandb_url(run_path):
+    parts = run_path.split('/')
+    return f"https://wandb.ai/{parts[0]}/{parts[1]}/runs/{parts[2]}"
+
+run_urls = {
+    "no_hybrid_norm": make_wandb_url(run_paths['no_hybrid_norm']),
+    "remove_attn_bias": make_wandb_url(run_paths['remove_attn_bias'])
+}
+
 # Add traces for each metric
 for idx, metric in enumerate(metrics, start=1):
     for run_name, df in data.items():
@@ -105,6 +115,7 @@ for idx, metric in enumerate(metrics, start=1):
                 line=dict(color=colors[run_name], width=2.5),
                 legendgroup=run_name,
                 showlegend=(idx == 1),  # Only show legend for first subplot
+                customdata=[run_urls[run_name]] * len(valid_data),
                 hovertemplate='<b>%{fullData.name}</b><br>Step: %{x}<br>Value: %{y:.6f}<extra></extra>'
             ),
             row=1, col=idx
@@ -178,7 +189,7 @@ fig.add_annotation(
 )
 
 # Save as HTML
-output_file = "wandb_metrics_plot_new.html"
+output_file = "wd_blog/public/experiments/wandb_metrics_plot_new.html"
 fig.write_html(
     output_file,
     config={
@@ -202,7 +213,7 @@ print(f"  Open it in your browser to view the interactive chart")
 with open(output_file, 'r') as f:
     html_content = f.read()
 
-# Inject some custom CSS
+# Inject custom CSS and JavaScript for click-to-redirect
 styled_html = html_content.replace(
     '</head>',
     '''
@@ -216,9 +227,34 @@ styled_html = html_content.replace(
         .plotly-graph-div {
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
         }
     </style>
     </head>
+    '''
+)
+
+# Inject JavaScript for click handling
+styled_html = styled_html.replace(
+    '</body>',
+    '''
+    <script>
+        // Wait for Plotly to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            var plotDiv = document.querySelector('.plotly-graph-div');
+            if (plotDiv) {
+                plotDiv.on('plotly_click', function(data) {
+                    if (data.points && data.points.length > 0) {
+                        var point = data.points[0];
+                        if (point.customdata) {
+                            window.open(point.customdata, '_blank');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    </body>
     '''
 )
 
@@ -231,4 +267,5 @@ print(f"✓ Legend updated: 'MuonH' and 'Muon'")
 print(f"✓ Loss y-axis range set to [3, 4]")
 print(f"✓ Y-axis and X-axis tick labels enlarged (size 13)")
 print(f"✓ Legend text enlarged (size 15)")
+print(f"✓ Click-to-redirect: clicking on curves opens W&B run in new tab")
 

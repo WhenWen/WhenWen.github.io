@@ -169,6 +169,16 @@ display_names = {
     "pt_to_cooldown": "AdamW"
 }
 
+# W&B URLs for click-to-redirect (format: entity/project/runs/run_id)
+def make_wandb_url(run_path):
+    parts = run_path.split('/')
+    return f"https://wandb.ai/{parts[0]}/{parts[1]}/runs/{parts[2]}"
+
+run_urls = {
+    "muonh_feistel": make_wandb_url(run_paths['muonh_feistel']),
+    "pt_to_cooldown": make_wandb_url(run_paths['pt_to_cooldown'])
+}
+
 # Add traces for each metric
 for idx, metric in enumerate(actual_metrics, start=1):
     for run_name, run_data in data.items():
@@ -186,6 +196,7 @@ for idx, metric in enumerate(actual_metrics, start=1):
                     line=dict(color=colors[run_name], width=2.5),
                     legendgroup=run_name,
                     showlegend=(idx == 1),
+                    customdata=[run_urls[run_name]] * len(valid_data),
                     hovertemplate='<b>%{fullData.name}</b><br>Step: %{x}<br>Value: %{y:.6f}<extra></extra>'
                 ),
                 row=1, col=idx
@@ -280,6 +291,7 @@ print(f"\n✓ Interactive plot saved to {output_file}")
 with open(output_file, 'r') as f:
     html_content = f.read()
 
+# Inject custom CSS and JavaScript for click-to-redirect
 styled_html = html_content.replace(
     '</head>',
     '''
@@ -293,9 +305,34 @@ styled_html = html_content.replace(
         .plotly-graph-div {
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
         }
     </style>
     </head>
+    '''
+)
+
+# Inject JavaScript for click handling
+styled_html = styled_html.replace(
+    '</body>',
+    '''
+    <script>
+        // Wait for Plotly to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            var plotDiv = document.querySelector('.plotly-graph-div');
+            if (plotDiv) {
+                plotDiv.on('plotly_click', function(data) {
+                    if (data.points && data.points.length > 0) {
+                        var point = data.points[0];
+                        if (point.customdata) {
+                            window.open(point.customdata, '_blank');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    </body>
     '''
 )
 
@@ -303,5 +340,6 @@ with open(output_file, 'w') as f:
     f.write(styled_html)
 
 print(f"✓ Styling applied to {output_file}")
+print(f"✓ Click-to-redirect: clicking on curves opens W&B run in new tab")
 print(f"✓ Open it in your browser to view the interactive chart")
 

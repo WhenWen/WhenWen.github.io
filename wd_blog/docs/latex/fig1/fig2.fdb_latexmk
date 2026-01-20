@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1768697014.84799 "/Users/kaiyuewen/Downloads/Projects/WhenWen.github.io/wd_blog/docs/latex/fig1/fig2.tex" "fig2.pdf" "fig2" 1768697015.27086 0
-  "/Users/kaiyuewen/Downloads/Projects/WhenWen.github.io/wd_blog/docs/latex/fig1/fig2.tex" 1768696986.94512 3282 17fe7e3e20e55527273c7bc3ddf93f6f ""
+["pdflatex"] 1768803794.61335 "/Users/kaiyuewen/Downloads/Projects/WhenWen.github.io/wd_blog/docs/latex/fig1/fig2.tex" "fig2.pdf" "fig2" 1768803795.04298 0
+  "/Users/kaiyuewen/Downloads/Projects/WhenWen.github.io/wd_blog/docs/latex/fig1/fig2.tex" 1768803794.44675 3290 6cf5ce5d8c594592ed681880791d0aa6 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex9.tfm" 1246382020 996 a18840b13b499c08ac2de96a99eda4bc ""
@@ -25,7 +25,6 @@
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb" 1248133631 32734 69e00a6b65cedb993666e42eedb3d48f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb" 1248133631 33993 9b89b85fd2d9df0482bd47194d1d3bf3 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb" 1248133631 32442 c975af247b6702f7ca0c299af3616b80 ""
-  "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pfb" 1248133631 30212 b6aafa449db0097a6b9b890f66741063 ""
   "/usr/local/texlive/2025/texmf-dist/tex/context/base/mkii/supp-pdf.mkii" 1461363279 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2025/texmf-dist/tex/generic/iftex/ifluatex.sty" 1572645307 492 1994775aa15b0d1289725a0b1bbc2d4c ""
   "/usr/local/texlive/2025/texmf-dist/tex/generic/iftex/iftex.sty" 1734129479 7984 7dbb9280f03c0a315425f1b4f35d43ee ""
@@ -132,8 +131,8 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1763261363 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1741450574 3345740 46b66fdb0378f7bf5921b5eabf1762b8 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "fig2.aux" 1768697015.21881 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
-  "fig2.tex" 1768696986.94512 3282 17fe7e3e20e55527273c7bc3ddf93f6f ""
+  "fig2.aux" 1768803795.00984 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "fig2.tex" 1768803794.44675 3290 6cf5ce5d8c594592ed681880791d0aa6 ""
   (generated)
   "fig2.aux"
   "fig2.log"
