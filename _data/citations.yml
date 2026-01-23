@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-01-16'
+  last_updated: '2026-01-23'
 papers:
   oTmQCFUAAAAJ:0EnyYjriUFMC:
     citations: 105
@@ -10,7 +10,7 @@ papers:
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 20
+    citations: 21
     title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2024'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -26,11 +26,11 @@ papers:
     title: 'Benign overfitting in classification: Provably counter label noise with larger models'
     year: '2022'
   oTmQCFUAAAAJ:9ZlFYXVOiuMC:
-    citations: 12
+    citations: 13
     title: Residual permutation test for regression coefficient testing
     year: '2025'
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 185
+    citations: 186
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
@@ -38,7 +38,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 31
+    citations: 33
     title: 'Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
@@ -58,11 +58,11 @@ papers:
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 29
+    citations: 30
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 17
+    citations: 20
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
