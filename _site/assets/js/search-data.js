@@ -30,26 +30,15 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-ii-part-2",
+        },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-2-1",
         
-          title: "Fantastic Pretraining Optimizers and Where to Find Them II (Part 2)",
-        
-        description: "A deep dive into hyperball geometry and pretraining optimization strategies.",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/wd_blog/public/weight-decay-part-2.html";
-          
-        },
-      },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-ii-part-1",
-        
-          title: "Fantastic Pretraining Optimizers and Where to Find Them II (Part 1)",
+          title: 'Fantastic Pretraining Optimizers and Where to Find Them 2.1 <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
         
         description: "A deep dive into hyperball geometry and pretraining optimization strategies.",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/wd_blog/public/hyperball-part-1.html";
+            window.open("https://psychedelic-sunstone-851.notion.site/Fantastic-Pretraining-Optimizers-and-Where-to-Find-Them-2-1-Hyperball-Optimization-2e924306e6f280e7a5ffee00eb40a0dd?source=copy_link", "_blank");
           
         },
       },{id: "books-the-godfather",

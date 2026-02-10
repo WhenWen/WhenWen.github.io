@@ -1,0 +1,43 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tcolorbox}
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+
+\begin{document}
+
+\begin{frame}
+
+% Notation and equation in red box
+\begin{tcolorbox}[colback=red!10, colframe=red!70!black, boxrule=1pt, arc=2pt, left=4pt, right=4pt, top=2pt, bottom=2pt]
+{\small $R = \|W_0\|_F$ (initial norm), \quad $\mathrm{Normalize}(x) = x / \|x\|_F$, \quad $u_t$: Adam/Muon update.}
+
+\vspace{0.2em}
+\textbf{Hyperball Optimization:} \quad $W_{t+1} = R \cdot \mathrm{Normalize}\bigl( W_t - \eta R \cdot \mathrm{Normalize}(u_t) \bigr)$.
+\end{tcolorbox}
+
+\vspace{0.5em}
+\begin{columns}[c]
+    % Left column (figure)
+    \begin{column}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig2.pdf}
+    \end{column}
+
+    % Right column (speedup figure)
+    \begin{column}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.95\textwidth]{speedup.png}
+
+        \vspace{-0.3em}
+        {\small \textbf{Speedup over AdamW on pretraining 1.2B models}}
+    \end{column}
+\end{columns}
+
+\end{frame}
+
+\end{document}
