@@ -1,20 +1,20 @@
 metadata:
-  last_updated: '2026-02-16'
+  last_updated: '2026-02-18'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
     title: 'Divide-and-Conquer CoT: RL for Reducing Latency via Parallel Reasoning'
     year: '2026'
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 106
+    citations: 108
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
-    citations: 7
+    citations: 8
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 22
+    citations: 25
     title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2024'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -22,70 +22,78 @@ papers:
     title: Practically Solving LPN in High Noise Regimes Faster Using Neural Networks
     year: '2023'
   oTmQCFUAAAAJ:7PzlFSSx8tAC:
-    citations: 27
+    citations: 32
     title: Fantastic pretraining optimizers and where to find them
     year: '2025'
   oTmQCFUAAAAJ:8k81kl-MbHgC:
-    citations: 12
+    citations: 11
     title: 'Benign overfitting in classification: Provably counter label noise with larger models'
     year: '2022'
   oTmQCFUAAAAJ:9ZlFYXVOiuMC:
     citations: 16
     title: Residual permutation test for regression coefficient testing
     year: '2025'
+  oTmQCFUAAAAJ:HDshCWvjkbEC:
+    citations: 5
+    title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval, 2024'
+    year: Unknown Year
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 186
+    citations: 187
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
-    citations: 37
+    citations: 36
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 53
-    title: 'Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free'
+    citations: 64
+    title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
-    citations: 48
+    citations: 49
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2024'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 128
+    citations: 131
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 14
+    citations: 16
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
-    citations: 8
+    citations: 10
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 39
+    citations: 40
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 25
+    citations: 30
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
-    citations: 10
-    title: 'PaTH Attention: Position Encoding via Accumulating Householder Transformations'
+    citations: 16
+    title: 'Path attention: Position encoding via accumulating householder transformations'
     year: '2025'
   oTmQCFUAAAAJ:hC7cP41nSMkC:
     citations: 0
     title: 'A Unified View of Attention and Residual Sinks: Outlier-Driven Rescaling is Essential for Transformer Training'
     year: '2026'
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 57
+    citations: 59
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
+  oTmQCFUAAAAJ:mB3voiENLucC:
+    citations: 0
+    title: Configuration-to-Performance Scaling Law with Neural Ansatz
+    year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 32
+    citations: 33
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
-    citations: 9
+    citations: 10
     title: 'Symmetrical visual contrastive optimization: Aligning vision-language models with minimal contrastive images'
     year: '2025'
