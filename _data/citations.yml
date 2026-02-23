@@ -1,12 +1,12 @@
 metadata:
-  last_updated: '2026-02-18'
+  last_updated: '2026-02-23'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
     title: 'Divide-and-Conquer CoT: RL for Reducing Latency via Parallel Reasoning'
     year: '2026'
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 108
+    citations: 109
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
@@ -14,7 +14,7 @@ papers:
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 25
+    citations: 26
     title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2024'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -22,7 +22,7 @@ papers:
     title: Practically Solving LPN in High Noise Regimes Faster Using Neural Networks
     year: '2023'
   oTmQCFUAAAAJ:7PzlFSSx8tAC:
-    citations: 32
+    citations: 34
     title: Fantastic pretraining optimizers and where to find them
     year: '2025'
   oTmQCFUAAAAJ:8k81kl-MbHgC:
@@ -38,7 +38,7 @@ papers:
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval, 2024'
     year: Unknown Year
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 187
+    citations: 188
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
@@ -46,7 +46,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 64
+    citations: 69
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
@@ -54,23 +54,23 @@ papers:
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2024'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 131
+    citations: 134
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 16
+    citations: 18
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
-    citations: 10
+    citations: 11
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 40
+    citations: 43
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 30
+    citations: 31
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
@@ -82,7 +82,7 @@ papers:
     title: 'A Unified View of Attention and Residual Sinks: Outlier-Driven Rescaling is Essential for Transformer Training'
     year: '2026'
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 59
+    citations: 63
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
   oTmQCFUAAAAJ:mB3voiENLucC:
