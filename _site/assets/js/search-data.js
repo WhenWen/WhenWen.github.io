@@ -30,15 +30,26 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-2-1",
+        },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-2-2-the-hitchhiker-39-s-guide-to-the-weight-norm-theory",
         
-          title: 'Fantastic Pretraining Optimizers and Where to Find Them 2.1 <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+          title: "Fantastic Pretraining Optimizers and Where to Find Them 2.2: The Hitchhiker&#39;s Guide to...",
         
-        description: "A deep dive into hyperball geometry and pretraining optimization strategies.",
+        description: "Why weight decay sets the effective step size, what weight norms are really doing, and how that theory motivates Hyperball.",
         section: "Posts",
         handler: () => {
           
-            window.open("https://psychedelic-sunstone-851.notion.site/Fantastic-Pretraining-Optimizers-and-Where-to-Find-Them-2-1-Hyperball-Optimization-2e924306e6f280e7a5ffee00eb40a0dd?source=copy_link", "_blank");
+            window.location.href = "/wd_blog/public/weight-decay-part-2.html";
+          
+        },
+      },{id: "post-fantastic-pretraining-optimizers-and-where-to-find-them-2-1-hyperball-optimization",
+        
+          title: "Fantastic Pretraining Optimizers and Where to Find Them 2.1: Hyperball Optimization",
+        
+        description: "Hyperball optimization, norm-constrained updates, and why explicit weight-norm control can speed up pretraining.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/wd_blog/public/hyperball-part-1.html";
           
         },
       },{id: "books-the-godfather",
@@ -123,6 +134,9 @@ ninja.data = [{
           description: "",
           section: "News",},{id: "news-new-preprint-fantastic-pretraining-optimizers-and-where-to-find-them-on-arxiv",
           title: 'New preprint (Fantastic Pretraining Optimizers and Where to Find Them) on arxiv!',
+          description: "",
+          section: "News",},{id: "news-gave-a-talk-at-the-ios-informs-optimization-society-conference-on-recent-works-around-fantastic-optimizers-amp-amp-hyperball-slides",
+          title: 'Gave a talk at the IOS INFORMS Optimization Society Conference on recent works...',
           description: "",
           section: "News",},{
         id: 'social-email',

@@ -1,11 +1,14 @@
 ---
 layout: post
-title: "Fantastic Pretraining Optimizers and Where to Find Them 2.1"
+title: "Fantastic Pretraining Optimizers and Where to Find Them 2.1: Hyperball Optimization"
 date: 2025-01-02
-description: "A deep dive into hyperball geometry and pretraining optimization strategies."
+description: "Hyperball optimization, norm-constrained updates, and why explicit weight-norm control can speed up pretraining."
 tags: [weight decay, hyperball, optimization, deep learning]
 categories: [research]
-redirect: https://psychedelic-sunstone-851.notion.site/Fantastic-Pretraining-Optimizers-and-Where-to-Find-Them-2-1-Hyperball-Optimization-2e924306e6f280e7a5ffee00eb40a0dd?source=copy_link
+redirect: /wd_blog/public/hyperball-part-1.html
+read_time: true
+read_time_minutes: 11
 featured: false
 ---
 
+This article is available locally at <a href="{{ '/wd_blog/public/hyperball-part-1.html' | relative_url }}">Fantastic Pretraining Optimizers and Where to Find Them 2.1: Hyperball Optimization</a>. You will be redirected automatically.
