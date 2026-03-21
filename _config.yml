@@ -148,6 +148,9 @@ collections:
 # Jekyll settings
 # -----------------------------------------------------------------------------
 
+# Build settings
+future: true
+
 # Markdown and syntax highlight
 markdown: kramdown
 highlighter: rouge
