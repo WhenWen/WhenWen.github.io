@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-04-10'
+  last_updated: '2026-04-15'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
@@ -34,7 +34,7 @@ papers:
     title: Residual permutation test for regression coefficient testing
     year: '2025'
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 191
+    citations: 192
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
@@ -42,7 +42,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 113
+    citations: 116
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2025'
   oTmQCFUAAAAJ:TQgYirikUcIC:
@@ -54,7 +54,7 @@ papers:
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2024'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 138
+    citations: 139
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
@@ -70,7 +70,7 @@ papers:
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 45
+    citations: 46
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
@@ -90,7 +90,7 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 45
+    citations: 46
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
