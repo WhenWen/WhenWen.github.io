@@ -17,19 +17,81 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node.js ⚙️
         uses: actions/setup-node@v4
       - name: Install Prettier 💾
         run: npm install --save-dev --save-exact prettier @shopify/prettier-plugin-liquid
+      - name: Collect changed files 📋
+        id: changed-files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+
+          if [[ -z "${BASE_SHA}" || "${BASE_SHA}" == "0000000000000000000000000000000000000000" ]]; then
+            BASE_SHA="$(git rev-parse HEAD^ 2>/dev/null || true)"
+          fi
+
+          if [[ -z "${BASE_SHA}" ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mapfile -d '' changed_files < <(git diff --name-only --diff-filter=d -z "${BASE_SHA}" "${GITHUB_SHA}")
+
+          prettier_files=()
+          for file in "${changed_files[@]}"; do
+            case "${file}" in
+              _site/*|node_modules/*|wd_blog/node_modules/*|wd_blog/docs/*|wd_blog/scripts/*|talkmap/leaflet_dist/*|lighthouse_results/*|readme_preview/*|assets/fonts/*|assets/webfonts/*|assets/audio/*|assets/video/*|assets/pdf/*|assets/js/search/*|assets/js/distillpub/*|assets/js/plugins/*|wd_blog/public/*)
+                continue
+                ;;
+              _includes/*|_layouts/*.html|_scripts/*|assets/css/collapse.css)
+                continue
+                ;;
+            esac
+
+            case "${file}" in
+              *.md|*.yml|*.yaml|*.json|*.scss|*.css|*.js|*.cjs|*.html|*.liquid)
+                prettier_files+=("${file}")
+                ;;
+            esac
+          done
+
+          if [[ ${#prettier_files[@]} -eq 0 ]]; then
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\0' "${prettier_files[@]}" > prettier-files.txt
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
       - name: Prettier Check 🔎
         id: prettier
-        run: npx prettier . --check
+        if: ${{ steps.changed-files.outputs.has_files == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' prettier_files < prettier-files.txt
+          npx prettier --check --ignore-unknown "${prettier_files[@]}"
       - name: Create diff 📝
         # https://docs.github.com/en/actions/learn-github-actions/expressions#failure
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.prettier.conclusion == 'failure' && steps.changed-files.outputs.has_files == 'true' }}
+        shell: bash
         run: |
-          npx prettier . --write
-          git diff -- . ':(exclude)package-lock.json' ':(exclude)package.json' > diff.txt
+          set -euo pipefail
+          mapfile -d '' prettier_files < prettier-files.txt
+          npx prettier --write --ignore-unknown "${prettier_files[@]}"
+          git diff -- "${prettier_files[@]}" ':(exclude)package-lock.json' ':(exclude)package.json' > diff.txt
+          if [[ ! -s diff.txt ]]; then
+            echo '<html><body><p>No diff produced.</p></body></html>' > diff.html
+            exit 0
+          fi
           npm install -g diff2html-cli
           diff2html -i file -s side -F diff.html -- diff.txt
       - name: Upload html diff ⬆️
