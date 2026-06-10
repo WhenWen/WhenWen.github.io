@@ -1,28 +1,32 @@
 metadata:
-  last_updated: '2026-05-20'
+  last_updated: '2026-06-10'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
     title: 'Divide-and-Conquer CoT: RL for Reducing Latency via Parallel Reasoning'
     year: '2026'
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 123
+    citations: 127
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
-    citations: 11
+    citations: 13
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
+  oTmQCFUAAAAJ:4JMBOYKVnBMC:
+    citations: 0
+    title: Pseudo-Formalization for Automatic Proof Verification
+    year: '2026'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 34
-    title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
+    citations: 36
+    title: 'From sparse dependence to sparse attention: Unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2025'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
     citations: 0
     title: Practically Solving LPN in High Noise Regimes Faster Using Neural Networks
     year: '2023'
   oTmQCFUAAAAJ:7PzlFSSx8tAC:
-    citations: 53
+    citations: 76
     title: Fantastic pretraining optimizers and where to find them
     year: '2025'
   oTmQCFUAAAAJ:8k81kl-MbHgC:
@@ -34,71 +38,63 @@ papers:
     title: Residual permutation test for regression coefficient testing
     year: '2025'
   oTmQCFUAAAAJ:IjCSPb-OGe4C:
-    citations: 194
+    citations: 196
     title: On transferability of prompt tuning for natural language processing
     year: '2022'
   oTmQCFUAAAAJ:KlAtU1dfN6UC:
-    citations: 39
+    citations: 40
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 159
+    citations: 199
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2026'
   oTmQCFUAAAAJ:R3hNpaxXUhUC:
-    citations: 1
-    title: Scaling Self-Play with Self-Guidance
+    citations: 3
+    title: Scaling self-play with self-guidance
     year: '2026'
-  oTmQCFUAAAAJ:RHpTSmoSYBkC:
-    citations: 6
-    title: Fantastic pretraining optimizers and where to find them, 2025
-    year: Unknown Year
   oTmQCFUAAAAJ:TQgYirikUcIC:
     citations: 0
     title: 'Fantastic Pretraining Optimizers and Where to Find Them 2.1: Hyperball Optimization'
     year: '2025'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
-    citations: 64
+    citations: 69
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2025'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 147
+    citations: 155
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 23
+    citations: 29
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
-    citations: 17
+    citations: 21
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2025'
-  oTmQCFUAAAAJ:_Qo2XoVZTnwC:
-    citations: 6
-    title: How Does Sharpness-Aware Minimization Minimize Sharpness?(2023)
-    year: Unknown Year
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 56
+    citations: 73
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape view'
     year: '2025'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 51
+    citations: 53
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
-    citations: 21
+    citations: 22
     title: 'Path attention: Position encoding via accumulating householder transformations'
     year: '2026'
-  oTmQCFUAAAAJ:e5wmG9Sq2KIC:
-    citations: 8
-    title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free, 2025'
-    year: Unknown Year
   oTmQCFUAAAAJ:hC7cP41nSMkC:
-    citations: 6
+    citations: 9
     title: 'A Unified View of Attention and Residual Sinks: Outlier-Driven Rescaling is Essential for Transformer Training'
     year: '2026'
+  oTmQCFUAAAAJ:j3f4tGmQtD8C:
+    citations: 0
+    title: Towards Understanding Momentum Acceleration in River-Valley Loss Landscape
+    year: Unknown Year
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 72
+    citations: 73
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
   oTmQCFUAAAAJ:mB3voiENLucC:
@@ -106,10 +102,14 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 55
+    citations: 58
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
-    citations: 13
+    citations: 15
     title: 'Symmetrical visual contrastive optimization: Aligning vision-language models with minimal contrastive images'
     year: '2025'
+  oTmQCFUAAAAJ:r0BpntZqJG4C:
+    citations: 5
+    title: 'others. 2025. Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
+    year: '1'
