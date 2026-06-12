@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-06-10'
+  last_updated: '2026-06-12'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
@@ -26,7 +26,7 @@ papers:
     title: Practically Solving LPN in High Noise Regimes Faster Using Neural Networks
     year: '2023'
   oTmQCFUAAAAJ:7PzlFSSx8tAC:
-    citations: 76
+    citations: 77
     title: Fantastic pretraining optimizers and where to find them
     year: '2025'
   oTmQCFUAAAAJ:8k81kl-MbHgC:
@@ -46,7 +46,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 199
+    citations: 200
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2026'
   oTmQCFUAAAAJ:R3hNpaxXUhUC:
@@ -66,7 +66,7 @@ papers:
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 29
+    citations: 30
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
@@ -74,11 +74,11 @@ papers:
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2025'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 73
+    citations: 75
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape view'
     year: '2025'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
-    citations: 53
+    citations: 54
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
@@ -102,7 +102,7 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 58
+    citations: 59
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
