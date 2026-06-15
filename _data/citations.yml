@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-06-12'
+  last_updated: '2026-06-15'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
@@ -10,7 +10,7 @@ papers:
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
-    citations: 13
+    citations: 14
     title: 'Task Generalization With AutoRegressive Compositional Structure: Can Learning From  Tasks Generalize to  Tasks?'
     year: '2025'
   oTmQCFUAAAAJ:4JMBOYKVnBMC:
@@ -18,7 +18,7 @@ papers:
     title: Pseudo-Formalization for Automatic Proof Verification
     year: '2026'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 36
+    citations: 37
     title: 'From sparse dependence to sparse attention: Unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2025'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -26,7 +26,7 @@ papers:
     title: Practically Solving LPN in High Noise Regimes Faster Using Neural Networks
     year: '2023'
   oTmQCFUAAAAJ:7PzlFSSx8tAC:
-    citations: 77
+    citations: 79
     title: Fantastic pretraining optimizers and where to find them
     year: '2025'
   oTmQCFUAAAAJ:8k81kl-MbHgC:
@@ -46,11 +46,11 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 200
+    citations: 209
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2026'
   oTmQCFUAAAAJ:R3hNpaxXUhUC:
-    citations: 3
+    citations: 4
     title: Scaling self-play with self-guidance
     year: '2026'
   oTmQCFUAAAAJ:TQgYirikUcIC:
@@ -66,7 +66,7 @@ papers:
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 30
+    citations: 31
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
@@ -86,7 +86,7 @@ papers:
     title: 'Path attention: Position encoding via accumulating householder transformations'
     year: '2026'
   oTmQCFUAAAAJ:hC7cP41nSMkC:
-    citations: 9
+    citations: 10
     title: 'A Unified View of Attention and Residual Sinks: Outlier-Driven Rescaling is Essential for Transformer Training'
     year: '2026'
   oTmQCFUAAAAJ:j3f4tGmQtD8C:
@@ -102,14 +102,10 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 59
+    citations: 60
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
     citations: 15
     title: 'Symmetrical visual contrastive optimization: Aligning vision-language models with minimal contrastive images'
     year: '2025'
-  oTmQCFUAAAAJ:r0BpntZqJG4C:
-    citations: 5
-    title: 'others. 2025. Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
-    year: '1'
