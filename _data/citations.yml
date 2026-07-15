@@ -1,12 +1,12 @@
 metadata:
-  last_updated: '2026-07-13'
+  last_updated: '2026-07-15'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
     title: 'Divide-and-Conquer CoT: RL for Reducing Latency via Parallel Reasoning'
     year: '2026'
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 132
+    citations: 133
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
@@ -58,11 +58,11 @@ papers:
     title: Training Hybrid Block Diffusion Language Models with Partial Bidirectionality
     year: '2026'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
-    citations: 71
+    citations: 73
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2025'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
-    citations: 156
+    citations: 157
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
@@ -82,7 +82,7 @@ papers:
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
-    citations: 25
+    citations: 26
     title: 'Path attention: Position encoding via accumulating householder transformations'
     year: '2026'
   oTmQCFUAAAAJ:hC7cP41nSMkC:
@@ -98,7 +98,7 @@ papers:
     title: Towards Understanding Momentum Acceleration in River-Valley Loss Landscape
     year: Unknown Year
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 75
+    citations: 77
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
   oTmQCFUAAAAJ:mB3voiENLucC:
@@ -106,7 +106,7 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 70
+    citations: 71
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
