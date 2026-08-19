@@ -1,12 +1,12 @@
 metadata:
-  last_updated: '2026-08-14'
+  last_updated: '2026-08-19'
 papers:
   oTmQCFUAAAAJ:-f6ydRqryjwC:
     citations: 0
     title: 'Divide-and-Conquer CoT: RL for Reducing Latency via Parallel Reasoning'
     year: '2026'
   oTmQCFUAAAAJ:0EnyYjriUFMC:
-    citations: 137
+    citations: 138
     title: Finding Skill Neurons in Pre-trained Transformer-based Language Models
     year: '2022'
   oTmQCFUAAAAJ:4DMP91E08xMC:
@@ -18,7 +18,7 @@ papers:
     title: Pseudo-Formalization for Automatic Proof Verification
     year: '2026'
   oTmQCFUAAAAJ:4TOpqqG69KYC:
-    citations: 44
+    citations: 45
     title: 'From sparse dependence to sparse attention: unveiling how chain-of-thought enhances transformer sample efficiency'
     year: '2025'
   oTmQCFUAAAAJ:5nxA0vEk-isC:
@@ -46,7 +46,7 @@ papers:
     title: 'Transformers are uninterpretable with myopic methods: a case study with bounded dyck grammars'
     year: '2023'
   oTmQCFUAAAAJ:QIV2ME_5wuYC:
-    citations: 292
+    citations: 301
     title: 'Gated attention for large language models: Non-linearity, sparsity, and attention-sink-free'
     year: '2026'
   oTmQCFUAAAAJ:R3hNpaxXUhUC:
@@ -58,7 +58,7 @@ papers:
     title: Training Hybrid Block Diffusion Language Models with Partial Bidirectionality
     year: '2026'
   oTmQCFUAAAAJ:ULOm3_A8WrAC:
-    citations: 76
+    citations: 77
     title: 'Rnns are not transformers (yet): The key bottleneck on in-context retrieval'
     year: '2025'
   oTmQCFUAAAAJ:UebtZRa9Y70C:
@@ -66,7 +66,7 @@ papers:
     title: How Sharpness-Aware Minimization Minimizes Sharpness?
     year: Unknown Year
   oTmQCFUAAAAJ:Wp0gIr-vW9MC:
-    citations: 36
+    citations: 37
     title: Weight ensembling improves reasoning in language models
     year: '2025'
   oTmQCFUAAAAJ:ZeXyd9-uunAC:
@@ -74,7 +74,7 @@ papers:
     title: 'Questa: Expanding reasoning capacity in llms via question augmentation'
     year: '2026'
   oTmQCFUAAAAJ:_kc_bZDykSQC:
-    citations: 95
+    citations: 98
     title: 'Understanding warmup-stable-decay learning rates: A river valley loss landscape perspective'
     year: '2024'
   oTmQCFUAAAAJ:aqlVkmm33-oC:
@@ -82,11 +82,11 @@ papers:
     title: 'Demons in the detail: On implementing load balancing loss for training specialized mixture-of-expert models'
     year: '2025'
   oTmQCFUAAAAJ:dhFuZR0502QC:
-    citations: 29
+    citations: 30
     title: 'Path attention: Position encoding via accumulating householder transformations'
     year: '2026'
   oTmQCFUAAAAJ:hC7cP41nSMkC:
-    citations: 11
+    citations: 13
     title: 'A unified view of attention and residual sinks: Outlier-driven rescaling is essential for transformer training'
     year: '2026'
   oTmQCFUAAAAJ:iH-uZ7U-co4C:
@@ -98,7 +98,7 @@ papers:
     title: Towards Understanding Momentum Acceleration in River-Valley Loss Landscape
     year: '2026'
   oTmQCFUAAAAJ:kNdYIx-mwKoC:
-    citations: 77
+    citations: 78
     title: Sharpness minimization algorithms do not only minimize sharpness to achieve better generalization
     year: '2023'
   oTmQCFUAAAAJ:mB3voiENLucC:
@@ -106,7 +106,7 @@ papers:
     title: Configuration-to-Performance Scaling Law with Neural Ansatz
     year: '2026'
   oTmQCFUAAAAJ:mVmsd5A6BfQC:
-    citations: 86
+    citations: 88
     title: Overtrained language models are harder to fine-tune
     year: '2025'
   oTmQCFUAAAAJ:qUcmZB5y_30C:
