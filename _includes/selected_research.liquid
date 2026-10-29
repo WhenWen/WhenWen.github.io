@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="{{ '/assets/css/research-cards.css' | relative_url }}">
+<section aria-labelledby="selected-research-title">
+  <h2 id="selected-research-title">Selected Research</h2>
+  <div class="selected-research-cards">
+    {% for group in site.data.selected_research %}
+      <h3>{{ group.title }}</h3>
+      <div class="research-card-grid">
+        {% for paper in group.papers %}
+          <article class="research-card">
+            <button class="research-figure" type="button" aria-label="Enlarge figure: {{ paper.title | escape }}">
+              <img src="{{ paper.image | relative_url }}" alt="{{ paper.alt | escape }}" loading="lazy">
+            </button>
+            <div class="research-copy">
+              <p class="research-venue">{{ paper.venue }}</p>
+              <h4><a href="{{ paper.url }}">{{ paper.title }}</a></h4>
+              <p class="research-summary">{{ paper.summary }}</p>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+<dialog class="research-lightbox" aria-label="Research figure">
+  <button type="button" aria-label="Close figure">×</button>
+  <img alt="">
+  <p></p>
+</dialog>
+<script defer src="{{ '/assets/js/research-cards.js' | relative_url }}"></script>

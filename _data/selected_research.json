@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Optimization and Training Dynamics",
+    "papers": [
+      {
+        "title": "Fantastic Pretraining Optimizers and Where to Find Them",
+        "url": "https://arxiv.org/abs/2509.02046",
+        "venue": "ICLR 2026",
+        "summary": "Rigorous optimizer benchmarking shows that vanilla Muon's efficiency advantage over AdamW shrinks with overtraining under constant weight decay.",
+        "image": "/assets/img/research/optimizer-scaling.png",
+        "alt": "Optimizer token efficiency at different overtraining budgets for 1.2B models"
+      },
+      {
+        "title": "Fantastic Pretraining Optimizers and Where to Find Them II: Hyperball Optimization",
+        "url": "https://arxiv.org/abs/2606.16899",
+        "venue": "2026 preprint",
+        "summary": "Hyperball uses weight-normalized training to improve Muon's efficiency.",
+        "image": "/assets/img/research/hyperball.png",
+        "alt": "Hyperball update followed by normalization to a fixed weight norm"
+      },
+      {
+        "title": "Understanding Warmup-Stable-Decay Learning Rates: A River Valley Loss Landscape Perspective",
+        "url": "https://arxiv.org/abs/2410.05192",
+        "venue": "ICLR 2025",
+        "summary": "Pretraining loss exhibits a river valley landscape, which resembles a deep valley with a river at its bottom. This explains how training with a high learning rate can make more progress than training with a low learning rate, even when its intermediate losses are higher.",
+        "image": "/assets/img/research/river-valley.png",
+        "alt": "River valley landscape and trajectories under different learning rates"
+      }
+    ]
+  },
+  {
+    "title": "Reasoning and Self-Improvement",
+    "papers": [
+      {
+        "title": "Trust the Critic More",
+        "url": "https://arxiv.org/abs/2609.39247",
+        "venue": "2026 preprint",
+        "summary": "A learned critic can guide reasoning RL using partial solutions. On Qwen3-4B trained on FineProofs-RL, AC2 exceeds GRPO's best mean score on IMO-ProofBench with approximately 60% fewer decoding FLOPs.",
+        "image": "/assets/img/research/critic-method.png",
+        "alt": "GRPO terminal rewards compared with AC2 critic estimates on partial solutions"
+      },
+      {
+        "title": "Priced Guidance: Can Language Models Generate Future Research Ideas?",
+        "url": "https://arxiv.org/abs/2610.04976",
+        "venue": "2026 preprint",
+        "summary": "Priced Guidance uses “20 Questions” to measure the amount of information an LLM needs to recover a future research idea. This yields a lower bound on the probability of generating that idea without hints.",
+        "image": "/assets/img/research/priced-guidance.png",
+        "alt": "Priced Guidance question-and-answer protocol for recovering a research idea"
+      }
+    ]
+  }
+]

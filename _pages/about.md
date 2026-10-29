@@ -12,7 +12,8 @@ profile:
     <p>Stanford University</p>
     <p>Stanford, CA</p>
 
-selected_papers: true
+selected_papers: false
+selected_research: true
 social: true
 
 announcements:
@@ -24,12 +25,10 @@ latest_posts:
   enabled: false
 ---
 
-Hello! I am Kaiyue Wen. I am a second-year Ph.D. student at Stanford University, where I am grateful to be advised by [Tengyu Ma](https://ai.stanford.edu/~tengyuma/) and [Percy Liang](https://cs.stanford.edu/~pliang/). I graduated from Tsinghua University, where I was a member of Yao's pilot class. During my undergraduate study, I am fortunate to be advised by [Tengyu Ma](https://ai.stanford.edu/~tengyuma/), [Zhiyuan Liu](http://nlp.csai.tsinghua.edu.cn/~lzy/), [Andrej Risteski](https://www.andrew.cmu.edu/user/aristesk/), [Jingzhao Zhang](https://sites.google.com/view/jingzhao/home), [Yuhao Wang](https://yuhaow.github.io/) and [Zhiyuan Li](https://ai.stanford.edu/~zhiyuanli/).
+I am a Ph.D. student at Stanford University, advised by [Tengyu Ma](https://ai.stanford.edu/~tengyuma/) and [Percy Liang](https://cs.stanford.edu/~pliang/). Previously, I studied at Tsinghua University's Yao Class. I study the science of deep learning. My work combines theory and experiments to understand how deep learning works and develop new algorithms. Recently, I have become interested in using AI to accelerate understanding of deep learning.
 
-My research interest spreads broadly in deep learning. My long-term goal is to understand the physics behind deep learning and I believe a combination of theoretical analysis and empirical study is essential for this goal.
+**Optimization and Training Dynamics.** How neural networks learn depends fundamentally on their optimization dynamics. My work examines [optimizer scaling](https://arxiv.org/abs/2509.02046), [Hyperball](https://arxiv.org/abs/2606.16899), and the [river valley structure of pretraining loss](https://arxiv.org/abs/2410.05192).
 
-Recently, I've become fascinated by two fundamental axes of scaling in deep learning.
+**Reasoning and Self-Improvement.** I also study how to elicit and measure language model capabilities from first principles. My work explores [critic-guided reinforcement learning](https://arxiv.org/abs/2609.39247) and measures idea generation capabilities through the [information needed to recover future research ideas](https://arxiv.org/abs/2610.04976).
 
-1. **Demystifying pretraining**: Pretraining has been the driving force behind the evolution of large language models, yet many foundational algorithmic choices remain poorly understood. Key aspects such as optimizers, architectures, and hyperparameter scaling strategies still lack consensus. My goal is to clarify these choices through rigorous benchmarking (e.g., [benchmarking modern optimizers](https://arxiv.org/abs/2509.02046)) and theoretical analysis (e.g., exploring the [representation limitation of RNNs](https://arxiv.org/abs/2402.18510), [architectures beyond $\mathrm{TC}^0$](https://arxiv.org/abs/2505.16381), and [river-valley loss landscape](https://arxiv.org/abs/2410.05192)). Most of my research in this direction is carried out in the open-source project [Marin](https://marin.community/).
-
-2. **New algorithmic paradigms in reasoning**: With the recent progress in reasoning reinforcement learning (RL), particularly innovations like long-chain-of-thought RL, there is growing potential to push the limits of model reasoning. While I am new to this field, my aim is to design end-to-end trainable multi-agent RL systems that build upon and extend the capabilities of current long-CoT RL paradigms.
+During my previous studies, I was fortunate to be advised by [Zhiyuan Liu](http://nlp.csai.tsinghua.edu.cn/~lzy/), [Andrej Risteski](https://www.andrew.cmu.edu/user/aristesk/), [Jingzhao Zhang](https://sites.google.com/view/jingzhao/home), [Yuhao Wang](https://yuhaow.github.io/), and [Zhiyuan Li](https://ai.stanford.edu/~zhiyuanli/).

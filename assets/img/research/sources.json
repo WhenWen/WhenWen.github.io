@@ -1,0 +1,22 @@
+{
+  "optimizer-scaling.png": {
+    "paper": "https://arxiv.org/abs/2509.02046",
+    "source": "figures/D_eff_vs_D_opt_1.2bM.pdf"
+  },
+  "hyperball.png": {
+    "paper": "https://arxiv.org/abs/2606.16899",
+    "source": "fig/hyperball_schematic.png"
+  },
+  "river-valley.png": {
+    "paper": "https://arxiv.org/abs/2410.05192",
+    "source": "figures/arxiv/function2.pdf"
+  },
+  "critic-method.png": {
+    "paper": "https://arxiv.org/abs/2609.39247",
+    "source": "PDF page 1, Figure 1 method panels"
+  },
+  "priced-guidance.png": {
+    "paper": "https://arxiv.org/abs/2610.04976",
+    "source": "PDF page 2, Figure 1"
+  }
+}
